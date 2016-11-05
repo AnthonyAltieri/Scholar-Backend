@@ -1,0 +1,105 @@
+<div class="content-dash_main">
+
+    <!-- Overlay -->
+    <div class="overlay" ng-show="dash.showOverlay">
+        <div id="card-class_over" class="card-overlay" ng-show="dash.showClassIsOver">
+            <h2>Class is over!</h2>
+            <a class="button-round" ng-click="dash.acknowledgeClassIsOver()">Ok</a>
+        </div>
+
+        <div id="card-confusion_submitted" class="card-overlay" ng-show="dash.showConfusionNoted">
+            <h2>Confusion alert sent to the instructor</h2>
+            <a class="button-round pink" ng-click="dash.acknowledgeConfusionSubmit()">Ok</a>
+        </div>
+    </div>
+
+
+
+    <div id="nav">
+        <div id="nav-top">
+            <div class="box-back">
+                <a id="button-back" ng-click="dash.clickBack()"></a>
+                <a class="text-back" ng-click="dash.clickBack()">{{dash.backText}}</a>
+            </div>
+            <h1 id="nav-header">{{dash.courseSession.classCode}}</h1>
+        </div>
+        <div id="nav-buttons">
+            <a class="nav-button"
+               ng-class="{ 'nav-button_active' : dash.mode === 'ASK', 'nav-button' : dash.mode !== 'ASK' }"
+               ng-click="(dash.mode === 'ASK') ? dash.backToQuestions() : dash.beginQuestionInputMode()"
+            >
+                Ask
+            </a>
+            <a ng-class="{ 'nav-button_active' : dash.showConfusionNoted, 'nav-button' : !vm.showConfusionNoted }"
+               ng-click="dash.submitConfusion()"
+            >
+                Alert
+            </a>
+        </div>
+    </div>
+
+    <div id="container-confusionbar">
+        <div
+            class="sk-three-bounce"
+            ng-show="dash.courseSession.activeAlerts === -1"
+            style="margin: auto"
+        >
+            <div class="sk-child sk-bounce1 background-dark"></div>
+            <div class="sk-child sk-bounce2 background-dark"></div>
+            <div class="sk-child sk-bounce3 background-dark"></div>
+        </div>
+        <div
+            id="wrap-confusionbar"
+            ng-show="dash.courseSession.activeAlerts !== -1"
+        >
+            <div
+                id="confusionbar"
+                ng-class="{ 'bargreen': dash.courseSession.activeAlertPercent < dash.courseSession.threshold,
+              'barred': dash.courseSession.activeAlertPercent >= dash.courseSession.threshold }"
+                ng-hide="dash.courseSession.activeAlerts === 0"
+            >
+            </div>
+            <p class="text" id="number">{{dash.courseSession.activeAlerts}}</p>
+            <p class="text" id="percent">{{dash.courseSession.activeAlertPercent}}%</p>
+        </div>
+        <p
+            class="info"
+            ng-hide="dash.courseSession.activeAlerts === -1"
+        >
+            Confusion Alerts
+        </p>
+    </div>
+
+    <div id="content-dash_main_inner">
+        <div ui-view="questions" ng-show="dash.mode === 'QUESTIONS'"></div>
+        <div ui-view="ask" ng-show="dash.mode === 'ASK'"></div>
+        <div ui-view="instant" ng-show="dash.mode === 'INSTANT'"></div>
+        <div ui-view="reflective" ng-show="dash.mode === 'REFLECTIVE'"></div>
+    </div>
+    <div id="connection-status">
+        <div class="r"
+             ng-show="dash.connectionStatus === 'connected'"
+             ng-hide="dash.connectionStatus !== 'connected'">
+            <a class="status-connected"></a>
+            <p>{{dash.connectionStatus}}</p>
+        </div>
+        <div class="r"
+             ng-show="dash.connectionStatus === 'disconnected'"
+             ng-hide="dash.connectionStatus !== 'disconnected'">
+            <a class="status-disconnected"></a>
+            <p>{{dash.connectionStatus}}</p>
+        </div>
+        <div class="r"
+             ng-show="dash.connectionStatus === 'unknown'"
+             ng-hide="dash.connectionStatus !== 'unknown'">
+            <a class="status-unknown"> </a>
+            <p>{{dash.connectionStatus}}</p>
+        </div>
+        <div class="r"
+             ng-show="dash.connectionStatus === 'unstable'"
+             ng-hide="dash.connectionStatus !== 'unstable'">
+            <a class="status-unstable"></a>
+            <p>{{dash.connectionStatus}}</p>
+        </div>
+     </div>
+</div>

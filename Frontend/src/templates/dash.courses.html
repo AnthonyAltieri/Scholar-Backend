@@ -1,0 +1,26 @@
+<div class="content-courses">
+    <div id="nav_classes">
+        <div id="nav-top_classes">
+            <a class="logout" ng-click="dash.logOut()">Log Out</a>
+            <h1 id="nav-header">Courses</h1>
+        </div>
+        <div id="nav-tabs">
+            <a class="tab"
+               ng-class="{ 'tab_active' : dash.tabSelected === 'ACTIVE'}"
+               ng-click="dash.clickActive()"
+               ui-sref=".active"
+            >
+                Active
+            </a>
+            <a class="tab"
+               ng-class="{ 'tab_active' : dash.tabSelected === 'INACTIVE'}"
+               ng-click="dash.clickInactive()"
+               ui-sref=".inactive"
+            >
+                Inactive
+            </a>
+        </div>
+    </div>
+
+    <div ui-view></div>
+</div>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="35px" height="41px" viewBox="0 0 35 41" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.2 (29753) - http://www.bohemiancoding.com/sketch -->
+    <title>Yello Icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="34" height="34" rx="7"></rect>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="1" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feColorMatrix values="0 0 0 0 0.832934736   0 0 0 0 0.832934736   0 0 0 0 0.832934736  0 0 0 0.5 0" type="matrix" in="shadowOffsetOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="New-Design-Student" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="iPhone-6-Copy-9" transform="translate(-29.000000, -363.000000)">
+            <g id="Yello-Icon" transform="translate(29.000000, 363.000000)">
+                <g id="Rectangle-1">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                    <use fill="#FEC214" fill-rule="evenodd" xlink:href="#path-1"></use>
+                </g>
+                <g id="noun_101409_cc" transform="translate(2.000000, 10.000000)" fill="#FFFFFF">
+                    <g id="Group">
+                        <path d="M18.2458333,16.374359 C20.8638889,14.7846154 22.5555556,11.6448718 22.5555556,8.74358974 C22.5555556,4.61025641 19.1319444,0 14.5,0 C9.86805556,0 6.44444444,4.61025641 6.44444444,8.74358974 C6.44444444,11.6448718 8.13611111,14.7846154 10.7541667,16.374359 C4.55138889,18.0038462 0,23.6076923 0,30.2051282 C0,30.6423077 0.3625,31 0.805555556,31 L28.1944444,31 C28.6375,31 29,30.6423077 29,30.2051282 C29,23.6076923 24.4486111,18.0038462 18.2458333,16.374359 L18.2458333,16.374359 Z M8.05555556,8.74358974 C8.05555556,4.65 11.4791667,1.58974359 14.5,1.58974359 C17.5208333,1.58974359 20.9444444,4.65 20.9444444,8.74358974 C20.9444444,12.8371795 17.5208333,15.8974359 14.5,15.8974359 C11.4791667,15.8974359 8.05555556,12.8371795 8.05555556,8.74358974 L8.05555556,8.74358974 Z M1.65138889,29.4102564 C2.05416667,22.7730769 7.69305556,17.4871795 14.5,17.4871795 C21.3069444,17.4871795 26.9458333,22.7730769 27.3486111,29.4102564 L1.65138889,29.4102564 L1.65138889,29.4102564 Z" id="Shape" fill="#FCF7FF"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

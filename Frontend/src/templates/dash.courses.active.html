@@ -1,0 +1,19 @@
+<div class="box-list-courses">
+    <p id="text-no_courses" ng-hide="dash.courses.active.length > 0">
+        No Active Courses
+    </p>
+    <ul ng-show="dash.courses.active.length > 0">
+        <li ng-repeat="course in dash.courses.active">
+            <div class="row-middle">
+                <div class="box-course-info">
+                    <h2 class="course-code">{{course.code}}</h2>
+                    <p class="course-time">{{course.courseTime}}</p>
+                    <p class="course-instructor">{{course.instructorName}}</p>
+                </div>
+                <div class="box-arrow" ng-click="dash.chooseClass(course)">
+                    <a class="arrow"></a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>

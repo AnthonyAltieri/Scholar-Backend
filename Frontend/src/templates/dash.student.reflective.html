@@ -1,0 +1,51 @@
+<div>
+    <div ng-show="dash.responding">
+        <div class="box-post_sticky">
+            <div class="post-content">
+                <img class="post-icon-sticky" src="/static/img/iconprof.svg">
+                <p class="post-text">{{dash.sticky.content || 'Verbal question proposed...'}}</p>
+                <p class="post-time">Just Now</p>
+            </div>
+        </div>
+        <div class="box-post_sticky-answer">
+            <img class="post_sticky-answer_icon" src="/static/img/iconstudentgreen.svg">
+                <textarea placeholder="Your answer..." class="post_sticky-answer_content"
+                          ng-model="dash.input.response"
+                ></textarea>
+        </div>
+        <div class="box-post_sticky-answer_buttons">
+            <a class="button-round" ng-click="dash.submitReflectiveAssessmentResponse()">Post</a>
+        </div>
+    </div>
+
+    <div ng-show="dash.reviewing">
+        <!-- Review RA -->
+        <div ng-show="dash.sticky.visibleResponses.length === 0">
+            <img src="/static/img/moon.svg" class="img-moon_response">
+            <p class="text-moon_response">
+                No responses right now
+            </p>
+        </div>
+        <ul class="list-response">
+            <li class="box-response" ng-repeat="response in dash.sticky.visibleResponses">
+                <div class="box-response_content">
+                    <img class="box-response_content_icon" src="/static/img/iconstudent.svg">
+                    <p class="box-response_content_text">{{response.content}}</p>
+                </div>
+                <div class="box-response_buttons">
+                    <a class="button-response"
+                       ng-click="dash.voteOnResponse(response, 'UP')"
+                    >
+                        Good Response
+                    </a>
+                    <a class="button-response"
+                       ng-click="dash.dismissResponse(response)"
+                    >
+                        Dismiss
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+

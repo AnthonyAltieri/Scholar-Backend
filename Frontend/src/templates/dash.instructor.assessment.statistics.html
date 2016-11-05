@@ -1,0 +1,56 @@
+<div class="popup-frame-header">
+    <div class="r">
+
+        <H3 class="frame_header-text">STATISTICS</H3>
+        <P>
+            <a href="http://scholarapp.xyz/dash/mcq" 
+               onclick="window.open('http://scholarapp.xyz/dash/mcq ', 'new2window', 'width=465, height=325'); 
+         return false;" > 
+                <img src="/static/img/popup.svg" class="img-popup">
+                 </a>
+        </P>
+    </div>
+</div>
+<div class="box-statistics" id="propose-stats" ng-show="!!assessment.active">
+    <div class="box-statistic">
+        <p class="stat-text">
+            <span class="stat-text_bold">
+                {{stats.attendance}}
+            </span>
+            <br>
+            students in class
+        </p>
+    </div>
+    <div class="box-statistic lines-reflective"
+    >
+        <p class="stat-text">
+            <span class="stat-text_bold">
+                {{stats.numberAnswered}}
+            </span>
+            <br>
+            answers submitted
+        </p>
+    </div>
+    <div class="box-statistic"
+         ng-show="assessment.selected === 'REFLECTIVE'"
+    >
+        <p class="stat-text">
+            <span class="stat-text_bold">
+                {{stats.numberReviewed}}
+            </span>
+            <br>
+            answers reviewed
+        </p>
+    </div>
+    <div class="box-statistic"
+         ng-show="assessment.selected === 'INSTANT'"
+    >
+        <p class="stat-text">
+            <span class="stat-text_bold">
+                {{stats.percentAnswered}}
+            </span>
+            <br>
+            answered
+        </p>
+    </div>
+</div>

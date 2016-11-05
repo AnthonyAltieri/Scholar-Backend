@@ -1,0 +1,68 @@
+<div class="popup-frame-header">
+    <div class="r">
+        <h4 class="frame_header-text" ng-show="questions.questionListToggleValue">
+            QUESTIONS
+        </h4>
+        <h4 class="frame_header-text-inactive" ng-hide="questions.questionListToggleValue">
+            QUESTIONS
+        </h4>
+        <P>
+            <input id="cb2" type="checkbox" class="tgl tgl-ios" checked ng-change="questions.toggleQuestionList()" ng-model="questions.questionListToggleValue"/>
+            <label for="cb2" class="tgl-btn"></label>
+        </P>
+    </div>
+</div>
+<div ng-show="questions.loading">
+    <div class="sk-cube-grid"
+         style="transform: scale(2); position: relative; top: 82px;"
+    >
+        <div class="sk-cube sk-cube1 background-primary"></div>
+        <div class="sk-cube sk-cube2 background-primary"></div>
+        <div class="sk-cube sk-cube3 background-primary"></div>
+        <div class="sk-cube sk-cube4 background-primary"></div>
+        <div class="sk-cube sk-cube5 background-primary"></div>
+        <div class="sk-cube sk-cube6 background-primary"></div>
+        <div class="sk-cube sk-cube7 background-primary"></div>
+        <div class="sk-cube sk-cube8 background-primary"></div>
+        <div class="sk-cube sk-cube9 background-primary"></div>
+    </div>
+</div>
+<div ng-hide="questions.loading">
+    <div ng-hide="questions.all.length > 0">
+        <img src="/static/img/moon.svg" class="img-moon">
+        <p class="text-moon">
+            Nothing here yet
+        </p>
+    </div>
+    <ul ng-show="questions.all.length > 0">
+        <li ng-repeat="question in questions.all | orderBy:'-rank'">
+            <div class="box-content">
+                <p class="content">
+                    {{question.content}}
+                </p>
+                <p class="time">
+                    {{questions.timeFromNow(question.created)}}
+                </p>
+            </div>
+            <!--ng-click="assessment.activateReflectiveAssessment(dash.courseSession.id, question.content)"-->
+            <div class="box-actions">
+                <div class="box-buttons">
+                    <a style="margin-bottom: 2px;"
+                       ng-click="dash.useForAssessment(question.content)"
+                    >
+                        Propose
+                    </a>
+                    <a style="margin-top: 2px;"
+                       ng-click="questions.dismissQuestion(question, question._id, questions.courseSessionId)"
+                    >
+                        Dismiss
+                    </a>
+                </div>
+                <p class="rank">
+                    {{question.rank}}
+                </p>
+            </div>
+        </li>
+    </ul>
+</div>
+
