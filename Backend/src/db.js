@@ -17,14 +17,9 @@ export default db;
 
 function findById(id, model) {
   return new Promise( (resolve, reject) => {
-    model.findById(id, (err, found) => {
-      if (err) {
-        reject(err);
-        return
-      }
-
-      resolve(found);
-    })
+    findOne({ id }, model)
+      .then((model) => { resolve(model) })
+      .catch((error) => { reject(err) })
   });
 }
 
