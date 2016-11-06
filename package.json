@@ -19,5 +19,8 @@
     "gulp-uglifyjs": "^0.6.2",
     "pump": "^1.0.1",
     "uglify-js": "^2.7.3"
+  },
+  "dependencies": {
+    "redux": "^3.6.0"
   }
 }

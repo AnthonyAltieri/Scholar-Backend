@@ -1,17 +1,13 @@
 /**
  * @author Anthony Altieri on 11/5/16.
- *
  */
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
-import Settings from './Settings';
+import Assessment from './Assessment';
 const Id = Mongoose.Schema.Types.ObjectId;
 
-const InstructorSettings = new Schema({
+const InstantAssessment = new Schema({
   ...Entity,
-  ...Settings,
-  userId: Id,
+  ...Assessment,
 });
-
-export default InstructorSettings;

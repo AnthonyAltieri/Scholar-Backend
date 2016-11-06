@@ -25,6 +25,8 @@ const validateTerm = (v) => {
 export default validateModel = (m) => {
   const { term } = m;
   idValidate(m);
+  required({ term });
+  validateTerm(term);
 };
 
 

@@ -13,7 +13,7 @@ const Course = new Schema({
   studentIds: [Id],
   schoolId: Id,
   activeSessionId: Id,
-  // qFall | qWinter | qSpring | sFall | sWinter | summer
+  // qFall | qWinter | qSpring | sFall | sWinter | summer | other
   term: String
 });
 

@@ -60,6 +60,12 @@ export default validateModel = (m) => {
   const { email, phone, password, loggedIn, type
   } = m;
   validateId(m);
+  required({
+    email,
+    password,
+    loggedIn,
+    type,
+  });
   validateEmail(email);
   validatePhone(phone);
   validatePassword(password);

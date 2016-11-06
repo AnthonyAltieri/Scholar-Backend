@@ -11,10 +11,13 @@ export const regexValidate = (value, regEx, name) => {
   }
 };
 
-export const required = (value, name) => {
-  if (typeof value === 'undefined') {
-    throw new Error(`[VALIDATION] ${name} is required`);
-  }
+export const required = (object) => {
+  const keys = Object.getKeys(object);
+  keys.forEach((k) => {
+    if (typeof object[k] === 'undefined') {
+      throw new Error(`[VALIDATION] ${k} is required`);
+    }
+  })
 };
 
 export const idValidate = (value, name) => {
