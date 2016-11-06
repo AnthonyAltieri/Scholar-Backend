@@ -2,22 +2,13 @@
  * @author Anthony Altieri on 11/5/16.
  */
 
-const CourseSession = (state, action) => {
-  switch (action.type) {
-    case 'JOIN_COURSESESSION': {
-      return {
-        id: action.id,
-      }
-    }
+import { combineReducers } from 'redux';
+import id from './CourseSessionId';
+import Questions from './Questions';
 
-    case 'LEFT_COURSESESSION': {
-      return {}
-    }
-
-    default: {
-      return state;
-    }
-  }
-};
+const CourseSession = combineReducers({
+  id,
+  Questions,
+});
 
 export default CourseSession;

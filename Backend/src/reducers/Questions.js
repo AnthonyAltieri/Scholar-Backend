@@ -5,7 +5,9 @@
 const Questions = (state = [], action) => {
   switch (action.type) {
     case 'RECEIVED_QUESTIONS': {
-      return action.questions;
+      return action
+        .questions
+        .filter(q => !q.isDismissed);
     }
 
     case 'JOINED_COURSESESSION': {
@@ -14,6 +16,23 @@ const Questions = (state = [], action) => {
       if (question.id !== action.id) {
         return [];
       }
+    }
+
+    case 'ADDED_QUESTION': {
+      return [...state, action.question]
+    }
+
+    case 'DISMISSED_QUESTION': {
+      return state
+        .filter(q => q.id !== action.id);
+    }
+
+    case 'VOTE_QUESTION': {
+      const question = state.filter(q => q.id === action.id);
+      const otherQuestions = state.filter(q => q.id !== action.id);
+      question.votes = [...question.votes, action.vote];
+
+
     }
 
     default: {
