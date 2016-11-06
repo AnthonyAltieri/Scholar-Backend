@@ -13,7 +13,7 @@ switch (SERVER_ENV.ENV) {
     PORT = 80;
     break;
 }
-var SESSION_SECRET = 'Splice620';
+var SESSION_SECRET = 'Scholar620';
 
 // var express = require('express');
 import express from 'express';
