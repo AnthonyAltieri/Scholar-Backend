@@ -4,16 +4,16 @@
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
-const Id = Mongoose.Schema.Types.ObjectId;
+const Id = mongoose.Schema.Types.ObjectId;
 
-const Vote = new Schema({
+const Question = new Schema({
   ...Entity,
   userId: Id,
   courseId: Id,
   courseSessionId: Id,
-  targetType: String, // Question, Response
-  targetId: Id,
-  type: String, //UP, DOWN, etc.
+  content: String,
+  isDismissed: Boolean,
+  isEndorsed: Boolean,
 });
 
-export default Vote;
+export default Question;

@@ -4,11 +4,10 @@
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
-const Id = Mongoose.Schema.Types.ObjectId;
 
 const School = new Schema({
   ...Entity,
-  name: String,
+  name: {type : String, unique: true  },
   termType: String, // ENUM: quarter | semester | trimester
 });
 

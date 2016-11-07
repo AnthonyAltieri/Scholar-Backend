@@ -10,8 +10,10 @@ const Response = new Schema({
   userId: Id,
   courseId: Id,
   courseSessionId: Id,
+  content: String,
   votes: [Vote],
   isFlagged: Boolean,
+  isEndorsed: Boolean,
   rootQuestionId: Id,
   parentId: Id,
   parentType: String, // Question | Response

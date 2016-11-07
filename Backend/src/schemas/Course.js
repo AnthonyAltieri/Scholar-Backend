@@ -13,8 +13,12 @@ const Course = new Schema({
   studentIds: [Id],
   schoolId: Id,
   activeSessionId: Id,
+  title: String,
+  abbreviation: String,
+  addCode: Number,
   // qFall | qWinter | qSpring | sFall | sWinter | summer | other
-  term: String
+  term: String,
+  isActive: Boolean,
 });
 
 export default Course;

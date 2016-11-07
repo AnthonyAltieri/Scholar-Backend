@@ -2,6 +2,9 @@
  * @author: Anthony Altieri
  */
 
+import { v1 } from 'node-uuid';
+const SALT = '620';
+
 const db = {
   findById,
   findAll,
@@ -55,7 +58,11 @@ function findOne(attributes, model) {
 
 function create(attributes, model) {
   return new Promise( (resolve, reject) => {
-    const focus = new model(attributes);
+    const focus = new model({
+      ...attributes,
+      id: v1() + SALT,
+      created: new Date()
+    });
     focus.save(error => {
       if (error) {
         reject(error);

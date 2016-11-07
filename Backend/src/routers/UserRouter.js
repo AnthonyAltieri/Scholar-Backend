@@ -4,34 +4,36 @@
 
 var express = require('express');
 var router = express.Router();
-import md5 from '../../node_modules/blueimp-md5/js/md5.min'
-const SALT = '620';
-
-import UserService from '../services/UserService'
-import QuestionService from '../services/QuestionService';
-
-import db from '../db';
+import md5 from '../../node_modules/blueimp-md5/js/md5.js'
 
 var mongoose = require('mongoose');
 
+import db from '../db';
+
+/*
+User Constants
+ */
+
+const TYPE_STUDENT = "STUDENT";
+const TYPE_INSTRUCTOR = "INSTRUCTOR";
+
+
+
 // Services
-import SessionService from '../services/SessionService';
+//import SessionService from '../services/SessionService';
 
 // Import User Schema
-var UserSchema = require('../schemas/User');
+
 
 // Create a model with the Schema
-var User = mongoose.model('users', UserSchema); 
 
-router.post('/get/id', getId);
-router.post('/remove', remove);
+
+import UserService from '../services/UserService'
+import SchoolService from '../services/SchoolService'
+
 router.post('/logIn', logIn);
 router.post('/logOut', logOut);
-router.post('/signUp', signUp);
-router.post('/getInfo', getInfo);
-router.post('/getType', getType);
-router.post('/session/checkValid', hasValidSession);
-router.post('/test', test);
+router.post('/signUp/student', signUpStudent);
 
 function test(req, res){
     console.log("TESTING");
@@ -113,58 +115,41 @@ function logIn(req, res) {
     });
 }
 
-function signUp(req, res) {
-  const { email, password, firstName, lastName, userType } = req.body;
-
-  const encryptedPassword = md5(password, null, true) + email + SALT;
-
-  db.findOne({
-    username: email,
-    password: encryptedPassword
-  }, User)
-    .then(user => {
-      if (user) {
-	console.log('EMAIL IN USE');
-        res.send({
-          msg: 'Email in use',
-          success: false
-        })
-      } else {
-        db.create({
-          username: email,
-          password: encryptedPassword,
+ async function signUpStudent(req, res) {
+    const  {
           firstName,
           lastName,
-          userType,
-          loggedIn: true
-        }, User)
-          .then(user => {
-            req.session.userName = email;
-            req.session.firstName = firstName;
-            req.session.lastName = lastName;
-            req.session.userType = userType;
-            req.session.userId = user._id;
+          email,
+          password,
+          phone,
+          school
+        } = req.body;
 
-            res.success()
-          })
-          .catch(error => { 
-		console.error('error: ', error);
-		res.error(error) 
-	})
-      }
-    })
-    .catch(error => { 
-	console.error('error: ', error);
-	res.error(error) 
-	})
-}
+    try {
+        UserService.validateModel();
+        const encryptedPassword = UserService.encryptPassword(password, email);
+        const isEmailVacant = await UserService.isEmailVacant( email);
+        const schoolFound = await SchoolService.findByName(school);//TODO: Hook this with SchoolService once ready; should return school obj if found
+        if (!!isEmailVacant && !!schoolFound) {
+            const user = await UserService
+                .attemptSignUp(
+                    firstName,
+                    lastName,
+                    email,
+                    password,
+                    phone,
+                    schoolFound.id,
+                    TYPE_STUDENT
+                );
+            res.send(UserService.mapToSend(user));
+        } else {
+            res.error("Email Already Exists or School Not Found");
+        }
 
-function remove(req, res) {
-  const { userId } = req.session;
-
-  db.remove(userId, User)
-    .then(user => { res.success() })
-    .catch(error => { res.error(error) })
+    }
+    catch (error) {
+        throw error;
+    }
 }
 
 function logOut(req, res) {
@@ -188,51 +173,5 @@ function logOut(req, res) {
     .catch(error => { res.sendServerError(error) })
 }
 
-function getInfo(req, res) {
-  const { userId } = req.session;
-  console.log('in /getInfo');
-  console.log('userId', userId);
-
-  User.findById(userId, (err, user) => {
-    if (err) {
-      res.sendServerError();
-      return
-    }
-
-    res.send({
-      success: true,
-      type: user.userType,
-      name: `${user.firstName} ${user.lastName}`
-    })
-  });
-}
-
-function getType(req, res) {
-  const { userId } = req.session;
-
-  User.findById(userId, (err, user) => {
-    if (err) {
-      res.sendServerError();
-      return
-    }
-
-    res.send({
-      success: true,
-      type: user.userType
-    })
-  })
-}
-
-function hasValidSession(req, res) {
-  if (req.session.userId) {
-    res.send({
-      hasValidSession: true
-    })
-  } else {
-    res.send({
-      hasValidSession: false
-    })
-  }
-}
 
 module.exports = router;

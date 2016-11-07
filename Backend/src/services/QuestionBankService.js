@@ -1,5 +1,0 @@
-class QuestionBankService {
-  constructor() {};
-  
-  
-}

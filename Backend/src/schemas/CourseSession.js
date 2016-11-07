@@ -5,7 +5,7 @@
 import mongoose, { Schema } from 'mongoose';
 import Settings from './Settings';
 import Entity from './Entity';
-const Id = Mongoose.Schema.Types.ObjectId;
+const Id = mongoose.Schema.Types.ObjectId;
 
 const CourseSession = new Schema({
   ...Entity,

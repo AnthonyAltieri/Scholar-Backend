@@ -1,7 +1,9 @@
 /**
  * @author Anthony Altieri on 11/5/16.
  */
-const Id = Mongoose.Schema.Types.ObjectId;
+
+import mongoose from 'mongoose';
+const Id = mongoose.Schema.Types.ObjectId;
 
 const settings = {
   isAskDisabled: Boolean,

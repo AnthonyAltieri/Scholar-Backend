@@ -4,8 +4,7 @@
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
-const Id = Mongoose.Schema.Types.ObjectId;
-
+const Id = mongoose.Schema.Types.ObjectId;
 
 const User = new Schema({
   ...Entity,
@@ -15,7 +14,8 @@ const User = new Schema({
   lastName: String,
   phone: String,
   loggedIn: Boolean,
-  enrolledCourses: [Id],
+  enrolledCourses: [String],
+  institutionId: String,
   type: String //STUDENT | INSTRUCTOR | ADMIN | STUDENT_REP | TEACHER_ASSISTANT
 
 });

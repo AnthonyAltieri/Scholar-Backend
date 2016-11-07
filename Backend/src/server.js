@@ -26,10 +26,10 @@ var MongoStore = require('connect-mongo/es5')(session);
 
 // Import Utilities
 import IdUtility from './utilities/IdUtility';
-import CourseRegistrationUtility from './utilities/CourseRegistrationUtility';
+//import CourseRegistrationUtility from './utilities/CourseRegistrationUtility';
 
 // Connect to MongoDB and our database
-mongoose.connect('mongodb://localhost/Splice');
+mongoose.connect('mongodb://localhost/Scholar');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
@@ -45,7 +45,8 @@ app.use( (req, res, next) => {
     console.error('ERROR: ', error);
     res.send({
       error: `Server error`,
-      success: false
+      success: false,
+      code: 500
     })
   };
 
@@ -53,7 +54,8 @@ app.use( (req, res, next) => {
     console.error('ERROR: ', error);
     res.send({
       error: `Server error`,
-      success: false
+      success: false,
+      code: 500
     })
   };
   next();
@@ -71,7 +73,7 @@ app.use( (req, res, next) => {
 
 if (SERVER_ENV === 'PRODUCTION') {
   app.use( (req, res, next) => {
-    console.log(req.url)
+    console.log(req.url);
     next();
   })
 }
@@ -132,11 +134,11 @@ app.get('/*', function(req, res) {
 
 
 // Services
-var QuestionService = require('./../dist/services/QuestionService');
-var questionService = new QuestionService();
-var InstantAssessmentService = require('./../dist/services/InstantAssessmentService');
-var instantAssessmentService = new InstantAssessmentService();
-import CourseSessionService from './../dist/services/CourseSessionService';
+// var QuestionService = require('./../dist/services/QuestionService');
+// var questionService = new QuestionService();
+// var InstantAssessmentService = require('./../dist/services/InstantAssessmentService');
+// var instantAssessmentService = new InstantAssessmentService();
+// import CourseSessionService from './../dist/services/CourseSessionService';
 
 server.listen(PORT, function() {
   console.log('Starting server, listening on port %s', PORT);
@@ -162,22 +164,28 @@ app.use((req, res, next) => {
 });
 
 
+
+
 // Routers
 
 import UserRouter from './routers/UserRouter';
 app.use('/api/user', UserRouter);
+//
+// import CourseRouter from './routers/CourseRouter';
+// app.use('/api/course', CourseRouter);
+//
+// import InstantAssessmentRouter from './routers/InstantAssessmentRouter';
+// app.use('/api/instantAssessment', InstantAssessmentRouter);
+//
+// import ReflectiveAssessmentRouter from './routers/ReflectiveAssessmentRouter';
+// app.use('/api/reflectiveAssessment', ReflectiveAssessmentRouter);
+//
+// import CourseSessionRouter from './routers/CourseSessionRouter';
+// app.use('/api/courseSession', CourseSessionRouter);
+//
+// import AdminRouter from './routers/AdminRouter';
+// app.use('/api/admin', AdminRouter);
 
-import CourseRouter from './routers/CourseRouter';
-app.use('/api/course', CourseRouter);
-
-import InstantAssessmentRouter from './routers/InstantAssessmentRouter';
-app.use('/api/instantAssessment', InstantAssessmentRouter);
-
-import ReflectiveAssessmentRouter from './routers/ReflectiveAssessmentRouter';
-app.use('/api/reflectiveAssessment', ReflectiveAssessmentRouter);
-
-import CourseSessionRouter from './routers/CourseSessionRouter';
-app.use('/api/courseSession', CourseSessionRouter);
-
-import AdminRouter from './routers/AdminRouter';
-app.use('/api/admin', AdminRouter);
+//Testing for v1.1
+// import TestRouter from './routers/TestRouter';
+// app.use('/api/test', TestRouter);
