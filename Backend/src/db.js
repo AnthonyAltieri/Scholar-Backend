@@ -38,6 +38,10 @@ function find(attributes, model){
         return
       }
 
+      if ( !found ) {
+        reject("Not Found");
+      }
+
       resolve(found);
     })
   })
@@ -49,6 +53,10 @@ function findOne(attributes, model) {
       if (err) {
         reject(err);
         return
+      }
+
+      if ( !found ) {
+        reject("Not Found");
       }
 
       resolve(found);

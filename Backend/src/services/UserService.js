@@ -5,6 +5,9 @@ import db from '../db';
 import md5 from '../../node_modules/blueimp-md5/js/md5.js'
 const SALT = '620';
 
+import SchoolService from '../services/SchoolService'
+import PasswordUtil from '../utilities/PasswordUtil'
+
 /**
  * Notifies all clients that are logged on to a particular username that another client
  * has logged on with the same username
@@ -44,16 +47,11 @@ function validateModel(user){
 }
 
 
-
-
-function encryptPassword(password, email){
-  return md5(password, null, true) + email + SALT;
-}
-
 async function isEmailVacant(email) {
+  console.log("Is Email Valid?" + email);
   try {
     const user = await db.findOne({ email : email }, User);
-    if (user) {
+    if (!!user) {
       console.error("ERROR : Email already in use");
       return false;
     }else {
@@ -66,7 +64,7 @@ async function isEmailVacant(email) {
 }
 
 async function attemptSignUp( firstName, lastName, email, password, phone,
-                        institutionId, type) {
+                        institutionId, type, referralCode) {
   // check if valid email/password
   try {
     const user = await db.create({
@@ -76,7 +74,8 @@ async function attemptSignUp( firstName, lastName, email, password, phone,
       password : password,
       phone : phone,
       institutionId : institutionId,
-      type: type
+      type: type,
+      referralCode: referralCode
     }, User);
     return user;
   }
@@ -86,11 +85,55 @@ async function attemptSignUp( firstName, lastName, email, password, phone,
   }
 }
 
+async function buildUser(  firstName,
+                           lastName,
+                           email,
+                           password,
+                           phone,
+                           school,
+                           userType,
+                           referralCode){
+  try {
+    UserService.validateModel();
+
+    const encryptedPassword = PasswordUtil.encryptPassword( password, email );
+
+    const isEmailVacant = await UserService.isEmailVacant( email );
+
+
+    let schoolFound;
+    if(!!isEmailVacant){
+      schoolFound = await SchoolService.findByName( school );
+    }
+
+    if (!!isEmailVacant && !!schoolFound) {
+      const user =
+          await attemptSignUp(
+              firstName,
+              lastName,
+              email,
+              encryptedPassword,
+              phone,
+              schoolFound.id,
+              userType,
+              referralCode
+          );
+      return (UserService.mapToSend(user));
+    } else {
+      return null;
+    }
+  }
+  catch (error){
+    throw error;
+  }
+
+
+}
 
 const UserService = {
+  buildUser: buildUser,
   isEmailVacant : isEmailVacant,
   attemptSignUp : attemptSignUp,
-  encryptPassword : encryptPassword,
   validateModel : validateModel,
   mapToSend : mapToSend
 };

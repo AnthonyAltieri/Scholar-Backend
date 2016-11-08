@@ -7,9 +7,11 @@ var router = express.Router();
 import md5 from '../../node_modules/blueimp-md5/js/md5.js'
 
 var mongoose = require('mongoose');
+import UserSchema from '../schemas/User';
+const User = mongoose.model('users', UserSchema);
 
 import db from '../db';
-
+import PasswordUtil from '../utilities/PasswordUtil'
 /*
 User Constants
  */
@@ -34,6 +36,7 @@ import SchoolService from '../services/SchoolService'
 router.post('/logIn', logIn);
 router.post('/logOut', logOut);
 router.post('/signUp/student', signUpStudent);
+router.post('/signUp/instructor', signUpInstructor);
 
 function test(req, res){
     console.log("TESTING");
@@ -59,57 +62,46 @@ function getId(req, res) {
 function logIn(req, res) {
   const { email, password } = req.body;
 
-  const encryptedPassword = md5(password, null, true) + email + SALT;
+  const encryptedPassword = PasswordUtil.encryptPassword(password, email);
 
-  db.findOne({ username: email }, User)
+  db.findOne({ email: email }, User)
     .then((user) => {
       db.findOne({
-        username: email,
+        email: email,
         password: encryptedPassword
       }, User)
         .then((user) => {
-          req.session.userName = email;
-          req.session.firstName = user.firstName;
-          req.session.lastName = user.lastName;
-          req.session.userType = user.userType;
-          req.session.userId = user._id;
 
-          const name = `${user.firstName} ${user.lastName}`;
-          const type = user.userType;
+            req.session.userName = email;
+            req.session.firstName = user.firstName;
+            req.session.lastName = user.lastName;
+            req.session.userType = user.type;
+            req.session.userId = user.id;
 
-          user.loggedIn = true;
+            const name = `${user.firstName} ${user.lastName}`;
+            const type = user.type;
 
-          db.save(user)
-            .then(user => {
-              res.send({
-                name,
-                type,
-                success: true,
-                userType: user.userType
-              });
-            })
-            .catch(error => { res.error(error) });
+            user.loggedIn = true;
+
+            db.save(user)
+                .then(user => {
+                    res.send(UserService.mapToSend(user))
+                })
+                .catch(error => { res.error(error) });
+
         })
         .catch(error => {
-          res.send({
-            success: false,
-            foundUser: true
-          })
+          res.error("Password Incorrect");
         })
     })
     .catch(error => {
       switch(error) {
         case 'Not Found':
-          res.send({
-            success: false,
-            foundUser: false
-          });
+          res.error("User Not Found");
           break;
 
         default:
-          res.send({
-            success: false
-          });
+          res.error("Unknown Error");
           break;
       }
     });
@@ -126,24 +118,22 @@ function logIn(req, res) {
         } = req.body;
 
     try {
-        UserService.validateModel();
-        const encryptedPassword = UserService.encryptPassword(password, email);
-        const isEmailVacant = await UserService.isEmailVacant( email);
-        const schoolFound = await SchoolService.findByName(school);//TODO: Hook this with SchoolService once ready; should return school obj if found
-        if (!!isEmailVacant && !!schoolFound) {
-            const user = await UserService
-                .attemptSignUp(
-                    firstName,
-                    lastName,
-                    email,
-                    password,
-                    phone,
-                    schoolFound.id,
-                    TYPE_STUDENT
-                );
-            res.send(UserService.mapToSend(user));
-        } else {
-            res.error("Email Already Exists or School Not Found");
+      const result = await UserService
+          .buildUser(
+            firstName,
+            lastName,
+            email,
+            password,
+            phone,
+            school,
+            TYPE_STUDENT
+          );
+
+        if( !!result ){
+            res.send(result);
+        }
+        else{
+            res.error("Error creating User: Likely problem with Email or School provided");
         }
 
     }
@@ -151,6 +141,44 @@ function logIn(req, res) {
         throw error;
     }
 }
+
+async function signUpInstructor(req, res){
+    const  {
+        firstName,
+        lastName,
+        email,
+        password,
+        phone,
+        school,
+        referralCode
+    } = req.body;
+
+    try {
+        const result = await UserService
+            .buildUser(
+                firstName,
+                lastName,
+                email,
+                password,
+                phone,
+                school,
+                TYPE_INSTRUCTOR,
+                referralCode
+            );
+
+        if( !!result ){
+            res.send(result);
+        }
+        else{
+            res.error("Error creating User: Likely problem with Email or School provided");
+        }
+
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
 
 function logOut(req, res) {
   const { userId } = req.session;
