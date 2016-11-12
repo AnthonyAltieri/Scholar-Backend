@@ -71,6 +71,11 @@ function logIn(req, res) {
         password: encryptedPassword
       }, User)
         .then((user) => {
+          if (!user) {
+            res.send({
+              notFound: true,
+            })
+          }
 
             req.session.userName = email;
             req.session.firstName = user.firstName;
@@ -85,7 +90,7 @@ function logIn(req, res) {
 
             db.save(user)
                 .then(user => {
-                    res.send(UserService.mapToSend(user))
+                    res.send({ user: UserService.mapToSend(user) })
                 })
                 .catch(error => { res.error(error) });
 

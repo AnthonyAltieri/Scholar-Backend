@@ -53,9 +53,8 @@ app.use( (req, res, next) => {
   res.error = (error) => {
     console.error('ERROR: ', error);
     res.send({
-      error: `Server error`,
+      error,
       success: false,
-      code: 500
     })
   };
   next();
@@ -84,15 +83,15 @@ var io = require('socket.io')(server);
 
 // For CORS, not used right now
 
-if (SERVER_ENV.ENV === 'PRODUCTION') {
+// if (SERVER_ENV.ENV === 'PRODUCTION') {
   app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, *');
     next();
   });
-}
+// }
 
 // Set up the application's body parser
 app.use(bodyParser.json());
@@ -146,22 +145,18 @@ server.listen(PORT, function() {
 
 // Sockets
 let allSockets = 0;
-import SocketRouter from '../dist/routers/SocketRouter';
-const socketRouter = new SocketRouter();
-io.on('connection', socket => {
-  allSockets += 1;
-  console.log(`Socket Connection Established, ${allSockets} currently connected`);
+// import SocketRouter from '../dist/routers/SocketRouter';
+// const socketRouter = new SocketRouter();
+// io.on('connection', socket => { allSockets += 1; console.log(`Socket Connection Established, ${allSockets} currently connected`); socket.on(socketRouter.DISCONNECT, function() {
+//     allSockets -= 1;
+//     console.log(`Socket Disconnect, ${allSockets} currently connected`);
+//   });
+// });
 
-  socket.on(socketRouter.DISCONNECT, function() {
-    allSockets -= 1;
-    console.log(`Socket Disconnect, ${allSockets} currently connected`);
-  });
-});
-
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
+// app.use((req, res, next) => {
+//   req.io = io;
+//   next();
+// });
 
 
 

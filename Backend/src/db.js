@@ -54,11 +54,6 @@ function findOne(attributes, model) {
         reject(err);
         return
       }
-
-      if ( !found ) {
-        reject("Not Found");
-      }
-
       resolve(found);
     })
   })
