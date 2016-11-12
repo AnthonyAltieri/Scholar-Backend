@@ -29,15 +29,15 @@ function leaveCurrentCourseSession(userId) {
 }
 
 function mapToSend(user){
-  if(!!user){
-    return {
-      id : user.id,
-      type : user.type,
-      firstName : user.firstName,
-      lastName : user.lastName};
+  if (!user) return null;
+  return {
+    user: {
+      id: user.id,
+      type: user.type,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    }
   }
-  else return false;
-
 }
 
 function validateModel(user){
@@ -63,65 +63,101 @@ async function isEmailVacant(email) {
   }
 }
 
-async function attemptSignUp( firstName, lastName, email, password, phone,
-                        institutionId, type, referralCode) {
+/**
+ * Attempts to create a user in the database
+ *
+ * @param firstName
+ * @param lastName
+ * @param email
+ * @param password
+ * @param phone
+ * @param institutionId
+ * @param schoolId
+ * @param type
+ * @param referralCode
+ * @returns user if successful and null if there was an error
+ */
+async function attemptSignUp(
+  firstName,
+  lastName,
+  email,
+  password,
+  phone,
+  institutionId,
+  schoolId,
+  type,
+  referralCode
+) {
   // check if valid email/password
   try {
     const user = await db.create({
-      firstName : firstName,
-      lastName : lastName,
-      email : email,
-      password : password,
-      phone : phone,
-      institutionId : institutionId,
-      type: type,
-      referralCode: referralCode
+      firstName,
+      lastName,
+      email,
+      password,
+      phone,
+      institutionId,
+      schoolId,
+      type,
+      referralCode,
     }, User);
     return user;
   }
   catch (error) {
-    console.log("Error Signing up :" + error);
-    return false;
+    return null;
   }
 }
 
-async function buildUser(  firstName,
-                           lastName,
-                           email,
-                           password,
-                           phone,
-                           school,
-                           userType,
-                           referralCode){
+/**
+ * Checks to determine if the credentials are in use and valid
+ *
+ * @returns an {user} if the build was successful
+ * or an {emailInUse:true} if the email is in use or
+ * an {schoolNotFound:true} if the school was not found
+ */
+async function buildUser(
+  firstName,
+  lastName,
+  email,
+  password,
+  phone,
+  institutionId,
+  school,
+  userType,
+  referralCode
+) {
   try {
     UserService.validateModel();
 
-    const encryptedPassword = PasswordUtil.encryptPassword( password, email );
+    const encryptedPassword = PasswordUtil.encryptPassword(password, email);
 
-    const isEmailVacant = await UserService.isEmailVacant( email );
+    const isEmailVacant = await UserService.isEmailVacant(email);
 
+    if (!isEmailVacant) {
+      return {
+        emailInUse: true,
+      }
+    }
+    const schoolFound = await SchoolService.findByName(school);
 
-    let schoolFound;
-    if(!!isEmailVacant){
-      schoolFound = await SchoolService.findByName( school );
+    if (!schoolFound) {
+      return {
+        schoolNotFound: true,
+      }
     }
 
-    if (!!isEmailVacant && !!schoolFound) {
-      const user =
-          await attemptSignUp(
-              firstName,
-              lastName,
-              email,
-              encryptedPassword,
-              phone,
-              schoolFound.id,
-              userType,
-              referralCode
-          );
-      return (UserService.mapToSend(user));
-    } else {
-      return null;
-    }
+    const user = await attemptSignUp(
+      firstName,
+      lastName,
+      email,
+      encryptedPassword,
+      phone,
+      institutionId,
+      schoolFound.id,
+      userType,
+      referralCode
+    );
+    return UserService.mapToSend(user);
   }
   catch (error){
     throw error;
@@ -131,11 +167,11 @@ async function buildUser(  firstName,
 }
 
 const UserService = {
-  buildUser: buildUser,
-  isEmailVacant : isEmailVacant,
-  attemptSignUp : attemptSignUp,
-  validateModel : validateModel,
-  mapToSend : mapToSend
+  buildUser,
+  isEmailVacant,
+  attemptSignUp,
+  validateModel,
+  mapToSend,
 };
 
 

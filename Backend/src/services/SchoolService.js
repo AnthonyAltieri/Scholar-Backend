@@ -9,9 +9,8 @@ import db from '../db';
 
 async function findByName(name){
 
-    console.log("Find schoola  by name" + name);
+    console.log("Find school by name " + name);
     try {
-
         const school = await db.findOne({name : name}, School);
 
         if (!!school){
@@ -30,7 +29,7 @@ async function findByName(name){
 }
 
 const SchoolService = {
-    findByName : findByName
+    findByName,
 };
 
 

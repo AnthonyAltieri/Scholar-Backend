@@ -53,8 +53,7 @@ app.use( (req, res, next) => {
   res.error = (error) => {
     console.error('ERROR: ', error);
     res.send({
-      error,
-      success: false,
+      error: 'Server Error',
     })
   };
   next();
