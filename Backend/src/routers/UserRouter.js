@@ -72,9 +72,7 @@ function logIn(req, res) {
       }, User)
         .then((user) => {
           if (!user) {
-            res.send({
-              notFound: true,
-            })
+            res.send({})
           }
 
             req.session.userName = email;
