@@ -4,8 +4,10 @@
 
 import { v1 } from 'node-uuid';
 const SALT = '620';
+const NOT_FOUND = 'NOT_FOUND';
 
 const db = {
+  NOT_FOUND,
   findById,
   findAll,
   findOne,
@@ -39,7 +41,7 @@ function find(attributes, model){
       }
 
       if ( !found ) {
-        reject("Not Found");
+        reject(NOT_FOUND);
       }
 
       resolve(found);
@@ -56,7 +58,7 @@ function findOne(attributes, model) {
       }
 
       if ( !found ) {
-        reject("Not Found");
+        reject(NOT_FOUND);
       }
 
       resolve(found);
