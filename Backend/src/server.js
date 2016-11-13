@@ -22,7 +22,7 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import mongoose from 'mongoose';
 var MongoStore = require('connect-mongo/es5')(session);
-
+import SchoolService from './services/SchoolService'
 
 // Import Utilities
 import IdUtility from './utilities/IdUtility';
@@ -110,6 +110,9 @@ app.use(session({
 app.use('/static', express.static(path.join(__dirname, 'public')));
 console.log(path.join(__dirname, 'public'));
 
+app.post('/schools', async function(req, res){
+  res.send((await SchoolService.findAll()).map(s => s.name));
+});
 
 app.get('/*', function(req, res) {
 
@@ -141,7 +144,7 @@ app.post('/pusher/auth', (req, res) => {
 // var instantAssessmentService = new InstantAssessmentService();
 // import CourseSessionService from './../dist/services/CourseSessionService';
 
-server.listen(PORT, function() {
+server.listen(PORT, async function() {
   console.log('Starting server, listening on port %s', PORT);
 });
 
@@ -167,9 +170,9 @@ let allSockets = 0;
 
 import UserRouter from './routers/UserRouter';
 app.use('/api/user', UserRouter);
-//
-// import CourseRouter from './routers/CourseRouter';
-// app.use('/api/course', CourseRouter);
+
+import CourseRouter from './routers/CourseRouter';
+app.use('/api/course', CourseRouter);
 //
 // import InstantAssessmentRouter from './routers/InstantAssessmentRouter';
 // app.use('/api/instantAssessment', InstantAssessmentRouter);

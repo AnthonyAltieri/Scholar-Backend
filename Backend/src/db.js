@@ -4,8 +4,10 @@
 
 import { v1 } from 'node-uuid';
 const SALT = '620';
+const NOT_FOUND = 'NOT_FOUND';
 
 const db = {
+  NOT_FOUND,
   findById,
   findAll,
   findOne,
@@ -20,7 +22,7 @@ export default db;
 
 function findById(id, model) {
   return new Promise((resolve, reject) => {
-    findOne({ id }, model)
+    findOne({ id : id }, model)
       .then((model) => { resolve(model) })
       .catch((error) => { reject(err) })
   });
@@ -39,7 +41,7 @@ function find(attributes, model){
       }
 
       if ( !found ) {
-        reject("Not Found");
+        reject(NOT_FOUND);
       }
 
       resolve(found);
@@ -53,6 +55,10 @@ function findOne(attributes, model) {
       if (err) {
         reject(err);
         return
+      }
+
+      if ( !found ) {
+        reject(NOT_FOUND);
       }
       resolve(found);
     })

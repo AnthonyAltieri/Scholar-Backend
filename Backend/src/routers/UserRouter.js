@@ -1,7 +1,3 @@
-/**
- * @author: Anthony Altieri
- */
-
 var express = require('express');
 var router = express.Router();
 import md5 from '../../node_modules/blueimp-md5/js/md5.js'
@@ -37,18 +33,6 @@ router.post('/logIn', logIn);
 router.post('/logOut', logOut);
 router.post('/signUp/student', signUpStudent);
 router.post('/signUp/instructor', signUpInstructor);
-
-function test(req, res){
-    console.log("TESTING");
-    console.log(req.headers);
-}
-
-function getId(req, res) {
-  res.send({
-    userId: req.session.userId
-  })
-
-}
 
 /**
  * @description
@@ -99,12 +83,12 @@ function logIn(req, res) {
     })
     .catch(error => {
       switch(error) {
-        case 'Not Found':
+        case db.NOT_FOUND:
           res.error("User Not Found");
           break;
 
         default:
-          res.error("Unknown Error");
+          res.error("Unknown Error from Database");
           break;
       }
     });
@@ -194,12 +178,12 @@ function logOut(req, res) {
               res.error(error);
               return
             }
-            res.success()
+            res.send();
           })
         })
-        .catch(error => { res.sendServerError(error) })
+        .catch(error => { res.error(error) })
     })
-    .catch(error => { res.sendServerError(error) })
+    .catch(error => { res.error(error) })
 }
 
 
