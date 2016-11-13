@@ -40,7 +40,7 @@ db.once('open', function() {
 var app = express();
 
 // Create Server Error middleware
-app.use( (req, res, next) => {
+app.use((req, res, next) => {
   res.sendServerError = (error) => {
     console.error('ERROR: ', error);
     res.send({
@@ -125,10 +125,13 @@ app.get('/*', function(req, res) {
   }
 
   res.sendFile(path.join(__dirname, 'index.html'));
-
-
 });
 
+app.post('/pusher/auth', (req, res) => {
+  const { socketId, channel } = req.body;
+  const auth = pusher.authenticate(socketId, channel);
+  res.send(auth);
+});
 
 
 // Services
