@@ -24,7 +24,7 @@ function findById(id, model) {
   return new Promise((resolve, reject) => {
     findOne({ id : id }, model)
       .then((model) => { resolve(model) })
-      .catch((error) => { reject(err) })
+      .catch((error) => { reject(error) })
   });
 }
 
@@ -39,11 +39,6 @@ function find(attributes, model){
         reject(err);
         return
       }
-
-      if ( !found ) {
-        reject(NOT_FOUND);
-      }
-
       resolve(found);
     })
   })
@@ -55,10 +50,6 @@ function findOne(attributes, model) {
       if (err) {
         reject(err);
         return
-      }
-
-      if ( !found ) {
-        reject(NOT_FOUND);
       }
       resolve(found);
     })

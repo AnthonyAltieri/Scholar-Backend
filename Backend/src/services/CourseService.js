@@ -66,11 +66,11 @@ function mapToSendList( courses ) {
     return { courseList : courses.map ( (c) => { return {id: c.id, title: c.title, abbreviation: c.abbreviation, isActive: c.isActive} })}
 }
 
-async function setActivationStatus( courseId, isActive ) {
+async function setActivationStatus(courseId, isActive) {
     try{
-        let course = await db.findOne({id : courseId}, Course);
+        let course = await db.findById(courseId, Course);
 
-        if( !!course ) {
+        if (!!course) {
             course.isActive = isActive;
 
             course = await db.save(course);
