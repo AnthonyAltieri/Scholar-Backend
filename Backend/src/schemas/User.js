@@ -15,6 +15,7 @@ const User = new Schema({
   phone: String,
   loggedIn: Boolean,
   enrolledCourses: [String],
+  schoolId: String,
   institutionId: String,
   type: String //STUDENT | INSTRUCTOR | ADMIN | STUDENT_REP | TEACHER_ASSISTANT
 

@@ -55,23 +55,26 @@ function logIn(req, res) {
         password: encryptedPassword
       }, User)
         .then((user) => {
+          if (!user) {
+            res.send({})
+          }
 
-            req.session.userName = email;
-            req.session.firstName = user.firstName;
-            req.session.lastName = user.lastName;
-            req.session.userType = user.type;
-            req.session.userId = user.id;
+          req.session.userName = email;
+          req.session.firstName = user.firstName;
+          req.session.lastName = user.lastName;
+          req.session.userType = user.type;
+          req.session.userId = user.id;
 
-            const name = `${user.firstName} ${user.lastName}`;
-            const type = user.type;
+          const name = `${user.firstName} ${user.lastName}`;
+          const type = user.type;
 
-            user.loggedIn = true;
+          user.loggedIn = true;
 
-            db.save(user)
-                .then(user => {
-                    res.send(UserService.mapToSend(user))
-                })
-                .catch(error => { res.error(error) });
+          db.save(user)
+              .then((user) => {
+                  res.send(UserService.mapToSend(user))
+              })
+              .catch((error) => { res.error(error) });
 
         })
         .catch(error => {
@@ -92,37 +95,35 @@ function logIn(req, res) {
 }
 
  async function signUpStudent(req, res) {
-    const  {
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      phone,
+      institutionId,
+      school
+    } = req.body;
+
+    try {
+      const result = await UserService
+        .buildUser(
           firstName,
           lastName,
           email,
           password,
           phone,
-          school
-        } = req.body;
+          institutionId,
+          school,
+          TYPE_STUDENT
+        );
 
-    try {
-      const result = await UserService
-          .buildUser(
-            firstName,
-            lastName,
-            email,
-            password,
-            phone,
-            school,
-            TYPE_STUDENT
-          );
-
-        if( !!result ){
-            res.send(result);
-        }
-        else{
-            res.error("Error creating User: Likely problem with Email or School provided");
-        }
-
+      res.send(
+        !!result ? result : { error: 'Server Error' }
+      );
     }
     catch (error) {
-        throw error;
+      res.error();
     }
 }
 

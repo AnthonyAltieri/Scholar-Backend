@@ -8,10 +8,9 @@ import db from '../db';
 
 
 async function findByName(name){
-
     console.log("Find schoole  by name" + name);
-    try {
 
+    try {
         const school = await db.findOne({name : name}, School);
 
         if (!!school){

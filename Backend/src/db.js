@@ -60,7 +60,6 @@ function findOne(attributes, model) {
       if ( !found ) {
         reject(NOT_FOUND);
       }
-
       resolve(found);
     })
   })
