@@ -167,9 +167,9 @@ let allSockets = 0;
 
 import UserRouter from './routers/UserRouter';
 app.use('/api/user', UserRouter);
-//
-// import CourseRouter from './routers/CourseRouter';
-// app.use('/api/course', CourseRouter);
+
+import CourseRouter from './routers/CourseRouter';
+app.use('/api/course', CourseRouter);
 //
 // import InstantAssessmentRouter from './routers/InstantAssessmentRouter';
 // app.use('/api/instantAssessment', InstantAssessmentRouter);

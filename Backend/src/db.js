@@ -22,7 +22,7 @@ export default db;
 
 function findById(id, model) {
   return new Promise((resolve, reject) => {
-    findOne({ id }, model)
+    findOne({ id : id }, model)
       .then((model) => { resolve(model) })
       .catch((error) => { reject(err) })
   });

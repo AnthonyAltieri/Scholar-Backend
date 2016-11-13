@@ -4,18 +4,18 @@
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
-const Id = Mongoose.Schema.Types.ObjectId;
+const Id = mongoose.Schema.Types.ObjectId;
 
 const Course = new Schema({
   ...Entity,
-  instructorIds: [Id],
-  teacherAssistantIds: [Id],
-  studentIds: [Id],
-  schoolId: Id,
-  activeSessionId: Id,
+  instructorIds: [String],
+  teacherAssistantIds: [String],
+  studentIds: [String],
+  schoolId: String,
+  activeSessionId: String,
   title: String,
   abbreviation: String,
-  addCode: Number,
+  addCode: String,
   // qFall | qWinter | qSpring | sFall | sWinter | summer | other
   term: String,
   isActive: Boolean,
