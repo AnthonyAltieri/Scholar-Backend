@@ -74,7 +74,7 @@ function create(attributes, model) {
 }
 
 function save(instance) {
-  return new Promise( (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     instance.save(error => {
       if (error) {
         reject(error);

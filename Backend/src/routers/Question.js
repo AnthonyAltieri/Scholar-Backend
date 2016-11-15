@@ -17,6 +17,7 @@ async function create(req, res) {
     courseId,
     courseSessionId,
   } = req.body;
+
   const question = await QuestionService
     .buildQuestion(
       content,
