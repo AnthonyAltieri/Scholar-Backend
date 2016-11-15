@@ -13,7 +13,7 @@ const DEFAULT_THRESHOLD = 30;
 
 async function getThreshold(courseId) {
   try {
-    const settings = await db.find({courseId : courseId}, CourseSettings);
+    const settings = await db.findOne({courseId : courseId}, CourseSettings);
     return settings.alertThreshold;
   } catch (e) {
     return DEFAULT_THRESHOLD;
