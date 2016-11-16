@@ -14,6 +14,7 @@ const Response = new Schema({
   votes: [Vote],
   isFlagged: Boolean,
   isEndorsed: Boolean,
+  endorsedBy: Id,
   rootQuestionId: Id,
   parentId: Id,
   parentType: String, // Question | Response

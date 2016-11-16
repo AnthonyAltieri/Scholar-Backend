@@ -1,79 +1,100 @@
 'use strict';
 
+import VoteService from '../services/Vote';
 import express from 'express';
-var router = express.Router();
-
-import mongoose from 'mongoose';
-
-import ReflectiveAssessmentSchema from '../schemas/ReflectiveAssessment';
-import CourseSessionSchema from '../schemas/CourseSession';
-import VoteSchema from '../schemas/Vote';
-
-var ReflectiveAssessment = mongoose.model('reflectiveAssessments', ReflectiveAssessmentSchema);
-var CourseSession = mongoose.model('courseSessions', CourseSessionSchema);
-var Vote = mongoose.model('votes', VoteSchema);
-
-
+import Socket from '../services/Socket';
+import Events from '../services/Events';
+const router = express.Router();
 
 // Votes on a question
-router.post('/question', (req, res) => {
-  let courseSessionId = req.body.courseSessionId;
-  let questionId = req.body.questionId;
-  let studentId = req.body.studentId;
-  let created = req.body.created;
-  let type = req.body.type;
+router.post('/question/add', questionAdd);
+router.post('/response/add')
 
-  CourseSession.findById(courseSessionId, (err, courseSession) => {
-    if (err) {
-      console.error(err);
+export function questionAdd(req, res) {
+  addQuestionResponse(req, res, 'QUESTION');
+}
+
+export function responseAdd(req, res) {
+  addQuestionResponse(req, res, 'RESPONSE');
+}
+
+async function addQuestionResponse (req, res, type) {
+  const {
+    userId,
+    courseId,
+    courseSessionId,
+    targetType,
+    targetId,
+    type,
+  } = req.body;
+  try {
+    const vote = await VoteService.build(
+      userId,
+      courseId,
+      courseSessionId,
+      targetType,
+      targetId,
+      type,
+    );
+    let response;
+    if (type === 'QUESTION') {
+      response = await VoteService.addToQuestion(targetId, vote);
+    } else if (type === 'RESONSE') {
+      response = await VoteService.addToResponse(targetId, vote);
+    } else {
+      console.error(`Invalid type: ${type}`);
+      res.error();
       return;
     }
-
-    let votes = null;
-    let questions = courseSession.questions;
-    for (let i = 0 ; i < questions.length ; i++) {
-      let question = questions[i];
-      if (question._id === questionId) {
-        let vote = new Vote({
-          studentId: studentId,
-          type: type,
-          created: created
-        });
-        break;
-      }
+    if (!response) {
+      res.error();
+      return;
     }
-
-    courseSession.save(err => {
-      if (err) {
-        console.error(err);
-        return;
+    Socket.send(
+      Socket.generatePrivateChannel(courseSessionId),
+      Events.ADD_VOTE,
+      {
+        targetId,
+        vote: VoteService.mapToSend(vote),
       }
-      console.log('Question %s successfully voted on by student %s', questionId, studentId);
-    });
+    );
+    res.end();
+  } catch (e) {
+    res.error();
+  }
+}
 
-  });
-  
-  res.end();
-});
+export async function remove(req, res, type) {
+  const { id, userId } = req.body;
+  try {
+    let result;
+    if (type === 'QUESTION') {
+      result = Vote.removeFromQuestion(id, userId);
+    } else if (type === 'RESPONSE') {
+      result = Vote.removeFromResponse(id, userId);
+    } else {
+      console.error(`Invalid type: ${type}`);
+      res.error();
+      return;
+    }
+    if (!result) {
+      res.error();
+      return;
+    }
+    const { courseSessionId, voteId } = result;
+    Socket.send(
+      Socket.generatePrivateChannel(courseSessionId),
+      Events.REMOVE_VOTE,
+      {
+        id: voteId,
+      }
+    );
+    res.end();
+  } catch (e) {
+    res.error();
+  }
+}
 
-// Votes on an Response 
-router.post('/response', (req, res) => {
-  let reflectiveAssessmentId = req.body.reflectiveAssessmentId;
-  let studentId = req.body.studentId;
-  let type = req.body.type;
-  let created = req.body.created;
-  
-  const vote = new Vote({
-    studentId,
-    type,
-    created
-  });
-  
-  ReflectiveAssessment.findById(reflectiveAssessmentId, (err, reflectiveAssessment) => {
-    
-  });
-  
-  
-});
+
 
 module.exports = router;

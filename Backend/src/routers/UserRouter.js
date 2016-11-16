@@ -1,21 +1,24 @@
-var express = require('express');
-var router = express.Router();
 import md5 from '../../node_modules/blueimp-md5/js/md5.js'
-
-var mongoose = require('mongoose');
 import UserSchema from '../schemas/User';
-const User = mongoose.model('users', UserSchema);
-
 import db from '../db';
-import PasswordUtil from '../utilities/PasswordUtil'
+import PasswordUtil from '../utilities/PasswordUtil';
+import nodemailer from 'nodemailer';
+import templateGenerator from '../ForgotPasswordEmail';
+
 /*
 User Constants
  */
 
+var mongoose = require('mongoose');
+const User = mongoose.model('users', UserSchema);
 const TYPE_STUDENT = "STUDENT";
 const TYPE_INSTRUCTOR = "INSTRUCTOR";
 
+var express = require('express');
+var router = express.Router();
 
+const transporter = nodemailer
+  .createTransport('smtps://no-reply%40crowdconnect.io:n6iNoz3ztW0d6y@smtp.gmail.com');
 
 // Services
 //import SessionService from '../services/SessionService';
@@ -24,6 +27,7 @@ const TYPE_INSTRUCTOR = "INSTRUCTOR";
 
 
 // Create a model with the Schema
+
 
 
 import UserService from '../services/UserService'
@@ -184,6 +188,60 @@ function logOut(req, res) {
         .catch(error => { res.error(error) })
     })
     .catch(error => { res.error(error) })
+}
+
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+  if (!email) {
+    res.send({
+      invalidRecipient: true,
+    });
+    return;
+  }
+  try {
+    const user = await db.findOne({ email }, User);
+    if (!user) {
+      res.send({
+        invalidRecipient: true,
+      });
+      return;
+    }
+    const resetCode = v1();
+    user.passwordResetCode = resetCode;
+    const savedUser = await db.save(user);
+    const mailOptions = {
+      from: '"CrowdConnect" <no-reply@crowdconnect.io>',
+      to: email,
+      subject: 'Reset password for Scholar account',
+      text: 'Please follow the link to reset your email',
+      html: templateGenerator(resetCode),
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        res.send({
+          error: true,
+        })
+        console.log('email sent successfully, info', info);
+        return;
+      }
+      res.send({
+        success: true,
+      })
+    })
+
+  } catch (e) {
+
+  }
+  db.findOne({ email }, User)
+    .then((user) => {
+      db.save(user)
+        .then((user) => {
+          console.log('mark5')
+        })
+        .catch((error) => {
+          console.log('SAVE ERROR', error)
+        })
+    })
 }
 
 

@@ -17,6 +17,7 @@ const User = new Schema({
   enrolledCourses: [String],
   schoolId: String,
   institutionId: String,
+  passwordResetCode: String,
   type: String //STUDENT | INSTRUCTOR | ADMIN | STUDENT_REP | TEACHER_ASSISTANT
 
 });

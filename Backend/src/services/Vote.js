@@ -1,0 +1,105 @@
+/**
+ * @author Anthony Altieri on 11/15/16.
+ */
+
+import mongoose from 'mongoose';
+import VoteSchema from '../schemas/Vote';
+import QuestionSchema from '../schemas/Question'
+import ResponseSchema from '../schemas/Response'
+const Vote = mongoose.model('votes', VoteSchema);
+const Question = mongoose.model('questions', QuestionSchema);
+const Response = mongoose.model('responses', ResponseSchema);
+import db from '../db';
+
+async function build(
+  userId,
+  courseId,
+  courseSessionId,
+  targetType,
+  targetId,
+  type
+) {
+  try {
+    const vote = await db.create({
+      userId,
+      courseId,
+      courseSessionId,
+      targetType,
+      targetId,
+      type,
+    }, Vote);
+    return vote;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function addToQuestion(id, vote) {
+  try {
+    const question = await db.findById(id, Question);
+    question.votes = [...question.votes, vote];
+    question.rank = question.votes.length;
+    return await db.save(question);
+  } catch (e) {
+    return null;
+  }
+}
+
+async function removeFromQuestion(id, userId) {
+  try {
+    const question = await db.findById(id, Question);
+    const vote = question.votes.filter(v => v.userId === userId);
+    question.votes = question.votes.filter(v => v.userId !== userId);
+    question.rank = question.votes.length;
+    await db.save(question);
+    return {
+      courseSessionId: question.courseSessionId,
+      voteId: vote.id
+    }
+  } catch (e) {
+    return null;
+  }
+}
+
+async function addToResponse(id, vote) {
+  try {
+    const response = await db.findById(id, Response);
+    response.votes = [...response.votes, vote];
+    response.rank = response.votes.length;
+    return await db.save(response);
+  } catch (e) {
+    return null;
+  }
+}
+
+async function removeFromResponse(id, userId) {
+  try {
+    const response = await db.findById(id, Response);
+    response.votes = response.votes.filter(v => v.userId != userId);
+    response.rank = response.votes.length;
+    return await db.save(response);
+  } catch (e) {
+    return null;
+  }
+}
+
+function mapToSend(vote) {
+  return {
+    id: vote.id,
+    userId: vote.userId,
+    courseId: vote.courseId,
+    courseSessionId: vote.courseSessionId,
+    targetType: vote.targetType,
+    targetId: vote.targetType,
+    type: vote.type,
+  }
+}
+
+export default {
+  build,
+  addToQuestion,
+  removeFromQuestion,
+  addToResponse,
+  removeFromResponse,
+  mapToSend,
+}

@@ -14,6 +14,9 @@ const Question = new Schema({
   content: String,
   isDismissed: Boolean,
   isEndorsed: Boolean,
+  endorsedBy: Id,
+  isFlagged: Boolean,
+  endorsedBy: Id,
 });
 
 export default Question;

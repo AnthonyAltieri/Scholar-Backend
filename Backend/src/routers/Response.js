@@ -1,8 +1,8 @@
 /**
- * @author Anthony Altieri on 11/12/16.
+ * @author Anthony Altieri on 11/15/16.
  */
 
-import QuestionService from '../services/Question';
+import ResponseService from '../services/Response';
 import Socket from '../services/Socket';
 import Events from '../services/Events';
 
@@ -19,22 +19,27 @@ router.post('/flag/remove', flagRemove);
 
 async function create(req, res) {
   const {
-    content,
     userId,
     courseId,
     courseSessionId,
+    content,
+    rootQuestionId,
+    parentId,
+    parentType,
   } = req.body;
-  const question = await QuestionService
-    .buildQuestion(
+  const response = await ResponseService
+    .buildResponse(
       content,
       userId,
       courseId,
       courseSessionId,
+      parentId,
+      rootQuestionId,
     );
   Socket.send(
     Socket.generatePrivateChannel(courseSessionId),
-    Events.QUESTION_ASKED,
-    QuestionService.mapToSend(question)
+    Events.ADD_RESPONSE,
+    ResponseService.mapToSend(response)
   );
   res.end();
 }
@@ -42,13 +47,13 @@ async function create(req, res) {
 async function dismiss(req, res) {
   const { id, courseSessionId } = req.body;
   try {
-    const question = await QuestionService.dismissQuestion(id);
-    if (!question) {
+    const response = await QuestionService.dismissResponse(id);
+    if (!response) {
       res.end();
     }
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
-      Events.QUESTION_DISMISSED,
+      Events.REMOVE_RESPONSE,
       { id }
     );
     res.end();
@@ -60,7 +65,7 @@ async function dismiss(req, res) {
 async function endorseAdd(req, res) {
   const { id, userId, courseSessionId } = req.body;
   try {
-    const id = await QuestionService.endorseAdd(id, userId);
+    const id = await ResponseService.endorseAddResponse(id, userId);
     if (!id) {
       res.end();
     }
@@ -78,13 +83,13 @@ async function endorseAdd(req, res) {
 async function endorseRemove(req, res) {
   const { id, courseSessionId } = req.body;
   try {
-    const id = await QuestionService.endorseRemove(id, userId);
+    const id = await ResponseService.endorseRemoveResponse(id);
     if (!id) {
       res.end();
     }
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
-      Events.ADD_ENDORSE,
+      Events.REMOVE_ENDORSE,
       { id }
     );
     res.end();
@@ -96,7 +101,7 @@ async function endorseRemove(req, res) {
 async function flagAdd(req, res) {
   const { id, courseSessionId } = req.body;
   try {
-    const id = await QuestionService.flagAdd(id);
+    const id = await ResponseService.flagAdd(id);
     if (!id) {
       res.end();
     }
@@ -114,7 +119,7 @@ async function flagAdd(req, res) {
 async function flagRemove(req, res) {
   const { id, courseSessionId } = req.body;
   try {
-    const id = await QuestionService.flagRemove(id);
+    const id = await ResponseService.flagRemove(id);
     if (!id) {
       res.end();
     }
@@ -128,4 +133,3 @@ async function flagRemove(req, res) {
     res.error();
   }
 }
-

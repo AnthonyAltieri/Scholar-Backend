@@ -21,7 +21,12 @@ function send(channel, event, payload) {
   pusher.trigger(channel, event, payload);
 }
 
+function generatePrivateChannel(name) {
+  return `private-${name}`;
+}
+
 export default {
   init,
   send,
+  generatePrivateChannel,
 }
