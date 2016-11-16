@@ -173,6 +173,9 @@ app.use('/api/user', UserRouter);
 
 import CourseRouter from './routers/CourseRouter';
 app.use('/api/course', CourseRouter);
+
+import CourseSettingsRouter from './routers/CourseSettings'
+app.use('/api/courseSettings', CourseSettingsRouter);
 //
 // import InstantAssessmentRouter from './routers/InstantAssessmentRouter';
 // app.use('/api/instantAssessment', InstantAssessmentRouter);

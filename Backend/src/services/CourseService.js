@@ -2,8 +2,12 @@
  * Created by bharatbatra on 11/11/16.
  */
 import mongoose from 'mongoose';
+
 import CourseSchema from '../schemas/Course';
 const Course = mongoose.model('Courses', CourseSchema);
+import UserSchema from '../schemas/User';
+const User = mongoose.model('users', UserSchema);
+
 import db from '../db';
 import ShortIdUtil from '../utilities/ShortIdUtil'
 
@@ -83,8 +87,40 @@ async function setActivationStatus(courseId, isActive) {
     catch ( error ) {
         throw error;
     }
+}
+
+async function attemptEnrollStudent(addCode, courseId, studentId){
+    try {
+        console.log("try enroll");
+        let course = await db.findById(courseId, Course);
+        if(!!course && course.addCode === addCode) {
+            console.log("course found and addCode match");
+            let student = await db.findById(studentId, User);
+            if(!!student) {
+                console.log("student found");
+                if(!student.enrolledCourses.includes(course.id)){
+                    console.log("student doesnt have course");
+                    student.enrolledCourses.push(course.id);
+                    student = await db.save(student);
+                }
+                if(!course.studentIds.includes(student.id)){
+                    console.log("course doesn't gave student");
+                    course.studentIds.push(student.id);
+                    course = await db.save(course);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    catch(error) {
+        throw error;
+    }
+
 
 }
+
+
 
 const CourseService = {
     buildCourse,
@@ -92,7 +128,8 @@ const CourseService = {
     mapToSendList,
     getAll,
     getActive,
-    setActivationStatus
+    setActivationStatus,
+    attemptEnrollStudent
 };
 
 export default  CourseService;

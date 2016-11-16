@@ -13,6 +13,7 @@ router.post('/create', createCourse);
 router.post('/get/all', getAll);
 router.post('/get/active', getActive);
 router.post('/set/activationStatus', setActivationStatus);
+router.post('/enroll/student', enrollStudent);
 
 async function createCourse(req, res){
     const {
@@ -92,5 +93,18 @@ async function setActivationStatus(req, res){
     }
 }
 
+async function enrollStudent(req, res){
+    const { addCode, courseId, studentId } = req.body;
+    try {
+        const isSuccess = await CourseService.attemptEnrollStudent(addCode, courseId, studentId);
+        if(!!isSuccess)
+            res.send();
+        else
+            res.error();
+    }
+    catch(error) {
+        res.error(error);
+    }
+}
 
 module.exports = router;

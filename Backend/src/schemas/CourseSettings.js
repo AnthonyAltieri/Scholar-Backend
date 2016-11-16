@@ -5,13 +5,13 @@
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
 import Settings from './Settings'
-const Id = Mongoose.Schema.Types.ObjectId;
+const Id = mongoose.Schema.Types.ObjectId;
 
 const CourseSettings = new Schema({
   ...Entity,
   ...Settings,
-  userId: Id,
-  courseId: Id,
+  userId: String,//TODO: do we really need this here?
+  courseId: String,
 });
 
 export default CourseSettings;

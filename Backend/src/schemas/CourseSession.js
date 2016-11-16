@@ -9,7 +9,6 @@ const Id = mongoose.Schema.Types.ObjectId;
 
 const CourseSession = new Schema({
   ...Entity,
-  ...Settings,
   courseId: Id,
   instructorIds: [Id],
   teacherAssistantIds: [Id],
