@@ -18,7 +18,7 @@ export function responseAdd(req, res) {
   addQuestionResponse(req, res, 'RESPONSE');
 }
 
-async function addQuestionResponse (req, res, type) {
+async function addQuestionResponse (req, res) {
   const {
     userId,
     courseId,

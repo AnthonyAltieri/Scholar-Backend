@@ -32,6 +32,9 @@ async function create(req, res) {
       courseId,
       courseSessionId,
     );
+  if (!question) {
+    res.error();
+  }
   Socket.send(
     Socket.generatePrivateChannel(courseSessionId),
     Events.QUESTION_ASKED,
