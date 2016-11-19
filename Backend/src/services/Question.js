@@ -3,7 +3,7 @@
  */
 
 import mongoose from 'mongoose';
-import QuestionSchema from '../schemas/QuestionSchema';
+import QuestionSchema from '../schemas/Question';
 const Question = mongoose.model('questions', QuestionSchema);
 import db from '../db';
 
@@ -112,6 +112,15 @@ function mapToSend(question) {
   }
 }
 
+async function findByCourseSessionId(id){
+  try {
+    return await db.find({courseSessionId: id}, Question);
+  }
+  catch (err) {
+    throw err;
+  }
+}
+
 export default {
   build,
   dismiss,
@@ -120,4 +129,5 @@ export default {
   flagAdd,
   flagRemove,
   mapToSend,
+  findByCourseSessionId,
 }

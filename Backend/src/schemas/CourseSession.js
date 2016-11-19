@@ -5,7 +5,7 @@
 import mongoose, { Schema } from 'mongoose';
 import Settings from './Settings';
 import Entity from './Entity';
-const Id = mongoose.Schema.Types.ObjectId;
+const Id = String;
 
 const CourseSession = new Schema({
   ...Entity,
@@ -13,7 +13,7 @@ const CourseSession = new Schema({
   instructorIds: [Id],
   teacherAssistantIds: [Id],
   studentIds: [Id],//attendance
-  activeSessionId: Id,
+  activeAssessmentId: Id
 });
 
 export default CourseSession;

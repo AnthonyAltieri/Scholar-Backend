@@ -120,16 +120,50 @@ async function attemptEnrollStudent(addCode, courseId, studentId){
 
 }
 
+async function findById(id){
+    return await db.findById(id, Course)
+}
+
+//Helper method that checks whether this instructor can make changes to course
+//OR thereby to courseSession
+function isInstructorPermittedForCourse(course, instructor){
+    console.log("HIT ME TO SEE IF PERMITTED");
+    let isValid = false;
+    if(!!course.id && !!instructor.id){
+        console.log("Yes we got ids");
+        course.instructorIds.forEach( id => {
+            console.log("LOOPS : " + id + " : " + instructor.id);
+            if(id === instructor.id){
+                console.log("found match");
+                isValid = true;
+            }
+        });
+    }
+    return isValid;
+
+}
+
+//Sets the activeSessionId of this course
+//To the courseSession.id
+async function setActiveSessionId(course, courseSession){
+    course.activeSessionId = courseSession.id;
+    return await db.save(course);
+
+}
+
 
 
 const CourseService = {
+    isInstructorPermittedForCourse,
+    findById,
     buildCourse,
     mapToSend,
     mapToSendList,
     getAll,
     getActive,
     setActivationStatus,
-    attemptEnrollStudent
+    attemptEnrollStudent,
+    setActiveSessionId,
 };
 
 export default  CourseService;

@@ -176,6 +176,9 @@ app.use('/api/course', CourseRouter);
 
 import CourseSettingsRouter from './routers/CourseSettings'
 app.use('/api/courseSettings', CourseSettingsRouter);
+
+import CourseSessionRouter from './routers/CourseSession';
+app.use('/api/courseSession', CourseSessionRouter);
 //
 // import InstantAssessmentRouter from './routers/InstantAssessmentRouter';
 // app.use('/api/instantAssessment', InstantAssessmentRouter);
@@ -183,8 +186,6 @@ app.use('/api/courseSettings', CourseSettingsRouter);
 // import ReflectiveAssessmentRouter from './routers/ReflectiveAssessmentRouter';
 // app.use('/api/reflectiveAssessment', ReflectiveAssessmentRouter);
 //
-// import CourseSessionRouter from './routers/CourseSessionRouter';
-// app.use('/api/courseSession', CourseSessionRouter);
 //
 // import AdminRouter from './routers/AdminRouter';
 // app.use('/api/admin', AdminRouter);

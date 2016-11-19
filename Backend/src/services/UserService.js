@@ -166,8 +166,14 @@ async function buildUser(
 
 }
 
+async function findById(id){
+  return await db.findById(id, User)
+}
+
+
 const UserService = {
   buildUser,
+  findById,
   isEmailVacant,
   attemptSignUp,
   validateModel,
