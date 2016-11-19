@@ -44,16 +44,16 @@ async function create(req, res) {
 }
 
 async function dismiss(req, res) {
-  const { id, courseSessionId } = req.body;
+  const { questionId, courseSessionId } = req.body;
   try {
-    const question = await QuestionService.dismissQuestion(id);
+    const question = await QuestionService.dismissQuestion(questionId);
     if (!question) {
       res.end();
     }
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
       Events.QUESTION_DISMISSED,
-      { id }
+      { id: questionId }
     );
     res.end();
   } catch (e) {
@@ -62,9 +62,13 @@ async function dismiss(req, res) {
 }
 
 async function endorseAdd(req, res) {
-  const { id, userId, courseSessionId } = req.body;
+  const {
+    questionId,
+    userId,
+    courseSessionId
+  } = req.body;
   try {
-    const id = await QuestionService.endorseAdd(id, userId);
+    const id = await QuestionService.endorseAdd(questionId, userId);
     if (!id) {
       res.end();
     }
@@ -80,9 +84,13 @@ async function endorseAdd(req, res) {
 }
 
 async function endorseRemove(req, res) {
-  const { id, courseSessionId } = req.body;
+  const {
+    questionId,
+    courseSessionId ,
+    userId,
+  } = req.body;
   try {
-    const id = await QuestionService.endorseRemove(id, userId);
+    const id = await QuestionService.endorseRemove(questionId, userId);
     if (!id) {
       res.end();
     }
@@ -98,9 +106,9 @@ async function endorseRemove(req, res) {
 }
 
 async function flagAdd(req, res) {
-  const { id, courseSessionId } = req.body;
+  const { questionId, courseSessionId } = req.body;
   try {
-    const id = await QuestionService.flagAdd(id);
+    const id = await QuestionService.flagAdd(questionId);
     if (!id) {
       res.end();
     }
@@ -116,9 +124,9 @@ async function flagAdd(req, res) {
 }
 
 async function flagRemove(req, res) {
-  const { id, courseSessionId } = req.body;
+  const { questionId, courseSessionId } = req.body;
   try {
-    const id = await QuestionService.flagRemove(id);
+    const id = await QuestionService.flagRemove(questionId);
     if (!id) {
       res.end();
     }

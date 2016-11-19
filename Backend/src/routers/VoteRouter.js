@@ -8,24 +8,25 @@ const router = express.Router();
 
 // Votes on a question
 router.post('/question/add', questionAdd);
-router.post('/response/add')
+router.post('/question/remove', questionRemove);
+router.post('/response/add', responseAdd);
+router.post('/response/remove', responseRemove);
 
-export function questionAdd(req, res) {
+function questionAdd(req, res) {
   addQuestionResponse(req, res, 'QUESTION');
 }
 
-export function responseAdd(req, res) {
+function responseAdd(req, res) {
   addQuestionResponse(req, res, 'RESPONSE');
 }
 
-async function addQuestionResponse (req, res) {
+async function addQuestionResponse (req, res, type) {
   const {
     userId,
     courseId,
     courseSessionId,
     targetType,
     targetId,
-    type,
   } = req.body;
   try {
     const vote = await VoteService.build(
@@ -64,14 +65,22 @@ async function addQuestionResponse (req, res) {
   }
 }
 
+function questionRemove(req, res) {
+  remove(req, res, 'QUESTION');
+}
+
+function responseRemove(req, res) {
+  remove(req, res, 'RESPONSE');
+}
+
 export async function remove(req, res, type) {
   const { id, userId } = req.body;
   try {
     let result;
     if (type === 'QUESTION') {
-      result = Vote.removeFromQuestion(id, userId);
+      result = VoteService.removeFromQuestion(id, userId);
     } else if (type === 'RESPONSE') {
-      result = Vote.removeFromResponse(id, userId);
+      result = VoteService.removeFromResponse(id, userId);
     } else {
       console.error(`Invalid type: ${type}`);
       res.error();
