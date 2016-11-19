@@ -45,9 +45,9 @@ async function create(req, res) {
 }
 
 async function dismiss(req, res) {
-  const { id, courseSessionId } = req.body;
+  const { responseId, courseSessionId } = req.body;
   try {
-    const response = await QuestionService.dismissResponse(id);
+    const response = await QuestionService.dismissResponse(responseId);
     if (!response) {
       res.end();
     }
@@ -63,9 +63,13 @@ async function dismiss(req, res) {
 }
 
 async function endorseAdd(req, res) {
-  const { id, userId, courseSessionId } = req.body;
+  const {
+    responseId,
+    userId,
+    courseSessionId
+  } = req.body;
   try {
-    const id = await ResponseService.endorseAddResponse(id, userId);
+    const id = await ResponseService.endorseAddResponse(responseId, userId);
     if (!id) {
       res.end();
     }
@@ -81,9 +85,9 @@ async function endorseAdd(req, res) {
 }
 
 async function endorseRemove(req, res) {
-  const { id, courseSessionId } = req.body;
+  const { responseId, courseSessionId } = req.body;
   try {
-    const id = await ResponseService.endorseRemoveResponse(id);
+    const id = await ResponseService.endorseRemoveResponse(responseId);
     if (!id) {
       res.end();
     }
@@ -99,9 +103,9 @@ async function endorseRemove(req, res) {
 }
 
 async function flagAdd(req, res) {
-  const { id, courseSessionId } = req.body;
+  const { responseId, courseSessionId } = req.body;
   try {
-    const id = await ResponseService.flagAdd(id);
+    const id = await ResponseService.flagAdd(responseId);
     if (!id) {
       res.end();
     }
@@ -117,9 +121,9 @@ async function flagAdd(req, res) {
 }
 
 async function flagRemove(req, res) {
-  const { id, courseSessionId } = req.body;
+  const { responseId, courseSessionId } = req.body;
   try {
-    const id = await ResponseService.flagRemove(id);
+    const id = await ResponseService.flagRemove(responseId);
     if (!id) {
       res.end();
     }
