@@ -132,40 +132,43 @@ function logIn(req, res) {
 }
 
 async function signUpInstructor(req, res){
-    const  {
+  const  {
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+    institutionId,
+    school,
+    referralCode
+  } = req.body;
+
+  try {
+    const result = await UserService
+      .buildUser(
         firstName,
         lastName,
         email,
         password,
         phone,
+        institutionId,
         school,
+        TYPE_INSTRUCTOR,
         referralCode
-    } = req.body;
-
-    try {
-        const result = await UserService
-            .buildUser(
-                firstName,
-                lastName,
-                email,
-                password,
-                phone,
-                school,
-                TYPE_INSTRUCTOR,
-                referralCode
-            );
-
-        if( !!result ){
-            res.send(result);
-        }
-        else{
-            res.error("Error creating User: Likely problem with Email or School provided");
-        }
-
+      );
+    const { emailInUse, schoolNotFound, user } = result;
+    if (!!emailInUse) {
+      res.send({ emailInUse });
+      return;
     }
-    catch (error) {
-        throw error;
+    if (!!schoolNotFound) {
+      res.send({ schoolNotFound });
+      return
     }
+    res.send({ user })
+  } catch (e) {
+      throw e;
+  }
 }
 
 

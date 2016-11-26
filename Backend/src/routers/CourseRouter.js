@@ -12,33 +12,54 @@ import CourseService from '../services/CourseService';
 router.post('/create', createCourse);
 router.post('/get/all', getAll);
 router.post('/get/active', getActive);
+router.post('/get/user', getUser);
 router.post('/set/activationStatus', setActivationStatus);
 router.post('/enroll/student', enrollStudent);
 
 async function createCourse(req, res){
     const {
-        instructorId,
-        school,
-        term,
-        title,
-        abbreviation
+      instructorId,
+      instructorName,
+      schoolId,
+      subject,
+      term,
+      title,
+      abbreviation,
+      timeStart,
+      timeEnd,
+      dateStart,
+      dateEnd,
+      days,
     } = req.body;
+  console.log('req.body', JSON.stringify(req.body, null, 2));
 
-    const schoolId = await SchoolService.findByName(school);
-
-    try{
-        const course = await CourseService
-            .buildCourse(
-                instructorId,
-                schoolId,
-                title,
-                abbreviation,
-                term);
-
-        res.send(CourseService.mapToSend(course));
+    try {
+      const course = await CourseService
+        .buildCourse(
+          instructorId,
+          instructorName,
+          schoolId,
+          title,
+          subject,
+          abbreviation,
+          term,
+          timeStart,
+          timeEnd,
+          dateStart,
+          dateEnd,
+          days,
+        );
+      if (!course) {
+        res.error();
+      }
+      const user = await CourseService.saveToUser(instructorId, course.id);
+      if (!user) {
+        res.error();
+      }
+      res.success();
     }
-    catch ( error ) {
-        res.error(error);
+    catch (error) {
+        res.error();
     }
 }
 
@@ -80,6 +101,23 @@ async function getActive(req, res){
     }
 }
 
+async function getUser(req, res) {
+  const { userId } = req.body;
+  try {
+    const userCourses = await CourseService.getByUser(userId);
+    if (!userCourses) {
+      res.send({ courses: [] });
+      return;
+    }
+    const courses = CourseService.mapArrayToSend(userCourses);
+    res.send({
+      courses: CourseService.mapArrayToSend(userCourses)
+    })
+  } catch (e) {
+    res.error()
+  }
+}
+
 async function setActivationStatus(req, res){
     const { courseId, activationStatus } = req.body;
 
@@ -94,17 +132,18 @@ async function setActivationStatus(req, res){
 }
 
 async function enrollStudent(req, res){
-    const { addCode, courseId, studentId } = req.body;
-    try {
-        const isSuccess = await CourseService.attemptEnrollStudent(addCode, courseId, studentId);
-        if(!!isSuccess)
-            res.send();
-        else
-            res.error();
+  const { addCode, studentId } = req.body;
+  try {
+    const result = await CourseService.enrollStudent(addCode, studentId);
+    const { invalidAddCode, courses} = result;
+    if (!!invalidAddCode) {
+      res.send({ invalidAddCode });
+      return;
     }
-    catch(error) {
-        res.error(error);
-    }
+    res.send({ courses });
+  } catch (e) {
+    res.error();
+  }
 }
 
 module.exports = router;

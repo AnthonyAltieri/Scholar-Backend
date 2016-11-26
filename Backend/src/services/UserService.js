@@ -8,6 +8,14 @@ const SALT = '620';
 import SchoolService from '../services/SchoolService'
 import PasswordUtil from '../utilities/PasswordUtil'
 
+async function getById(userId) {
+  try {
+    return await db.findById(userId, User);
+  } catch(e) {
+    return null;
+  }
+}
+
 /**
  * Notifies all clients that are logged on to a particular username that another client
  * has logged on with the same username
@@ -42,13 +50,11 @@ function mapToSend(user){
 
 function validateModel(user){
   //TODO: Call the user validation
-  console.log("Validating User Model");
   return true;
 }
 
 
 async function isEmailVacant(email) {
-  console.log("Is Email Valid?" + email);
   try {
     const user = await db.findOne({ email : email }, User);
     if (!!user) {
@@ -167,6 +173,7 @@ async function buildUser(
 }
 
 const UserService = {
+  getById,
   buildUser,
   isEmailVacant,
   attemptSignUp,

@@ -9,6 +9,7 @@ const NOT_FOUND = 'NOT_FOUND';
 const db = {
   NOT_FOUND,
   findById,
+  findByIdArray,
   findAll,
   findOne,
   create,
@@ -26,6 +27,18 @@ function findById(id, model) {
       .then((model) => { resolve(model) })
       .catch((error) => { reject(error) })
   });
+}
+
+function findByIdArray(idArray, model) {
+  return new Promise((resolve, reject) => {
+    model.find({ id: { $in: idArray } }, (err, found) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(found);
+    })
+  })
 }
 
 /*

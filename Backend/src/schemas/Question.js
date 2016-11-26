@@ -16,7 +16,6 @@ const Question = new Schema({
   isEndorsed: Boolean,
   endorsedBy: Id,
   isFlagged: Boolean,
-  endorsedBy: Id,
 });
 
 export default Question;

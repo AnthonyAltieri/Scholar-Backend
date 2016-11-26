@@ -14,11 +14,11 @@ const User = new Schema({
   lastName: String,
   phone: String,
   loggedIn: Boolean,
-  enrolledCourses: [String],
+  courses: [String],
   schoolId: String,
   institutionId: String,
   passwordResetCode: String,
-  referralCode: Id,
+  referralCode: String,
   type: String //STUDENT | INSTRUCTOR | ADMIN | STUDENT_REP | TEACHER_ASSISTANT
 
 });

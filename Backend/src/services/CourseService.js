@@ -2,6 +2,7 @@
  * Created by bharatbatra on 11/11/16.
  */
 import mongoose from 'mongoose';
+import UserService from './UserService';
 
 import CourseSchema from '../schemas/Course';
 const Course = mongoose.model('Courses', CourseSchema);
@@ -15,23 +16,40 @@ function generateShortCode(length){
     return ShortIdUtil.generateShortId();
 }
 
-async function buildCourse(instructorId, schoolId, title, abbreviation, term ){
+async function buildCourse(
+  instructorId,
+  instructorName,
+  schoolId,
+  title,
+  subject,
+  abbreviation,
+  term,
+  timeStart,
+  timeEnd,
+  dateStart,
+  dateEnd,
+  days,
+) {
     const addCode = generateShortCode(5);
-    try{
-        const course = await db
-            .create({
-                    instructorIds : [instructorId],
-                    schoolId : schoolId,
-                    title : title,
-                    abbreviation : abbreviation,
-                    addCode : addCode,
-                    term : term,
-                    isActive: true //TODO: consider revising how to set isActive
-                },
-                Course);
-        return course;
+    try {
+        return await db.create({
+          schoolId,
+          title,
+          subject,
+          abbreviation,
+          addCode,
+          term,
+          timeStart,
+          timeEnd,
+          dateStart,
+          dateEnd,
+          instructorName,
+          days,
+          instructorIds : [instructorId],
+          }, Course
+        )
     }
-    catch ( error ) {
+    catch (error) {
         throw error;
     }
 
@@ -58,78 +76,118 @@ async function getActive(instructorId){
     }
 }
 
-function mapToSend( course ) {
-    return {course : {
-        id: course.id,
-        title: course.title,
-        abbreviation: course.abbreviation
-    }};
+function mapToSend(course) {
+  console.log('mapToSend', JSON.stringify(course, null ,2))
+    return {
+      id: course.id,
+      title: course.title,
+      abbreviation: course.abbreviation,
+      activeSessionId: course.activeSessionId,
+      instructorName: course.instructorName,
+      subject: course.subject,
+      isActive: course.isActive,
+      timeStart: course.timeStart,
+      timeEnd: course.timeEnd,
+      days: course.days,
+    };
 }
 
-function mapToSendList( courses ) {
-    return { courseList : courses.map ( (c) => { return {id: c.id, title: c.title, abbreviation: c.abbreviation, isActive: c.isActive} })}
-}
+
 
 async function setActivationStatus(courseId, isActive) {
-    try{
-        let course = await db.findById(courseId, Course);
-
-        if (!!course) {
-            course.isActive = isActive;
-
-            course = await db.save(course);
-            return course;
-        }
-        else {
-            throw error("No Course Found");
-        }
-    }
-    catch ( error ) {
-        throw error;
-    }
-}
-
-async function attemptEnrollStudent(addCode, courseId, studentId){
     try {
-        console.log("try enroll");
-        let course = await db.findById(courseId, Course);
-        if(!!course && course.addCode === addCode) {
-            console.log("course found and addCode match");
-            let student = await db.findById(studentId, User);
-            if(!!student) {
-                console.log("student found");
-                if(!student.enrolledCourses.includes(course.id)){
-                    console.log("student doesnt have course");
-                    student.enrolledCourses.push(course.id);
-                    student = await db.save(student);
-                }
-                if(!course.studentIds.includes(student.id)){
-                    console.log("course doesn't gave student");
-                    course.studentIds.push(student.id);
-                    course = await db.save(course);
-                }
-                return true;
-            }
-        }
-        return false;
+      let course = await db.findById(courseId, Course);
+      if (!course) return null;
+      course.isActive = isActive;
+      return await db.save(course);
+    } catch (e) {
+        throw e;
     }
-    catch(error) {
-        throw error;
-    }
-
-
 }
+
+async function getByUser(userId) {
+  console.log('CourseService.getByUser()');
+  try {
+    const user = await UserService.getById(userId);
+    if (!user) return null;
+    if (!user.courses) {
+      return [];
+    }
+    const courses = await getCourses(user.courses);
+    console.log('courses', courses);
+    return courses;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function findById(id) {
+  try {
+    return await db.findById(id, Course);
+  } catch (e) {
+    return null;
+  }
+}
+
+async function getCourses(courses) {
+  try {
+    const foundCourses = await db.findByIdArray(courses, Course);
+    return foundCourses;
+  } catch (e) {
+    console.log('catch getCourses', e)
+    return null;
+  }
+}
+
+async function enrollStudent(addCode, studentId) {
+  try {
+    const course = await db.find({ addCode }, Course);
+    if (!course) {
+      return { invalidAddCode: true };
+    }
+    course.studentIds = [...course.studentIds, studentId];
+    await db.save(course);
+    const student = await db.findById(studentId, User);
+    student.courses = [...student.courses, course.id];
+    await db.save(student);
+    return {
+      courses: (await getByUser(studentId)).map(mapToSend)
+    }
+  } catch (e) {
+    return null;
+  }
+}
+
+function mapArrayToSend(courses) {
+  return courses.map(mapToSend);
+}
+
+async function saveToUser(userId, courseId) {
+  try {
+    const user = await db.findById(userId, User);
+    if (!user.courses) {
+      user.courses = [];
+    }
+    user.courses = [...user.courses, courseId];
+    return await db.save(user);
+  } catch (e) {
+    return null;
+  }
+}
+
 
 
 
 const CourseService = {
-    buildCourse,
-    mapToSend,
-    mapToSendList,
-    getAll,
-    getActive,
-    setActivationStatus,
-    attemptEnrollStudent
+  buildCourse,
+  mapToSend,
+  mapArrayToSend,
+  getAll,
+  getActive,
+  getByUser,
+  enrollStudent,
+  saveToUser,
+  setActivationStatus,
 };
 
 export default  CourseService;

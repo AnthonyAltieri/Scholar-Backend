@@ -9,6 +9,7 @@ const Id = mongoose.Schema.Types.ObjectId;
 const Course = new Schema({
   ...Entity,
   instructorIds: [String],
+  instructorName: String,
   teacherAssistantIds: [String],
   studentIds: [String],
   schoolId: String,
@@ -16,9 +17,14 @@ const Course = new Schema({
   title: String,
   abbreviation: String,
   addCode: String,
+  subject: String,
+  days: [Boolean],
   // qFall | qWinter | qSpring | sFall | sWinter | summer | other
   term: String,
-  isActive: Boolean,
+  timeStart: String,
+  timeEnd: String,
+  dateStart: Date,
+  dateEnd: Date,
 });
 
 export default Course;

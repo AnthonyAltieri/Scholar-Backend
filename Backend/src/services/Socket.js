@@ -4,7 +4,6 @@
 
 var Pusher = require('pusher');
 
-
 var pusher;
 
 

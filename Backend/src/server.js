@@ -3,17 +3,6 @@
 
 import SERVER_ENV from './ServerEnv';
 
-var PORT = null;
-switch (SERVER_ENV.ENV) {
-  case 'DEVELOPMENT':
-    PORT = 8000;
-    break;
-  
-  case 'PRODUCTION':
-    PORT = 80;
-    break;
-}
-var SESSION_SECRET = 'Scholar620';
 
 // var express = require('express');
 import express from 'express';
@@ -24,9 +13,19 @@ import mongoose from 'mongoose';
 var MongoStore = require('connect-mongo/es5')(session);
 import SchoolService from './services/SchoolService'
 
-// Import Utilities
 import IdUtility from './utilities/IdUtility';
-//import CourseRegistrationUtility from './utilities/CourseRegistrationUtility';
+
+var PORT = null;
+switch (SERVER_ENV.ENV) {
+  case 'DEVELOPMENT':
+    PORT = 8000;
+    break;
+
+  case 'PRODUCTION':
+    PORT = 80;
+    break;
+}
+const SESSION_SECRET = 'Scholar620';
 
 // Connect to MongoDB and our database
 mongoose.connect('mongodb://localhost/Scholar');
@@ -39,14 +38,10 @@ db.once('open', function() {
 // Initialize the express application
 var app = express();
 
-// Create Server Error middleware
 app.use((req, res, next) => {
-  res.sendServerError = (error) => {
-    console.error('ERROR: ', error);
+  res.success = () => {
     res.send({
-      error: `Server error`,
-      success: false,
-      code: 500
+      success: true
     })
   };
 
@@ -56,18 +51,10 @@ app.use((req, res, next) => {
       error: 'Server Error',
     })
   };
+
   next();
 });
 
-// Create Server Success middleware
-app.use( (req, res, next) => {
-  res.success = () => {
-    res.send({
-      success: true
-    })
-  };
-  next();
-});
 
 if (SERVER_ENV === 'PRODUCTION') {
   app.use( (req, res, next) => {
@@ -76,21 +63,13 @@ if (SERVER_ENV === 'PRODUCTION') {
   })
 }
 
-// Set up SocketIO
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
-
-// For CORS, not used right now
-
-// if (SERVER_ENV.ENV === 'PRODUCTION') {
-  app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, *');
-    next();
-  });
-// }
+app.use(function (req, res, next) {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, *');
+  next();
+});
 
 // Set up the application's body parser
 app.use(bodyParser.json());
@@ -137,36 +116,10 @@ app.post('/pusher/auth', (req, res) => {
 });
 
 
-// Services
-// var QuestionService = require('./../dist/services/QuestionService');
-// var questionService = new QuestionService();
-// var InstantAssessmentService = require('./../dist/services/InstantAssessmentService');
-// var instantAssessmentService = new InstantAssessmentService();
-// import CourseSessionService from './../dist/services/CourseSessionService';
 
-server.listen(PORT, async function() {
+app.listen(PORT, async function() {
   console.log('Starting server, listening on port %s', PORT);
 });
-
-// Sockets
-let allSockets = 0;
-// import SocketRouter from '../dist/routers/SocketRouter';
-// const socketRouter = new SocketRouter();
-// io.on('connection', socket => { allSockets += 1; console.log(`Socket Connection Established, ${allSockets} currently connected`); socket.on(socketRouter.DISCONNECT, function() {
-//     allSockets -= 1;
-//     console.log(`Socket Disconnect, ${allSockets} currently connected`);
-//   });
-// });
-
-// app.use((req, res, next) => {
-//   req.io = io;
-//   next();
-// });
-
-
-
-
-// Routers
 
 import UserRouter from './routers/UserRouter';
 app.use('/api/user', UserRouter);
@@ -176,18 +129,12 @@ app.use('/api/course', CourseRouter);
 
 import CourseSettingsRouter from './routers/CourseSettings'
 app.use('/api/courseSettings', CourseSettingsRouter);
-//
-// import InstantAssessmentRouter from './routers/InstantAssessmentRouter';
-// app.use('/api/instantAssessment', InstantAssessmentRouter);
-//
-// import ReflectiveAssessmentRouter from './routers/ReflectiveAssessmentRouter';
-// app.use('/api/reflectiveAssessment', ReflectiveAssessmentRouter);
-//
-// import CourseSessionRouter from './routers/CourseSessionRouter';
-// app.use('/api/courseSession', CourseSessionRouter);
-//
-// import AdminRouter from './routers/AdminRouter';
-// app.use('/api/admin', AdminRouter);
+
+import InstructorSettingsRouter from './routers/InstructorSettings'
+app.use('/api/instructorSettings', InstructorSettingsRouter);
+
+
+
 
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';
