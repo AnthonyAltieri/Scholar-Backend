@@ -16,17 +16,6 @@ async function getById(userId) {
   }
 }
 
-/**
- * Notifies all clients that are logged on to a particular username that another client
- * has logged on with the same username
- *
- * @param username {String} - The username that is being logged on with
- * @param io {Object} - socket io object
- */
-function notifyLogIn(username, io) {
-
-  io.sockets.emit(username, {});
-}
 
 function leaveCurrentCourseSession(userId) {
   db.findById(userId, User)
@@ -172,9 +161,15 @@ async function buildUser(
 
 }
 
+async function findById(id){
+  return await db.findById(id, User)
+}
+
+
 const UserService = {
   getById,
   buildUser,
+  findById,
   isEmailVacant,
   attemptSignUp,
   validateModel,

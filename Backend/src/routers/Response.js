@@ -27,37 +27,44 @@ async function create(req, res) {
     parentId,
     parentType,
   } = req.body;
-  const response = await ResponseService
-    .buildResponse(
-      content,
-      userId,
-      courseId,
-      courseSessionId,
-      parentId,
-      rootQuestionId,
-    );
-  Socket.send(
-    Socket.generatePrivateChannel(courseSessionId),
-    Events.ADD_RESPONSE,
-    ResponseService.mapToSend(response)
-  );
-  res.end();
+  try {
+    const response = await ResponseService
+      .build(
+        content,
+        userId,
+        courseId,
+        courseSessionId,
+        parentId,
+        rootQuestionId,
+        parentType,
+      );
+    // Socket.send(
+    //   Socket.generatePrivateChannel(courseSessionId),
+    //   Events.ADD_RESPONSE,
+    //   ResponseService.mapToSend(response)
+    // );
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] /api/response/create', e);
+    res.error();
+  }
 }
 
 async function dismiss(req, res) {
   const { responseId, courseSessionId } = req.body;
   try {
-    const response = await QuestionService.dismissResponse(responseId);
+    const response = await ResponseService.dismiss(responseId);
     if (!response) {
-      res.end();
+      res.error();
     }
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
       Events.REMOVE_RESPONSE,
-      { id }
+      { id: responseId }
     );
-    res.end();
+    res.success();
   } catch (e) {
+    console.error('[ERROR] Response Router dismiss', e);
     res.error();
   }
 }
@@ -137,3 +144,5 @@ async function flagRemove(req, res) {
     res.error();
   }
 }
+
+export default router;

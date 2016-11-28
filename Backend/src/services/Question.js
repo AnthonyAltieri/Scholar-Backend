@@ -3,7 +3,7 @@
  */
 
 import mongoose from 'mongoose';
-import QuestionSchema from '../schemas/QuestionSchema';
+import QuestionSchema from '../schemas/Question';
 const Question = mongoose.model('questions', QuestionSchema);
 import db from '../db';
 
@@ -25,10 +25,11 @@ export async function build(
       isDismissed: false,
       isEndorsed: false,
       isFlagged: false,
-      created: new Date.UTC(),
+      created: new Date().getTime(),
     }, Question);
     return question;
   } catch (e) {
+    console.error('[ERROR] QuestionService', e);
     return null;
   }
 }
@@ -102,14 +103,72 @@ async function flagRemove(id) {
   }
 }
 
-function mapToSend(question) {
+function mapToSend(questionOrResponse) {
   return {
-    id: question.id,
-    content: question.content,
-    userId: question.userId,
-    courseSessionId: question.courseSessionId,
-    created: question.created,
+    id: questionOrResponse.id,
+    userId: questionOrResponse.userId,
+    courseSessionId: questionOrResponse.courseSessionId,
+    content: questionOrResponse.content,
+    votes: questionOrResponse.votes || [],
+    isFlagged: !!questionOrResponse.isFlagged,
+    isEndorsed: !!questionOrResponse.isEndorsed,
+    isDismissed: questionOrResponse.isDismissed,
+    endorsedBy: questionOrResponse.endorsedBy || null,
+    rootQuestionId: questionOrResponse.rootQuestionId || null,
+    parentId: questionOrResponse.parentId || null,
+    parentType: questionOrResponse.parentType || null,
+    created: questionOrResponse.created,
+    responses: [],
   }
+}
+
+async function findByCourseSessionId(id){
+  try {
+    return await db.find({courseSessionId: id}, Question);
+  }
+  catch (err) {
+    throw err;
+  }
+}
+
+function sortByCreatedTime(lhs, rhs) {
+    if (lhs.created < rhs.created) {
+      return 1;
+    } else if (lhs.created > rhs.created) {
+      return -1;
+    } else {
+      return 0;
+    }
+}
+
+function createQuestionTree(question, responses) {
+  // Create a hashmap where every element id maps to its
+  // corresponding object element that has been mapped to send
+  let idToElemHM = {};
+  idToElemHM[question.id] = mapToSend(question);
+  responses.forEach((r) => {
+    idToElemHM[r.id] = mapToSend(r);
+  });
+  // Put all of the elements in their corresponding parent's
+  // response array
+  const keys = Object.keys(idToElemHM);
+  keys.forEach((k) => {
+    const questionOrResponse = idToElemHM[k];
+    const parentId = questionOrResponse.parentId;
+    if (parentId) {
+      const parent = idToElemHM[questionOrResponse.parentId];
+      parent.responses = [...parent.responses, questionOrResponse];
+    }
+  });
+  // Now sort all responses by time
+  keys.forEach((k) => {
+    const questionOrResponse = idToElemHM[k];
+    if (questionOrResponse.responses.length > 0) {
+      questionOrResponse.responses.sort(sortByCreatedTime);
+    }
+  });
+  // Return the root question
+  return idToElemHM[question.id];
 }
 
 export default {
@@ -120,4 +179,6 @@ export default {
   flagAdd,
   flagRemove,
   mapToSend,
+  findByCourseSessionId,
+  createQuestionTree,
 }

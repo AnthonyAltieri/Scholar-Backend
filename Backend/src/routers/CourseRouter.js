@@ -109,10 +109,9 @@ async function getUser(req, res) {
       res.send({ courses: [] });
       return;
     }
-    const courses = CourseService.mapArrayToSend(userCourses);
     res.send({
       courses: CourseService.mapArrayToSend(userCourses)
-    })
+    });
   } catch (e) {
     res.error()
   }

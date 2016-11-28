@@ -14,33 +14,42 @@ async function build(
   courseSessionId,
   parentId,
   rootQuestionId,
+  parentType,
 ) {
   try {
-    const response = await db.create({
+    return await db.create({
       content,
       userId,
       courseId,
       courseSessionId,
       parentId,
       rootQuestionId,
+      parentType,
+      votes: [],
       isDismissed: false,
       isEndorsed: false,
       isFlagged: false,
-      created: new Date.UTC(),
+      created: new Date().getTime(),
     }, Response);
-    return response;
   } catch (e) {
+    console.error('[ERROR] ResponseService', e);
     return null;
   }
 }
 
 async function dismiss(id) {
+  console.log('Response Service dismiss(' + id + ')');
   try {
     const response = await db.findById(id, Response);
+    if (!response) {
+      console.error('[ERROR] Response Service dismiss db.findById');
+      return null;
+    }
     response.isDismissed = true;
     const savedResponse = await db.save(response);
     return savedResponse.id;
   } catch (e) {
+    console.error('[ERROR] Response Service dismiss', e);
     return null;
   }
 }
@@ -103,6 +112,15 @@ async function flagRemove(id) {
   }
 }
 
+async function findByRootQuestionId(rootQuestionId) {
+  try {
+    return await db.find({ rootQuestionId }, Response);
+  } catch (e) {
+    console.error('[ERROR] findByRootQuestionId', e);
+    return null;
+  }
+}
+
 export default {
   build,
   dismiss,
@@ -110,5 +128,5 @@ export default {
   endorseRemove,
   flagAdd,
   flagRemove,
-  mapToSend,
+  findByRootQuestionId,
 }

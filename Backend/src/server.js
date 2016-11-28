@@ -2,6 +2,7 @@
 
 
 import SERVER_ENV from './ServerEnv';
+import Socket from './services/Socket';
 
 
 // var express = require('express');
@@ -14,6 +15,8 @@ var MongoStore = require('connect-mongo/es5')(session);
 import SchoolService from './services/SchoolService'
 
 import IdUtility from './utilities/IdUtility';
+
+Socket.init();
 
 var PORT = null;
 switch (SERVER_ENV.ENV) {
@@ -133,7 +136,14 @@ app.use('/api/courseSettings', CourseSettingsRouter);
 import InstructorSettingsRouter from './routers/InstructorSettings'
 app.use('/api/instructorSettings', InstructorSettingsRouter);
 
+import CourseSessionRouter from './routers/CourseSession'
+app.use('/api/courseSession', CourseSessionRouter);
 
+import QuestionRouter from './routers/Question';
+app.use('/api/question', QuestionRouter);
+
+import ResponseRouter from './routers/Response'
+app.use('/api/response', ResponseRouter);
 
 
 //Testing for v1.1

@@ -2,8 +2,9 @@
  * @author Anthony Altieri on 11/4/16.
  */
 import Entity from './Entity';
+import Vote from './Vote';
 import mongoose, { Schema } from 'mongoose';
-const Id = Mongoose.Schema.Types.ObjectId;
+const Id = Schema.Types.String;
 
 const Response = new Schema({
   ...Entity,
@@ -14,6 +15,7 @@ const Response = new Schema({
   votes: [Vote],
   isFlagged: Boolean,
   isEndorsed: Boolean,
+  isDismissed: Boolean,
   endorsedBy: Id,
   rootQuestionId: Id,
   parentId: Id,

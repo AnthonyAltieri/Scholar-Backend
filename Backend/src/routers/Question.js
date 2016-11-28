@@ -3,6 +3,7 @@
  */
 
 import QuestionService from '../services/Question';
+import ResposneService from '../services/Response';
 import Socket from '../services/Socket';
 import Events from '../services/Events';
 
@@ -16,6 +17,7 @@ router.post('/endorse/add', endorseAdd);
 router.post('/endorse/remove', endorseRemove);
 router.post('/flag/add', flagAdd);
 router.post('/flag/remove', flagRemove);
+router.post('/get/courseSession', getCourseSession);
 
 async function create(req, res) {
   const {
@@ -26,7 +28,7 @@ async function create(req, res) {
   } = req.body;
 
   const question = await QuestionService
-    .buildQuestion(
+    .build(
       content,
       userId,
       courseId,
@@ -35,28 +37,32 @@ async function create(req, res) {
   if (!question) {
     res.error();
   }
-  Socket.send(
-    Socket.generatePrivateChannel(courseSessionId),
-    Events.QUESTION_ASKED,
-    QuestionService.mapToSend(question)
-  );
-  res.end();
+  // Socket.send(
+  //   Socket.generatePrivateChannel(courseSessionId),
+  //   Events.QUESTION_ASKED,
+  //   QuestionService.mapToSend(question)
+  // );
+  res.success();
 }
 
 async function dismiss(req, res) {
-  const { questionId, courseSessionId } = req.body;
+  const {
+    questionId,
+    courseSessionId
+  } = req.body;
   try {
-    const question = await QuestionService.dismissQuestion(questionId);
+    const question = await QuestionService.dismiss(questionId);
     if (!question) {
-      res.end();
+      res.error();
     }
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
       Events.QUESTION_DISMISSED,
       { id: questionId }
     );
-    res.end();
+    res.success();
   } catch (e) {
+    console.error('[ERROR] Question Router dismiss()', e);
     res.error();
   }
 }
@@ -141,3 +147,28 @@ async function flagRemove(req, res) {
   }
 }
 
+async function getCourseSession(req, res) {
+  const { courseSessionId } = req.body;
+  try {
+    const questions = await QuestionService
+      .findByCourseSessionId(courseSessionId);
+    let questionTrees = [];
+    for (let i = 0 ; i < questions.length ; i++) {
+      const question = questions[i];
+      const allResponses = await ResposneService
+        .findByRootQuestionId(question.id);
+      console.log('allResponses', JSON.stringify(allResponses, null, 2))
+      questionTrees = [
+        ...questionTrees,
+        QuestionService.createQuestionTree(question, allResponses),
+      ]
+    }
+    res.send({
+      questions: questionTrees,
+    })
+  } catch (e) {
+    console.error('[ERROR] getCourseSession', e);
+  }
+}
+
+export default router;

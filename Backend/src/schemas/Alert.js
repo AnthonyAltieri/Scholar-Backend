@@ -7,7 +7,7 @@
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
-const Id = Mongoose.Schema.Types.ObjectId;
+const Id = String;
 
 const Alert = new Schema({
   ...Entity,

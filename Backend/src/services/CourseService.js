@@ -82,7 +82,7 @@ function mapToSend(course) {
       id: course.id,
       title: course.title,
       abbreviation: course.abbreviation,
-      activeSessionId: course.activeSessionId,
+      activeCourseSessionId: course.activeCourseSessionId,
       instructorName: course.instructorName,
       subject: course.subject,
       isActive: course.isActive,
@@ -175,7 +175,41 @@ async function saveToUser(userId, courseId) {
   }
 }
 
+async function findById(id){
+    return await db.findById(id, Course)
+}
 
+//Helper method that checks whether this instructor can make changes to course
+//OR thereby to courseSession
+function isInstructorPermittedForCourse(course, instructor){
+    console.log("HIT ME TO SEE IF PERMITTED");
+    let isValid = false;
+    if(!!course.id && !!instructor.id){
+        console.log("Yes we got ids");
+        course.instructorIds.forEach( id => {
+            console.log("LOOPS : " + id + " : " + instructor.id);
+            if(id === instructor.id){
+                console.log("found match");
+                isValid = true;
+            }
+        });
+    }
+    return isValid;
+
+}
+
+//Sets the activeSessionId of this course
+//To the courseSession.id
+async function setActiveCourseSessionId(course, courseSessionId){
+  course.activeCourseSessionId = courseSessionId;
+  try {
+    return await db.save(course);
+  } catch (e) {
+    console.error('[ERROR] setActiveCourseSessionId', e);
+    return null;
+  }
+
+}
 
 
 const CourseService = {
@@ -188,6 +222,9 @@ const CourseService = {
   enrollStudent,
   saveToUser,
   setActivationStatus,
+  isInstructorPermittedForCourse,
+  findById,
+  setActiveCourseSessionId,
 };
 
 export default  CourseService;
