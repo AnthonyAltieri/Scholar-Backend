@@ -96,29 +96,37 @@ app.post('/schools', async function(req, res){
   res.send((await SchoolService.findAll()).map(s => s.name));
 });
 
-app.get('/*', function(req, res) {
+// app.get('/*', function(req, res) {
+//
+//   if(req.query.course && req.query.code){
+//     console.log("got query params to add course");
+//     CourseRegistrationUtility.handleInitialRequest(req, res);
+//   }
+//   if(req.query.talk === "jae-kim"){
+//     req.query.course="Playground";
+//     req.query.code="57e44ecb0bde70455e0b4821";
+//     req.query.instantSignOn="true";
+//     CourseRegistrationUtility.handleInitialRequest(req, res);
+//   }
+//
+//   res.sendFile(path.join(__dirname, 'index.html'));
+// });
 
-  if(req.query.course && req.query.code){
-    console.log("got query params to add course");
-    CourseRegistrationUtility.handleInitialRequest(req, res);
-  }
-  if(req.query.talk === "jae-kim"){
-    req.query.course="Playground";
-    req.query.code="57e44ecb0bde70455e0b4821";
-    req.query.instantSignOn="true";
-    CourseRegistrationUtility.handleInitialRequest(req, res);
-  }
+app.get("/pusher/auth", function(req, res) {
+  var query = req.query;
+  var socketId = query.socket_id;
+  var channel = query.channel_name;
+  var callback = query.callback;
 
-  res.sendFile(path.join(__dirname, 'index.html'));
+  var auth = JSON.stringify(Socket.authenticate(socketId, channel));
+  var cb = callback.replace(/\"/g,"") + "(" + auth + ");";
+
+  res.set({
+    "Content-Type": "application/javascript"
+  });
+
+  res.send(cb);
 });
-
-app.post('/pusher/auth', (req, res) => {
-  const { socketId, channel } = req.body;
-  const auth = pusher.authenticate(socketId, channel);
-  res.send(auth);
-});
-
-
 
 app.listen(PORT, async function() {
   console.log('Starting server, listening on port %s', PORT);

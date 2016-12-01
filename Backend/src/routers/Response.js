@@ -59,7 +59,7 @@ async function dismiss(req, res) {
     }
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
-      Events.REMOVE_RESPONSE,
+      Events.RESPONSE_REMOVED,
       { id: responseId }
     );
     res.success();

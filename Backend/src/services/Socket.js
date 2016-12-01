@@ -16,7 +16,14 @@ function init() {
   });
 }
 
+function authenticate(socketId, channel) {
+  return pusher.authenticate(socketId, channel);
+}
+
 function send(channel, event, payload) {
+  console.log('socket send');
+  console.log('channel: ' + channel + ' | event: ' + event);
+  console.log('payload: ', JSON.stringify(payload, null, 2));
   pusher.trigger(channel, event, payload);
 }
 
@@ -27,5 +34,6 @@ function generatePrivateChannel(name) {
 export default {
   init,
   send,
+  authenticate,
   generatePrivateChannel,
 }

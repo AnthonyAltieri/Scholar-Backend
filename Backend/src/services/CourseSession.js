@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import UserService from '../services/UserService';
 import CourseService from '../services/CourseService';
 import CourseSessionSchema from '../schemas/CourseSession';
+import moment from 'moment';
 const CourseSession = mongoose.model('coursesessions', CourseSessionSchema);
 import QuestionService from '../services/Question';
 import AlertService from '../services/Alert';
@@ -196,6 +197,42 @@ async function instructorEndSession(courseId, instructorId){
 }
 
 
+
+async function findByCourseId(courseId) {
+  try {
+    return await db.find({ courseId }, CourseSession);
+  } catch (e) {
+    console.error('[ERROR] CourseSession service findByCourseId', e)
+    return null;
+  }
+}
+
+async function hasCourseSessionInLast24Hours(courseId) {
+  try {
+    const courseSessions = await findByCourseId(courseId);
+    if (courseSessions.length === 0) return false;
+    courseSessions.sort(((a, b) => {
+      if (a.created < b.created) {
+        return 1;
+      } else if (a.created > b.created) {
+        return -1;
+      } else {
+        return 0;
+      }
+    }));
+    const mostRecentCourseSession = courseSessions[0];
+    const twentyFourHoursAgo = moment().subtract(1, 'days');
+    return !twentyFourHoursAgo
+      .isBefore(
+        moment(mostRecentCourseSession.created)
+      )
+  } catch (e) {
+    console.error('[ERROR] CourseSession service hasCourseSessionInLast24Hours', e);
+    return false;
+  }
+}
+
+
 export default {
   build,
   instructorEndSession,
@@ -203,5 +240,6 @@ export default {
   studentJoinActiveSession,
   joinActiveSession,
   mapToSend,
-  getThreshold
+  getThreshold,
+  findByCourseId,
 }
