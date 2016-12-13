@@ -24,6 +24,7 @@ const Course = new Schema({
   timeEnd: String,
   dateStart: Date,
   dateEnd: Date,
+  bankedAssessments: [String],
 });
 
 export default Course;

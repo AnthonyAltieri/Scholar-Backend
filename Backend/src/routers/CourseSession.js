@@ -26,22 +26,21 @@ async function createCourseSession(req, res){
     if (!courseSession) {
       res.error();
     }
-    res.send(await CourseSessionService.mapToSend(courseSession));
+    res.send({ courseSessionId: courseSession.id });
   } catch (e) {
     res.error();
   }
 }
 
-async function instructorJoinSession(req, res){
-  try{
+async function instructorJoinSession(req, res) {
+  try {
     const {courseId, instructorId} = req.body;
     const courseSession = await CourseSessionService.instructorJoinActiveSession(courseId, instructorId);
     res.send(await CourseSessionService.mapToSend(courseSession));
+  } catch (e) {
+    console.error('[ERROR] CourseSession Router instructorJoinSession', e);
+    res.error();
   }
-  catch(err) {
-    res.error(err);
-  }
-  res.end();
 }
 
 async function studentJoinSession(req, res){
@@ -57,17 +56,17 @@ async function studentJoinSession(req, res){
 }
 
 async function instructorEndSession(req, res){
-  try{
-    const {courseId, instructorId} = req.body;
-    if(!!(await CourseSessionService.instructorEndSession(courseId, instructorId))){
-      res.send();
-    }
-    else {
+  try {
+    const { courseId, instructorId } = req.body;
+    const course = await CourseSessionService
+      .instructorEndSession(courseId, instructorId);
+    if (!course) {
       res.error();
     }
-  }
-  catch (err) {
-    res.error(err);
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] CourseSession router instructorEndSession', e);
+    res.error(e);
   }
 }
 

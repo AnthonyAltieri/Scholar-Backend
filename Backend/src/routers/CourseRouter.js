@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 
 import SchoolService from '../services/SchoolService';
 import CourseService from '../services/CourseService';
+import BankedAssessmentService from '../services/BankedAssessment';
 
 router.post('/create', createCourse);
 router.post('/get/all', getAll);
@@ -15,6 +16,8 @@ router.post('/get/active', getActive);
 router.post('/get/user', getUser);
 router.post('/set/activationStatus', setActivationStatus);
 router.post('/enroll/student', enrollStudent);
+router.post('/add/bankedAssessment', addBankedAssessment);
+router.post('/get/bankedAssessments', getBankedAssessments);
 
 async function createCourse(req, res){
     const {
@@ -142,6 +145,31 @@ async function enrollStudent(req, res){
     res.send({ courses });
   } catch (e) {
     res.error();
+  }
+}
+
+async function addBankedAssessment(req, res) {
+  const { courseId, bankedAssessmentId } = req.body;
+  try {
+    const course = CourseService
+      .addBankedAssessment(courseId, bankedAssessmentId)
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] Course Router addBankedAssessment', e);
+    res.error();
+  }
+}
+
+async function getBankedAssessments(req, res) {
+  const { courseId } = req.body;
+  try {
+    const bankedAssessments = CourseService.getBankedAssessments(courseId);
+    res.send({
+      bankedAssessments: bankedAssessments
+        .map(BankedAssessmentService.mapToSend)
+    })
+  } catch (e) {
+    console.error('[ERROR] Course Router getBankedAssessments', e);
   }
 }
 

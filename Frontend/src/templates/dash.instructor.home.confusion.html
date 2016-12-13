@@ -1,38 +1,0 @@
-<div class="popup-frame-header">
-  <div class="r">
-
-      <H4 class="frame_header-text">CONFUSION</H4>
-      <P>
-        <a href="http://scholarapp.xyz/dash/confusion" 
-         onclick="window.open('http://scholarapp.xyz/dash/confusion ', 'newwindow', 'width=600, height=275'); 
-         return false;" > 
-          <img src="/static/img/popup.svg" class="img-popup">
-         </a>
-
-      </P>
-      <P>
-
-          <input type="text" class="box-setting" ng-model="dash.confusionThresholdSelectedValue " my-enter="dash.setThreshold()">
-          <label class="label-setting">threshold</label>
-      <!--<a href="#" ng-click="dash.setThreshold()" >-->
-
-
-      </P>
-      <P>
-          <a class="button-round-section-heading" ng-click="dash.setThreshold()">SAVE</a>
-      </P>
-
-
-
-      <!--</a>-->
-
-
-  </div>
-</div>
-<!-- GRAPH GOES HERE -->
-<nvd3
-      options="dash.confusionGraph.options"
-      data="dash.confusionGraph.data"
-      id="chart"
-></nvd3>
-

@@ -4,6 +4,7 @@ import db from '../db';
 import PasswordUtil from '../utilities/PasswordUtil';
 import nodemailer from 'nodemailer';
 import templateGenerator from '../ForgotPasswordEmail';
+import AssessmentBankService from '../services/AssessmentBank';
 
 /*
 User Constants
@@ -144,7 +145,7 @@ async function signUpInstructor(req, res){
   } = req.body;
 
   try {
-    const result = await UserService
+    const user = await UserService
       .buildUser(
         firstName,
         lastName,
@@ -156,7 +157,7 @@ async function signUpInstructor(req, res){
         TYPE_INSTRUCTOR,
         referralCode
       );
-    const { emailInUse, schoolNotFound, user } = result;
+    const { emailInUse, schoolNotFound, createdUser } = result;
     if (!!emailInUse) {
       res.send({ emailInUse });
       return;
@@ -165,9 +166,12 @@ async function signUpInstructor(req, res){
       res.send({ schoolNotFound });
       return
     }
-    res.send({ user })
+    const assessmentBank = await AssessmentBankService
+      .create(createdUser.id);
+    res.send({ user: createdUser })
   } catch (e) {
-      throw e;
+    console.error('[ERROR] Router User signUpInstructor', e);
+    res.error();
   }
 }
 

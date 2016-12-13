@@ -162,4 +162,4 @@ gulp.task('watchFrontendImg', function() {
 });
 
 
-gulp.task('default', ['Frontend', 'Backend']);
+gulp.task('default', ['Backend']);

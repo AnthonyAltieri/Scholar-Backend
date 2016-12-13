@@ -7,11 +7,7 @@ import Entity from './Entity';
 
 const AssessmentBank = new Schema({
   ...Entity,
-  userId: Id,
-  courseId: Id,
-  name: Id,
-  datePlanned: Date,
-  isDirty: Boolean,
+  userId: String,
 });
 
 export default AssessmentBank;

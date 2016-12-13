@@ -168,6 +168,7 @@ async function getCourseSession(req, res) {
     })
   } catch (e) {
     console.error('[ERROR] getCourseSession', e);
+    res.error();
   }
 }
 
