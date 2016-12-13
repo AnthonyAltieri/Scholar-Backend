@@ -154,6 +154,7 @@ async function enrollStudent(addCode, studentId) {
       courses: (await getByUser(studentId)).map(mapToSend)
     }
   } catch (e) {
+    console.error('[ERROR] Course Service enrollStudent', e);
     return null;
   }
 }
