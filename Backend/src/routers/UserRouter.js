@@ -51,6 +51,7 @@ router.post('/signUp/instructor', signUpInstructor);
 function logIn(req, res) {
   const { email, password } = req.body;
 
+  console.log("Attempted login");
   const encryptedPassword = PasswordUtil.encryptPassword(password, email);
 
   db.findOne({ email: email }, User)

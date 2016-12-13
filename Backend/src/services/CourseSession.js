@@ -26,7 +26,7 @@ async function getThreshold(id) {
 //Maps the courseSession object into a consumable object for the client
 //We shall populate the courseSession with all required entities here
 async function mapToSend(courseSession){
-  console.log("Map to send cours session");
+  console.log("Map to send course session");
 
   try {
     if(!!courseSession && typeof courseSession !== 'undefined'){
@@ -41,10 +41,12 @@ async function mapToSend(courseSession){
       console.log("got alerts");
       //TODO: Add logic for assessments
       return {
-        id : courseSession.id,
-        questions : questions.map( q => QuestionService.mapToSend(q)),
-        alerts : alerts.map( a => AlertService.mapToSend(a)),
-        attendance : attendance
+        courseSession : {
+          id: courseSession.id,
+          questions: questions.map(q => QuestionService.mapToSend(q)),
+          alerts: alerts.map(a => AlertService.mapToSend(a)),//TODO: Only send number of active alerts
+          attendance: attendance
+        }
       }
     }
     else{
@@ -126,6 +128,8 @@ async function studentJoinActiveSession(courseId, studentId){
   try{
     const courseSession = await joinActiveSession(courseId);
 
+    console.log("Student Join Active Session : " + studentId);
+
     //add student to sessionAttendance
     await addToAttendanceList(studentId, courseSession);
     //send socket notification
@@ -153,7 +157,6 @@ function isStudentInCourseSession(studentId, courseSession){
 async function addToAttendanceList(studentId, courseSession){
   try{
     const user = await UserService.findById(studentId);
-    console.log("Found user ");
     if(!!user && user.type === 'STUDENT'){
       console.log("valid student");
       if(!isStudentInCourseSession(studentId, courseSession)){
@@ -176,12 +179,12 @@ async function joinActiveSession(courseId){
   try {
     let course = await CourseService.findById(courseId);
 
-    if(!!course.activeSessionId) {
-      console.log("Activer session id : " + course.activeSessionId);
-      return await db.findById(course.activeSessionId, CourseSession);
+    if(!!course.activeCourseSessionId) {
+      console.log("Activer session id : " + course.activeCourseSessionId);
+      return await db.findById(course.activeCourseSessionId, CourseSession);
     }
     else {
-      throw new Error("No Active Session Id");
+      throw new Error("CourseSessionService > joinActiveSession: No Active Session Id");
     }
   }
   catch (err){
