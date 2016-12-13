@@ -8,7 +8,7 @@ const Assessment = {
   courseId: Id,
   courseSessionId: Id,
   creatorId: Id,
-  prompt: String,
+  question: String,
   bankId: Id,
 };
 

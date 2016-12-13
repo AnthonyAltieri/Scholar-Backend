@@ -214,6 +214,30 @@ async function setActiveCourseSessionId(course, courseSessionId){
 
 }
 
+async function addBankedAssessment(courseId, bankedAssessmentId) {
+  try {
+    const course = await db.findById(courseId, Course);
+    course.bankedAssessments = [
+      ...course.bankedAssessments,
+      bankedAssessmentId
+    ];
+    return await db.save(course);
+  } catch (e) {
+    console.error('[ERROR] Course Service addBankedAssessment', e);
+    return null;
+  }
+}
+
+async function getBankedAssessments(courseId) {
+  try {
+    const course = await db.findById(courseId, Course);
+    return course.bankedAssessments;
+  } catch (e) {
+    console.error('[ERROR] Course Service getBankedAssessments', e);
+    return null;
+  }
+}
+
 
 const CourseService = {
   buildCourse,
@@ -228,6 +252,7 @@ const CourseService = {
   isInstructorPermittedForCourse,
   findById,
   setActiveCourseSessionId,
+  addBankedAssessment,
 };
 
 export default  CourseService;

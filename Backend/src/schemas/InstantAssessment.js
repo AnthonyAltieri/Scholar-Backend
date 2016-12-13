@@ -10,6 +10,5 @@ const Id = Mongoose.Schema.Types.ObjectId;
 const InstantAssessment = new Schema({
   ...Entity,
   ...Assessment,
-  options: [Option],
+  options: [String],
 });
-

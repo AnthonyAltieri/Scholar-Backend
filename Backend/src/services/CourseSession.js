@@ -65,17 +65,29 @@ async function build(courseId, instructorId){
   try {
     //Validate Course & Instructor ID
     const course = await CourseService.findById(courseId);
+
+    if (!course) {
+      console.error(`[ERROR] No course found with id: ${courseId}`);
+      res.error();
+      return;
+    }
+
     const instructor = await UserService.findById(instructorId);
 
-    //validate that this instructor is allowed to make set change
-    console.log("Build in service");
+    if (!instructor) {
+      console.error(`[ERROR] No user found with id: ${instructorId}`);
+      res.error();
+      return;
+    }
+
+    // TODO: validate that this instructor is allowed to make set change
 
     //build the courseSession if valid course & instructor
     if (!!CourseService.isInstructorPermittedForCourse(course, instructor)) {
       console.log("Instructor is permitted");
       const courseSession = await db.create(
         {
-          courseId: course.id,
+          courseId,
           instructorIds: [instructor.id]
         },
         CourseSession
@@ -183,19 +195,14 @@ async function joinActiveSession(courseId){
 async function instructorEndSession(courseId, instructorId){
   try {
     const course = await CourseService.findById(courseId);
-
-    if(!!course){
-      course.activeSessionId = null;
-
-      return await db.save(course);
+    if (!course) {
+      return null;
     }
-    else{
-      throw new Error("Invalid Course Id");
-    }
-
-  }
-  catch (err) {
-    throw err;
+    course.activeCourseSessionId = null;
+    return await db.save(course);
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service instructorEndSession', e);
+    return null;
   }
 }
 
@@ -235,6 +242,44 @@ async function hasCourseSessionInLast24Hours(courseId) {
   }
 }
 
+async function getById(id) {
+  try {
+    return await db.findById(id, CourseSession);
+  } catch (e) {
+    console.error('[ERROR] CourseSession service getById', e);
+    return null;
+  }
+}
+
+async function save(courseSession) {
+  try {
+    return await db.save(courseSession);
+  } catch (e) {
+    console.error('[ERROR] CourseSession service save', e);
+    return null;
+  }
+}
+
+async function setActiveAssessment(courseSessionId, assessmentId, type) {
+  try {
+    const courseSession = await getById(courseSessionId);
+    courseSession.activeAssessmentId = assessmentId;
+    courseSession.activeAssessmentType = type;
+    return await save(courseSession);
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service setActiveAssessment', e);
+    return null;
+  }
+}
+
+async function removeActiveAssessment(courseSessionId) {
+  try {
+    return await setActiveAssessment(courseSessionId, null, null);
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service removeActiveAssessment', e);
+    return null;
+  }
+}
 
 export default {
   build,
@@ -245,4 +290,8 @@ export default {
   mapToSend,
   getThreshold,
   findByCourseId,
+  getById,
+  save,
+  setActiveAssessment,
+  removeActiveAssessment,
 }

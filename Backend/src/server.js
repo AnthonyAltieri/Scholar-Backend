@@ -153,6 +153,12 @@ app.use('/api/question', QuestionRouter);
 import ResponseRouter from './routers/Response'
 app.use('/api/response', ResponseRouter);
 
+import AssessmentBankRotuer from './routers/AssessmentBank';
+app.use('/api/assessmentBank', AssessmentBankRotuer);
+
+import BankedAssessmentRouter from './routers/BankedAssessment';
+app.use('/api/bankedAssessment', BankedAssessmentRouter);
+
 
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';
