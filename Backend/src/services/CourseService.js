@@ -134,16 +134,22 @@ async function getCourses(courses) {
     const foundCourses = await db.findByIdArray(courses, Course);
     return foundCourses;
   } catch (e) {
-    console.log('catch getCourses', e)
+    console.log('[ERROR] caught in CourseService > getCourses : ', e)
     return null;
   }
 }
 
+
 async function enrollStudent(addCode, studentId) {
   try {
-    const course = await db.find({ addCode }, Course);
+    const course = await db.findOne({ addCode }, Course);
+
     if (!course) {
       return { invalidAddCode: true };
+    }
+    if(course.studentIds.includes(studentId)){
+      console.error("[ERROR] in CourseService > enrollStudent: Student Already Enrolled in Course");
+      return { studentAlreadyEnrolled: true }
     }
     course.studentIds = [...course.studentIds, studentId];
     await db.save(course);
@@ -151,9 +157,10 @@ async function enrollStudent(addCode, studentId) {
     student.courses = [...student.courses, course.id];
     await db.save(student);
     return {
-      courses: (await getByUser(studentId)).map(mapToSend)
+      course: course
     }
   } catch (e) {
+    console.error("[ERROR] in CourseService > enrollStudent : " + e);
     return null;
   }
 }
@@ -182,14 +189,10 @@ async function findById(id){
 //Helper method that checks whether this instructor can make changes to course
 //OR thereby to courseSession
 function isInstructorPermittedForCourse(course, instructor){
-    console.log("HIT ME TO SEE IF PERMITTED");
     let isValid = false;
     if(!!course.id && !!instructor.id){
-        console.log("Yes we got ids");
         course.instructorIds.forEach( id => {
-            console.log("LOOPS : " + id + " : " + instructor.id);
             if(id === instructor.id){
-                console.log("found match");
                 isValid = true;
             }
         });

@@ -131,18 +131,23 @@ async function setActivationStatus(req, res){
 }
 
 async function enrollStudent(req, res){
+  console.log("Course router enroll student");
   const { addCode, studentId } = req.body;
   try {
     const result = await CourseService.enrollStudent(addCode, studentId);
-    const { invalidAddCode, courses} = result;
+    const { invalidAddCode, course, studentAlreadyEnrolled} = result;
     if (!!invalidAddCode) {
       res.send({ invalidAddCode });
       return;
     }
-    res.send({ courses });
+    if (!!studentAlreadyEnrolled) {
+      res.send({ studentAlreadyEnrolled });
+      return;
+    }
+    res.send({ course });
   } catch (e) {
     res.error();
   }
 }
 
-module.exports = router;
+export default router;
