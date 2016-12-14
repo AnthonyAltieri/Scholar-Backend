@@ -37,11 +37,11 @@ async function create(req, res) {
   if (!question) {
     res.error();
   }
-  // Socket.send(
-  //   Socket.generatePrivateChannel(courseSessionId),
-  //   Events.QUESTION_ASKED,
-  //   QuestionService.mapToSend(question)
-  // );
+  Socket.send(
+    Socket.generatePrivateChannel(courseSessionId),
+    Events.QUESTION_ASKED,
+    QuestionService.mapToSend(question)
+  );
   res.success();
 }
 
@@ -151,20 +151,9 @@ async function getCourseSession(req, res) {
   const { courseSessionId } = req.body;
   try {
     const questions = await QuestionService
-      .findByCourseSessionId(courseSessionId);
-    let questionTrees = [];
-    for (let i = 0 ; i < questions.length ; i++) {
-      const question = questions[i];
-      const allResponses = await ResposneService
-        .findByRootQuestionId(question.id);
-      console.log('allResponses', JSON.stringify(allResponses, null, 2))
-      questionTrees = [
-        ...questionTrees,
-        QuestionService.createQuestionTree(question, allResponses),
-      ]
-    }
+      .getQuestionTrees(courseSessionId);
     res.send({
-      questions: questionTrees,
+      questions,
     })
   } catch (e) {
     console.error('[ERROR] getCourseSession', e);

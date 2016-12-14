@@ -15,9 +15,10 @@ async function create(req, res) {
     question,
     bankId,
     options,
+    correctOption,
   } = req.body;
   try {
-    const instantassessmentId = await InstantassessmentService
+    const instantAssessmentId = await InstantassessmentService
       .create(
         courseId,
         courseSessionId,
@@ -25,6 +26,7 @@ async function create(req, res) {
         question,
         bankId,
         options,
+        correctOption,
       );
     if (!instantAssessmentId) {
       res.error();

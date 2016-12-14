@@ -44,15 +44,14 @@ async function instructorJoinSession(req, res) {
 }
 
 async function studentJoinSession(req, res){
-  try{
+  try {
     const {courseId, studentId} = req.body;
-    const courseSession = await CourseSessionService.studentJoinActiveSession(courseId, studentId);
+    const courseSession = await CourseSessionService
+      .studentJoinActiveSession(courseId, studentId);
     res.send(await CourseSessionService.mapToSend(courseSession));
+  } catch(err) {
+    res.error();
   }
-  catch(err) {
-    res.error(err);
-  }
-  res.end();
 }
 
 async function instructorEndSession(req, res){

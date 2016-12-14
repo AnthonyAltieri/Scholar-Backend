@@ -1,7 +1,7 @@
 
 import express from 'express';
 import mongoose from 'mongoose';
-import ReflectiveAssessmentService from '../services/ReflectiveAssessmentService';
+import ReflectiveAssessmentService from '../services/ReflectiveAssessment';
 
 const router = express.Router();
 
