@@ -8,11 +8,11 @@ const Id = mongoose.Schema.Types.ObjectId;
 
 const Vote = new Schema({
   ...Entity,
-  userId: Id,
-  courseId: Id,
-  courseSessionId: Id,
+  userId: String,
+  courseId: String,
+  courseSessionId: String,
   targetType: String, // Question, Response
-  targetId: Id,
+  targetId: String,
   type: String, //UP, DOWN, etc.
 });
 

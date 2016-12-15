@@ -165,6 +165,9 @@ app.use('/api/instantAssessment', InstantAssessmentRouter);
 import ReflectiveAssessmentRouter from './routers/ReflectiveAssessment';
 app.use('/api/reflectiveAssessment', ReflectiveAssessmentRouter);
 
+import VoteRouter from './routers/VoteRouter';
+app.use('/api/vote', VoteRouter);
+
 
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';

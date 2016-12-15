@@ -12,8 +12,13 @@ router.post('/question/remove', questionRemove);
 router.post('/response/add', responseAdd);
 router.post('/response/remove', responseRemove);
 
-function questionAdd(req, res) {
-  addQuestionResponse(req, res, 'QUESTION');
+async function questionAdd(req, res) {
+  console.log('questionAdd')
+  try {
+    await addQuestionResponse(req, res, 'QUESTION');
+  } catch (e) {
+    console.error('[ERROR] Vote Router questionAdd', e);
+  }
 }
 
 function responseAdd(req, res) {
@@ -21,6 +26,7 @@ function responseAdd(req, res) {
 }
 
 async function addQuestionResponse (req, res, type) {
+  console.log('addQuestionResponse')
   const {
     userId,
     courseId,
@@ -35,12 +41,13 @@ async function addQuestionResponse (req, res, type) {
       courseSessionId,
       targetType,
       targetId,
-      type,
+      'UP',
     );
+    console.log('vote', vote);
     let response;
     if (type === 'QUESTION') {
       response = await VoteService.addToQuestion(targetId, vote);
-    } else if (type === 'RESONSE') {
+    } else if (type === 'RESPONSE') {
       response = await VoteService.addToResponse(targetId, vote);
     } else {
       console.error(`Invalid type: ${type}`);
@@ -51,6 +58,7 @@ async function addQuestionResponse (req, res, type) {
       res.error();
       return;
     }
+    console.log('vote', vote);
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
       Events.ADD_VOTE,
@@ -59,8 +67,9 @@ async function addQuestionResponse (req, res, type) {
         vote: VoteService.mapToSend(vote),
       }
     );
-    res.end();
+    res.success();
   } catch (e) {
+    console.error('[ERROR] Vote Router create', e);
     res.error();
   }
 }
@@ -98,7 +107,7 @@ export async function remove(req, res, type) {
         id: voteId,
       }
     );
-    res.end();
+    res.success();
   } catch (e) {
     res.error();
   }
