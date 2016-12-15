@@ -40,7 +40,9 @@ async function create(req, res) {
   Socket.send(
     Socket.generatePrivateChannel(courseSessionId),
     Events.QUESTION_ASKED,
-    QuestionService.mapToSend(question)
+    {
+      question: QuestionService.mapToSend(question),
+    }
   );
   res.success();
 }
