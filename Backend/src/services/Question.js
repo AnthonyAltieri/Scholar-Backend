@@ -3,6 +3,7 @@
  */
 
 import mongoose from 'mongoose';
+import ResponseService from './Response';
 import QuestionSchema from '../schemas/Question';
 const Question = mongoose.model('questions', QuestionSchema);
 import db from '../db';
@@ -171,6 +172,27 @@ function createQuestionTree(question, responses) {
   return idToElemHM[question.id];
 }
 
+async function getQuestionTrees(courseSessionId) {
+  try {
+    const questions = await findByCourseSessionId(courseSessionId);
+    let questionTrees = [];
+    for (let i = 0 ; i < questions.length ; i++) {
+      const question = questions[i];
+      const allResponses = await ResponseService
+        .findByRootQuestionId(question.id);
+      console.log('allResponses', JSON.stringify(allResponses, null, 2))
+      questionTrees = [
+        ...questionTrees,
+        createQuestionTree(question, allResponses),
+      ]
+    }
+    return questionTrees;
+  } catch (e) {
+    console.error('[ERROR] Question Service getQuestionTrees', e);
+    return null;
+  }
+}
+
 export default {
   build,
   dismiss,
@@ -181,4 +203,5 @@ export default {
   mapToSend,
   findByCourseSessionId,
   createQuestionTree,
+  getQuestionTrees,
 }

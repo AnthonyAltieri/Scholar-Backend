@@ -1,6 +1,6 @@
 import db from '../db';
 import mongoose from 'mongoose';
-import CourseSessionService from './CourseSessionService';
+import CourseSessionService from './CourseSession';
 import InstantAssessmentSchema from '../schemas/InstantAssessment';
 const InstantAssessment = mongoose
   .model('instantassessments', InstantAssessmentSchema);
@@ -12,19 +12,21 @@ async function create(
   question,
   bankId,
   options,
+  correctOption,
 ) {
   try {
-    const instantassessment = await db.create({
+    const instantAssessment = await db.create({
       courseId,
       courseSessionId,
       creatorId,
       question,
       bankId,
       options,
+      correctOption,
     }, InstantAssessment);
     await CourseSessionService.setActiveAssessment(
       courseSessionId,
-      instantassessment.id,
+      instantAssessment.id,
       'INSTANT',
     );
     return instantAssessment.id;

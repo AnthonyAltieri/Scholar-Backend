@@ -160,7 +160,7 @@ async function enrollStudent(addCode, studentId) {
       course: course
     }
   } catch (e) {
-    console.error("[ERROR] in CourseService > enrollStudent : " + e);
+    console.error('[ERROR] Course Service enrollStudent', e);
     return null;
   }
 }

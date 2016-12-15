@@ -159,6 +159,12 @@ app.use('/api/assessmentBank', AssessmentBankRotuer);
 import BankedAssessmentRouter from './routers/BankedAssessment';
 app.use('/api/bankedAssessment', BankedAssessmentRouter);
 
+import InstantAssessmentRouter from './routers/InstantAssessment';
+app.use('/api/instantAssessment', InstantAssessmentRouter);
+
+import ReflectiveAssessmentRouter from './routers/ReflectiveAssessment';
+app.use('/api/reflectiveAssessment', ReflectiveAssessmentRouter);
+
 
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';

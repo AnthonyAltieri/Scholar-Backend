@@ -1,7 +1,7 @@
 
 import db from '../db';
 import mongoose from 'mongoose';
-import CourseSessionService from './CourseSessionService';
+import CourseSessionService from './CourseSession';
 import ReflectiveAssessmentSchema from '../schemas/ReflectiveAssessment';
 const ReflectiveAssessment = mongoose
   .model('reflectiveassessments', ReflectiveAssessmentSchema);

@@ -27,37 +27,33 @@ async function getThreshold(id) {
 //We shall populate the courseSession with all required entities here
 async function mapToSend(courseSession){
   console.log("Map to send course session");
-
   try {
     if(!!courseSession && typeof courseSession !== 'undefined'){
       console.log(JSON.stringify(courseSession, null, 2));
       console.log("attendance");
-      const attendance = !!courseSession.studentIds? courseSession.studentIds.length : 0;
-
-      const questions = await QuestionService.findByCourseSessionId(courseSession.id);
-      console.log("got Qs");
+      const attendance = !!courseSession.studentIds
+        ? courseSession.studentIds.length
+        : 0;
+      const questions = await QuestionService
+        .getQuestionTrees(courseSession.id);
+      console.log('questions', JSON.stringify(questions, null, 2));
       const alerts = await AlertService.findByCourseSessionId(courseSession.id);
-
       console.log("got alerts");
       //TODO: Add logic for assessments
       return {
         courseSession : {
+          questions,
+          attendance,
           id: courseSession.id,
-          questions: questions.map(q => QuestionService.mapToSend(q)),
-          alerts: alerts.map(a => AlertService.mapToSend(a)),//TODO: Only send number of active alerts
-          attendance: attendance
+          alerts: alerts.map(AlertService.mapToSend),//TODO: Only send number of active alerts
         }
       }
-    }
-    else{
+    } else {
       throw new Error("CourseSession not correctly defined for Mapping");
     }
-
-
-
-  }
-  catch (err) {
-    throw err;
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service mapToSend', e);
+    return null;
   }
 }
 

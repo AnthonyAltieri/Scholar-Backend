@@ -2,14 +2,13 @@
  * @author Anthony Altieri on 11/5/16.
  */
 
-const Id = Mongoose.Schema.Types.ObjectId;
 
 const Assessment = {
-  courseId: Id,
-  courseSessionId: Id,
-  creatorId: Id,
+  courseId: String,
+  courseSessionId: String,
+  creatorId: String,
   question: String,
-  bankId: Id,
+  bankId: String,
 };
 
 export default Assessment;
