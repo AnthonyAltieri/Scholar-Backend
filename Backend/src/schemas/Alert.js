@@ -14,7 +14,6 @@ const Alert = new Schema({
   userId: Id,
   courseId: Id,
   courseSessionId: Id,
-
 });
 
 export default Alert;
