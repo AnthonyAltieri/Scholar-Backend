@@ -6,12 +6,15 @@ const router = express.Router();
 
 import CourseService from '../services/CourseService';
 import CourseSessionService from '../services/CourseSession';
+import InstantService from '../services/InstantAssessment';
+import ReflectiveService from '../services/ReflectiveAssessment';
 import UserService from '../services/UserService';
 
 router.post('/create', createCourseSession);
 router.post('/join/instructor', instructorJoinSession);
 router.post('/join/student', studentJoinSession);
 router.post('/end', instructorEndSession);
+router.post('/get/activeAssessment', getActiveAssessment);
 
 async function createCourseSession(req, res){
   const {
@@ -65,7 +68,62 @@ async function instructorEndSession(req, res){
     res.success();
   } catch (e) {
     console.error('[ERROR] CourseSession router instructorEndSession', e);
-    res.error(e);
+    res.error();
+  }
+}
+
+async function getActiveAssessment(req, res) {
+  const { courseSessionId } = req.body;
+  try {
+    const result = await CourseSessionService.getActiveAssessment(courseSessionId);
+    if (!result) {
+      res.error();
+      return;
+    }
+    const { activeAssessmentType, activeAssessmentId } = result;
+    if (!activeAssessmentId) {
+      res.send({})
+      return;
+    }
+    if (activeAssessmentType === 'INSTANT') {
+      const instantAssessment = await InstantService
+        .getById(activeAssessmentId);
+      res.send({
+        activeAssessmentType,
+        activeAssessment: {
+          options: instantAssessment.options,
+          question: instantAssessment.question,
+          id: activeAssessmentId,
+          answers: instantAssessment.answers.map(a => ({
+            optionIndex: a.optionIndex,
+            userId: a.userId,
+          })),
+        }
+      })
+    } else if (activeAssessmentType === 'REFLECTIVE') {
+      const reflectiveAssessment = await ReflectiveService
+        .getById(activeAssessmentId);
+      const answers = await ReflectiveService.getAnswers(activeAssessmentId);
+      const numberAnswers = answers.length;
+      const numberReviews = answers.reduce((a, c) => a + c.reviews.length, 0);
+      res.send({
+        activeAssessmentType,
+        activeAssessment: {
+          numberAnswers,
+          numberReviews,
+          id: activeAssessmentId,
+          question: reflectiveAssessment.question,
+        }
+      })
+
+    } else {
+      throw new Error(
+        `Invalid active assessment type ${activeAssessmentType}`
+      );
+    }
+  } catch (e) {
+    console.error('[ERROR] CourseSession router getActiveAssessment', e);
+    res.error();
   }
 }
 

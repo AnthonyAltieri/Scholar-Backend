@@ -4,15 +4,12 @@
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
-const Id = Mongoose.Schema.Types.ObjectId;
 
 const Review = new Schema({
   ...Entity,
-  courseSessionId: Id,
-  courseId: Id,
-  userId: Id,
+  courseSessionId: String,
+  courseId: String,
+  userId: String,
   type: String, //SIMILAR/DISSIMILAR/GOOD/BAD
-  answerId: Id,
+  answerId: String,
 });
-
-

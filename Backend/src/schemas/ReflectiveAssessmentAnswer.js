@@ -4,14 +4,14 @@
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
-const Id = Mongoose.Schema.Types.ObjectId;
+import Review from './Review';
 
 const ReflectiveAssessmentAnswer = new Schema({
   ...Entity,
-  courseSessionId: Id,
-  userId: Id,
-  assessmentId: Id,
-  courseId: Id,
+  courseSessionId: String,
+  userId: String,
+  assessmentId: String,
+  courseId: String,
   content: String,
   reviews: [Review],
 });
