@@ -77,8 +77,61 @@ async function getAnswers(assessmentId) {
   }
 }
 
+async function review(
+  courseSessionId,
+  courseId,
+  userId,
+  type,
+  answerId,
+) {
+  try {
+    const review = await db.create({
+      courseSessionId,
+      courseId,
+      userId,
+      type,
+      answerId,
+    }, Review);
+    const answer = await db.findById(answerId, ReflectiveAnswer);
+    if (!answer.reviews) {
+      answer.reviews = [];
+    }
+    answer.reviews = [
+      ...answer.reviews,
+      review,
+    ];
+    await db.save(review);
+    return answer;
+  } catch (e) {
+    console.error('[ERROR] ReflectiveAssessment Service review', e);
+    return null;
+  }
+}
+
+async function answer(
+  courseSessionId,
+  userId,
+  assessmentId,
+  courseId,
+  content,
+) {
+  try {
+    return await db.create({
+      courseSessionId,
+      userId,
+      assessmentId,
+      courseId,
+      content,
+    }, ReflectiveAnswer);
+  } catch (e) {
+    console.error('[ERROR] ReflectiveAssessment Service review', e);
+    return null;
+  }
+}
+
 export default {
   create,
   deactivate,
   getById,
+  review,
 }
