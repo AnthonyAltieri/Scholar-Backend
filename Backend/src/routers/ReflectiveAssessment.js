@@ -2,6 +2,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import ReflectiveAssessmentService from '../services/ReflectiveAssessment';
+import Socket from '../services/Socket';
+import Events from '../services/Events';
 
 const router = express.Router();
 
@@ -29,7 +31,15 @@ async function create(req, res) {
       res.error();
       return;
     }
-    // TODO: socket stuff
+    Socket.send(
+      Socket.generatePrivateChannel(courseSessionId),
+      Events.ASSESMENT_ACTIVATED,
+      {
+        assessmentType: 'REFLECTIVE',
+        question,
+        options,
+      }
+    )
     res.send({
       reflectiveAssessmentId,
     })
@@ -48,7 +58,11 @@ async function deactivate(req, res) {
       res.error();
       return;
     }
-    // TODO: socket stuff
+    Socket.send(
+      Socket.generatePrivateChannel(courseSessionId),
+      Events.ASSESSMENT_DEACTIVATED,
+      {}
+    )
     res.success();
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Router deactivate', e);
