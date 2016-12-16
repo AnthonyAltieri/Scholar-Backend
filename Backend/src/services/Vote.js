@@ -20,7 +20,7 @@ async function build(
   type
 ) {
   try {
-    const vote = await db.create({
+    return await db.create({
       userId,
       courseId,
       courseSessionId,
@@ -28,8 +28,8 @@ async function build(
       targetId,
       type,
     }, Vote);
-    return vote;
   } catch (e) {
+    console.error('[ERROR] Vote Service build', e);
     return null;
   }
 }
@@ -37,10 +37,13 @@ async function build(
 async function addToQuestion(id, vote) {
   try {
     const question = await db.findById(id, Question);
-    question.votes = [...question.votes, vote];
+    question.votes = !!question.votes
+      ? [...question.votes, vote]
+      : [vote];
     question.rank = question.votes.length;
     return await db.save(question);
   } catch (e) {
+    console.error('[ERROR] Vote Service addToQuestion', e);
     return null;
   }
 }
@@ -90,7 +93,7 @@ function mapToSend(vote) {
     courseId: vote.courseId,
     courseSessionId: vote.courseSessionId,
     targetType: vote.targetType,
-    targetId: vote.targetType,
+    targetId: vote.targetId,
     type: vote.type,
   }
 }

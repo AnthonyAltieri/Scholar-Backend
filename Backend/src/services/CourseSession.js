@@ -277,6 +277,19 @@ async function removeActiveAssessment(courseSessionId) {
   }
 }
 
+async function getActiveAssessment(courseSessionId) {
+  try {
+    const courseSession = await getById(courseSessionId);
+    return {
+      activeAssessmentType: courseSession.activeAssessmentType,
+      activeAssessmentId: courseSessionId.activeAssessmentId,
+    }
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service getActiveAssessment', e);
+    return null;
+  }
+}
+
 export default {
   build,
   instructorEndSession,

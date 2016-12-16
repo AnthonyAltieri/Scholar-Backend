@@ -168,6 +168,10 @@ app.use('/api/reflectiveAssessment', ReflectiveAssessmentRouter);
 import AlertRouter from './routers/AlertRouter'
 app.use('/api/alert', AlertRouter);
 
+import VoteRouter from './routers/VoteRouter';
+app.use('/api/vote', VoteRouter);
+
+
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';
 // app.use('/api/test', TestRouter);
