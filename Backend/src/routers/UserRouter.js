@@ -78,6 +78,7 @@ function logIn(req, res) {
 
           db.save(user)
               .then((user) => {
+                console.log("[SUCCESS] Login Success");
                   res.send(UserService.mapToSend(user))
               })
               .catch((error) => { res.error(error) });

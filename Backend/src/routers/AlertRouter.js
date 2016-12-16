@@ -3,17 +3,36 @@
  */
 var express = require('express');
 var router = express.Router();
+import AlertService from '../services/Alert';
 
-var mongoose = require('mongoose');
 
-router.post('/add', addAlert);
+router.post('/create', addAlert);
 router.post('/get/active', getActiveAlerts);
 
-
+//NOTE: Alert Window is in seconds
 async function addAlert(req, res) {
-  { userId, courseId, courseSess }
+  const { userId, courseId, courseSessionId, alertWindow } = req.body;
+
+  try {
+    const alert = await AlertService.attemptAddAlert(userId, courseId, courseSessionId, alertWindow);
+
+    if (!!alert) {
+      res.send({alert: AlertService.mapToSend(alert)})
+    }
+    else {
+      res.error();
+    }
+  }
+  catch (e) {
+    res.error(" [ERROR] in AlertRouter > addAlert : " + e);
+  }
+
 }
 
 async function getActiveAlerts(req, res) {
-
+  //TODO: Actually implement this correctly
+  res.send( { activeAlerts : Math.floor((Math.random() * 40) + 1)} );
 }
+
+
+export default router;
