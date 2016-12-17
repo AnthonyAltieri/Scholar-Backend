@@ -50,6 +50,11 @@ function getMostRecentAlert(alerts){
   return mostRecentAlert;
 }
 
+function isAlertInWindow(alert, alertWindowMillis) {
+  return ((DateUtility.diffMillisFromNow(alert.created.getTime())) < alertWindowMillis)
+
+}
+
 async function isDuplicateAlert(userId, courseSessionId, alertWindowMillis) {
   try {
     let userAlerts = await findByUserAndCourseSessionId(userId, courseSessionId);
@@ -58,7 +63,7 @@ async function isDuplicateAlert(userId, courseSessionId, alertWindowMillis) {
 
       let mostRecentAlert = getMostRecentAlert(userAlerts);
 
-      if( DateUtility.diffMillisFromNow(mostRecentAlert.created.getTime()) < alertWindowMillis ) {
+      if( isAlertInWindow(mostRecentAlert, alertWindowMillis) ) {
         return true;
       }
     }
@@ -70,10 +75,11 @@ async function isDuplicateAlert(userId, courseSessionId, alertWindowMillis) {
   }
 }
 
+//NOTE: alertWindow is in seconds
 async function attemptAddAlert(userId, courseId, courseSessionId, alertWindow = 60) {
   try {
     let alertWindowMillis = alertWindow * 1000;
-    if(! ( await isDuplicateAlert(userId, courseSessionId, alertWindowMillis ))){
+    if(! ( await isDuplicateAlert(userId, courseSessionId, alertWindowMillis ))) {
       return await db.create({
         userId,
         courseId,
@@ -90,11 +96,30 @@ async function attemptAddAlert(userId, courseId, courseSessionId, alertWindow = 
   }
 }
 
+//NOTE: alertWindow is in seconds
+async function getActiveAlerts(courseSessionId, alertWindow = 60) {
+  try {
+    let alerts = await findByCourseSessionId(courseSessionId);
+
+    if(!!alerts && alerts.length > 0){
+      return alerts.filter( (a) => isAlertInWindow(a, alertWindow * 1000)).length;
+    }
+    else {
+      return 0;
+    }
+  }
+  catch (e) {
+    console.error("[ERROR] in Alert Service > getActiveAlerts : " + e);
+    throw e;
+  }
+}
+
 const AlertService = {
   build,
   mapToSend,
   findByCourseSessionId,
-  attemptAddAlert
+  attemptAddAlert,
+  getActiveAlerts
 };
 
 export default AlertService;
