@@ -12,7 +12,7 @@ router.post('/get/active', getActiveAlerts);
 //NOTE: Alert Window is in seconds
 async function addAlert(req, res) {
   const { userId, courseId, courseSessionId, alertWindow } = req.body;
-
+  
   try {
     const alert = await AlertService.attemptAddAlert(userId, courseId, courseSessionId, alertWindow);
 
@@ -33,7 +33,8 @@ async function getActiveAlerts(req, res) {
   const { courseSessionId, alertWindow } = req.body;
 
   try {
-    res.send({ activeAlerts : await AlertService.getActiveAlerts(courseSessionId, alertWindow)});
+    const numActiveAlerts = await AlertService.getActiveAlerts(courseSessionId, alertWindow);
+    res.send({ activeAlerts : numActiveAlerts });
   }
   catch (e) {
     console.error("[ERROR] in AlertRouter > getActiveAlerts : " + e);
