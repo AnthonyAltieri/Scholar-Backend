@@ -303,4 +303,5 @@ export default {
   save,
   setActiveAssessment,
   removeActiveAssessment,
+  getActiveAssessment,
 }

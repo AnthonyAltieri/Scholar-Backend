@@ -26,6 +26,7 @@ async function create(
       creatorId,
       question,
       bankId,
+      reviewStarted: false,
     }, ReflectiveAssessment);
     await CourseSessionService.setActiveAssessment(
       courseSessionId,
@@ -129,9 +130,23 @@ async function answer(
   }
 }
 
+async function startReview(assessmentId) {
+  try {
+    const await reflectiveAssessment = await getById(assessmentId);
+    reflectiveAssessment.reviewStarted = true;
+    await db.save(reflectiveAssessment);
+    return reflectiveAssessment;
+  } catch (e) {
+    console.error('[ERROR] ReflectiveAssessment Service startReview', e);
+    return null;
+  }
+}
+
 export default {
   create,
   deactivate,
   getById,
   review,
+  answer,
+  startReview,
 }

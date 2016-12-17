@@ -9,4 +9,5 @@ import Assessment from './Assessment';
 const InstantAssessment = new Schema({
   ...Entity,
   ...Assessment,
+  reviewStarted: Boolean,
 });

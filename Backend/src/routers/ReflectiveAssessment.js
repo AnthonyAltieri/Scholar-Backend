@@ -11,6 +11,7 @@ router.post('/create', create);
 router.post('/deactivate', deactivate);
 router.post('/review', review);
 router.post('/answer', answer);
+router.post('/startReview', startReview);
 
 async function create(req, res) {
   const {
@@ -35,11 +36,10 @@ async function create(req, res) {
     }
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
-      Events.ASSESMENT_ACTIVATED,
+      Events.ASSESSMENT_ACTIVATED,
       {
         assessmentType: 'REFLECTIVE',
         question,
-        options,
       }
     )
     res.send({
@@ -127,8 +127,29 @@ async function answer(req, res) {
       Events.REFLECTIVE_ASSESSMENT_ANSWERED,
       {}
     );
+    res.success();
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Router answer', e);
+    res.error();
+  }
+}
+
+async function startReview(req, res) {
+  const {
+    assessmentId,
+    courseSessionId,
+  } = req.body;
+  try {
+    const reflectiveAssessment = await ReflectiveAssessmentService
+      .startReview(assessmentId);
+    Socket.send(
+      Socket.generatePrivateChannel(courseSessionId),
+      Events.REFLECTIVE_ASSESSMENT_START_REVIEW,
+      {}
+    );
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] ReflectiveAssessment Router startReview');
     res.error();
   }
 }
