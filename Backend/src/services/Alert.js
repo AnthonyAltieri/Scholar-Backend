@@ -40,18 +40,25 @@ async function findByUserAndCourseSessionId(userId, courseSessionId){
   }
 }
 
+function getMostRecentAlert(alerts){
+  let mostRecentAlert = alerts[0];
+  alerts.forEach( a => {
+    if(a.created.getTime() > mostRecentAlert.created.getTime()) {
+      mostRecentAlert = a;
+    }
+  });
+  return mostRecentAlert;
+}
+
 async function isDuplicateAlert(userId, courseSessionId, alertWindowMillis) {
   try {
     let userAlerts = await findByUserAndCourseSessionId(userId, courseSessionId);
 
     if(!!userAlerts && userAlerts.length > 0) {
-      const mostRecentAlert = userAlerts.sort(
-          (a, b) => {
-          return (a > b);
-        }
-      );
 
-      if(DateUtility.diffMillisFromNow(mostRecentAlert[0].created) < alertWindowMillis) {
+      let mostRecentAlert = getMostRecentAlert(userAlerts);
+
+      if( DateUtility.diffMillisFromNow(mostRecentAlert.created.getTime()) < alertWindowMillis ) {
         return true;
       }
     }

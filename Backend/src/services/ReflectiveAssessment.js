@@ -132,7 +132,7 @@ async function answer(
 
 async function startReview(assessmentId) {
   try {
-    const await reflectiveAssessment = await getById(assessmentId);
+    const reflectiveAssessment = await getById(assessmentId);
     reflectiveAssessment.reviewStarted = true;
     await db.save(reflectiveAssessment);
     return reflectiveAssessment;
