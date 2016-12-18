@@ -117,13 +117,15 @@ async function answer(
   content,
 ) {
   try {
-    return await db.create({
+    const answer = await db.create({
       courseSessionId,
       userId,
       assessmentId,
       courseId,
       content,
     }, ReflectiveAnswer);
+    console.log('ReflectiveAssessmentAnswer', answer);
+    return answer;
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Service review', e);
     return null;
@@ -132,12 +134,58 @@ async function answer(
 
 async function startReview(assessmentId) {
   try {
-    const await reflectiveAssessment = await getById(assessmentId);
+    const reflectiveAssessment = await getById(assessmentId);
     reflectiveAssessment.reviewStarted = true;
     await db.save(reflectiveAssessment);
     return reflectiveAssessment;
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Service startReview', e);
+    return null;
+  }
+}
+
+async function createVoteMatrix(assessmentId, numberExpectedReviews) {
+  try {
+    const retrievedAnswers = await db.findAll({ assessmentId }, ReflectiveAnswer);
+    let matrix = [];
+    let answers = [];
+    // Helper fuction to calculate which answer's a particular
+    // user will have been presented for review
+    const getIndicesOfReviewed = (answerIndex, numberAnswers) => {
+      let indicesOfReviewed = [];
+      for (let i = 1 ; i < (numberExpectedReviews + 1) ; i++) {
+        indicesOfReviewed = [
+          ...indicesOfReviewed,
+          ((answerIndex + i) % (numberAnswers - 1)),
+        ];
+      }
+      return indicesOfReviewed;
+    };
+    for (let i = 0 ; i < retrievedAnswers.length ; i++) {
+      let matrix = [...matrix, []];
+      const answer = retrievedAnswers[i];
+      answer.reviews = await db.findByIdArray(answer.reviews, Review);
+      answers = [...answers, answer];
+    };
+    for (let i = 0 ; i < retrievedAnswers.length ; i++) {
+      let userId = answers[i].userId;
+      let row = matrix[i];
+      const indiciesOfReviewed = getIndicesOfReviewed(i);
+      for (let j = 0 ; j < indiciesOfReviewed.length ; j++) {
+        const index = indiciesOfReviewed[j];
+        const answerToExamine = answers[index];
+        const userReview = answerToExamine.reviews
+          .filter(r => r.userId === userId)[0];
+        if (!userReview) {
+          row = [...row, 0]
+          continue;
+        }
+        row = [...row, (userReview.type === 'AGREE' ? 1 : -1)];
+      }
+    }
+    return matrix;
+  } catch (e) {
+    console.error('[ERROR] ReflectiveAssessment Service createVoteMatrix', e);
     return null;
   }
 }

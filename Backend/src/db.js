@@ -128,5 +128,3 @@ function findAll(model) {
 function generate(attributes, model) {
   return new model(attributes)
 }
-
-

@@ -10,4 +10,5 @@ const InstantAssessment = new Schema({
   ...Entity,
   ...Assessment,
   reviewStarted: Boolean,
+  content: String,
 });
