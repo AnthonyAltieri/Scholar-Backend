@@ -12,7 +12,9 @@ const CourseSession = new Schema({
   courseId: Id,
   instructorIds: [Id],
   teacherAssistantIds: [Id],
-  studentIds: [Id],//attendance
+  studentIds: [Id],//students who entered this session
+  attendanceCode : String,
+  attendanceIds: [Id],
   activeAssessmentId: Id,
   activeAssessmentType: String,
   inAttendance: [String],

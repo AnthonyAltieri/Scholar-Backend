@@ -10,8 +10,11 @@ import moment from 'moment';
 const CourseSession = mongoose.model('coursesessions', CourseSessionSchema);
 import QuestionService from '../services/Question';
 import AlertService from '../services/Alert';
-
+import ShortIdUtil from '../utilities/ShortIdUtil';
 import db from '../db';
+
+const ATTENDANCE_CODE_LENGTH = 4;
+const ATTENDANCE_CODE_POOL = 'ABCDEFGHUJKLMNOPQRSTUVWXYZ1234567890';
 
 //TODO: @tonio - account for this in routes
 async function getThreshold(id) {
@@ -290,6 +293,116 @@ async function getActiveAssessment(courseSessionId) {
   }
 }
 
+async function findByAttendanceCode(code) {
+  try {
+    let courseSession = await db.findOne({attendanceCode : code}, CourseSession);
+
+    if(!!courseSession){
+      return courseSession;
+    }
+    else {
+      console.info("[INFO] Coursesession Service > findByattendanceCode :  No course found with code " + code);
+      return null;
+    }
+
+  }
+  catch (e) {
+    console.error('[ERROR] CourseSession Service > findByAttendanceCode :  ', e);
+    throw e;
+  }
+}
+async function generateUniqueAttendanceCode() {
+  let code = ShortIdUtil.generateShortIdWithRequirements(ATTENDANCE_CODE_LENGTH, ATTENDANCE_CODE_POOL);
+
+  console.log(code);
+  while(!!(await findByAttendanceCode(code))){
+    console.info("[INFO] CourseSession Service > createAttendanceCode : Attendance Code Already in use - " + code );
+    code = ShortIdUtil.generateShortIdWithRequirements(ATTENDANCE_CODE_LENGTH, ATTENDANCE_CODE_POOL);
+    console.log(code);
+  }
+
+  return code;
+}
+async function createAttendanceCode(courseSessionId) {
+  try {
+    console.log("In service : " + courseSessionId);
+    let code = await generateUniqueAttendanceCode();
+    let courseSession = await db.findById(courseSessionId, CourseSession);
+
+    if(!courseSession) {
+      throw new Error("Invalid Course Session Id : " + courseSessionId);
+    }
+
+    courseSession.attendanceCode = code;
+    return await db.save(courseSession);
+  }
+  catch (e) {
+    console.error('[ERROR] CourseSession Service > createAttendanceCode : ', e);
+    return null;
+  }
+}
+
+async function destroyAttendanceCode(courseSessionId) {
+  try {
+    console.log("Destory attendance code for : " + courseSessionId);
+
+    let courseSession = await db.findById(courseSessionId, CourseSession);
+    if(!courseSession) {
+      throw new Error("Invalid Course Session Id : " + courseSessionId);
+    }
+
+    console.log("Found coursesession");
+    courseSession.attendanceCode = null;
+    await db.save(courseSession);
+    console.log("DB save done : " );
+    return courseSession;
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service > destroyAttendanceCode : ', e);
+    return null;
+  }
+}
+
+function isStudentInAttendance(courseSession, userId) {
+  try {
+    return ((courseSession.attendanceIds.filter( (u) => { return u === userId;})).length > 0) ;
+  }
+  catch (e) {
+    console.error('[ERROR] CourseSession Service > isStudentInAttendance : ', e);
+    throw e;
+  }
+}
+
+async function studentJoinAttendance(courseSessionId, code, userId) {
+  try {
+    let courseSession = await db.findById(courseSessionId, CourseSession);
+
+    if(!courseSession) {
+      throw new Error("Invalid Course Session Id : " + courseSessionId);
+    }
+
+    if(courseSession.attendanceCode !== code){
+      console.error(console.error('[ERROR] CourseSession Service > studentJoinAttendance : Incorrect Code ', code));
+      console.info('[INFO] CourseSession Service > studentJoinAttendance : Correct Code ', courseSession.attendanceCode);
+      if(!courseSession.attendanceCode){
+        return ({isAttendanceOpen : false})
+      }
+      return ({invalidCode : true});
+    }
+    //attempt to add student
+    if(!isStudentInAttendance(courseSession, userId)){
+      courseSession.attendanceIds = [...courseSession.attendanceIds, userId];
+      await db.save(courseSession);
+      return null;
+    }
+    else{
+      return null;
+    }
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service > studentJoinAttendance : ', e);
+    return null;
+  }
+}
+
 export default {
   build,
   instructorEndSession,
@@ -304,4 +417,7 @@ export default {
   setActiveAssessment,
   removeActiveAssessment,
   getActiveAssessment,
+  createAttendanceCode,
+  destroyAttendanceCode,
+  studentJoinAttendance
 }
