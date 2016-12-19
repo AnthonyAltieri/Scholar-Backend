@@ -15,6 +15,9 @@ router.post('/join/instructor', instructorJoinSession);
 router.post('/join/student', studentJoinSession);
 router.post('/end', instructorEndSession);
 router.post('/get/activeAssessment', getActiveAssessment);
+router.post('/attendance/create/code', createAttendanceCode);
+router.post('/attendance/end', endAttendance);
+router.post('/attendance/join', joinAttendance);
 
 async function createCourseSession(req, res){
   const {
@@ -127,4 +130,37 @@ async function getActiveAssessment(req, res) {
   }
 }
 
+async function createAttendanceCode(req, res){
+  try {
+    const { courseSessionId } = req.body;
+    console.log("Create Attendance code for : " + courseSessionId);
+    const courseSession = await CourseSessionService.createAttendanceCode( courseSessionId );
+    res.send({ code : courseSession.attendanceCode });
+  } catch (e) {
+    console.error('[ERROR] CourseSession Router > createAttendanceCode : ' + e);
+    res.error();
+  }
+}
+
+async function endAttendance(req, res) {
+  try {
+    const { courseSessionId } = req.body;
+    console.log("End attendance for : " + courseSessionId);
+    res.send(await CourseSessionService.destroyAttendanceCode(courseSessionId));
+  } catch (e) {
+    console.error('[ERROR] CourseSession Router > endAttendance : ' + e);
+    res.error();
+  }
+}
+
+async function joinAttendance(req, res) {
+  try {
+    const { courseSessionId, code, userId } = req.body;
+    res.send(await CourseSessionService.studentJoinAttendance(courseSessionId, code, userId));
+  }
+  catch (e) {
+    console.error('[ERROR] CourseSession Router > joinAttendance : ' + e);
+    res.error();
+  }
+}
 export default router;
