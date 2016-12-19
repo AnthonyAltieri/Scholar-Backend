@@ -9,6 +9,8 @@ import CourseSessionService from '../services/CourseSession';
 import InstantService from '../services/InstantAssessment';
 import ReflectiveService from '../services/ReflectiveAssessment';
 import UserService from '../services/UserService';
+import Socket from '../services/Socket';
+import Events from '../services/Events';
 
 router.post('/create', createCourseSession);
 router.post('/join/instructor', instructorJoinSession);
@@ -146,7 +148,8 @@ async function endAttendance(req, res) {
   try {
     const { courseSessionId } = req.body;
     console.log("End attendance for : " + courseSessionId);
-    res.send(await CourseSessionService.destroyAttendanceCode(courseSessionId));
+    await CourseSessionService.destroyAttendanceCode(courseSessionId);
+    res.send({success: true});
   } catch (e) {
     console.error('[ERROR] CourseSession Router > endAttendance : ' + e);
     res.error();
@@ -156,7 +159,20 @@ async function endAttendance(req, res) {
 async function joinAttendance(req, res) {
   try {
     const { courseSessionId, code, userId } = req.body;
-    res.send(await CourseSessionService.studentJoinAttendance(courseSessionId, code, userId));
+    const payload = await CourseSessionService.studentJoinAttendance(courseSessionId, code, userId);
+
+    if(payload.attendance) {
+      console.log("success");
+      res.send({attendance: payload.attendance});
+      Socket.send(
+        Socket.generatePrivateChannel(courseSessionId),
+        Events.STUDENT_JOINED_ATTENDANCE,
+        { attendance: payload.attendance }
+      );
+    }
+    else{
+      res.send(payload);
+    }
   }
   catch (e) {
     console.error('[ERROR] CourseSession Router > joinAttendance : ' + e);
