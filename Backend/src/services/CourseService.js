@@ -238,6 +238,23 @@ async function getBankedAssessments(courseId) {
   }
 }
 
+async function getAllCourseSessions(courseId) {
+  try {
+    return await db.find({ courseId }, CourseSession);
+  } catch (e) {
+    console.error('[ERROR] Course Service getAllCourseSessions', e);
+    return null;
+  }
+}
+
+async function getUsers(courseId) {
+  try {
+    return await db.find({ courses: courseId }, User);
+  } catch (e) {
+    console.error('[ERROR] Course Service getUsers', e);
+    return null;
+  }
+};
 
 const CourseService = {
   buildCourse,
@@ -253,6 +270,7 @@ const CourseService = {
   findById,
   setActiveCourseSessionId,
   addBankedAssessment,
+  getAllCourseSessions,
 };
 
 export default  CourseService;

@@ -18,6 +18,7 @@ router.post('/set/activationStatus', setActivationStatus);
 router.post('/enroll/student', enrollStudent);
 router.post('/add/bankedAssessment', addBankedAssessment);
 router.post('/get/bankedAssessments', getBankedAssessments);
+router.post('/grades/summary', gradesSummary);
 
 async function createCourse(req, res){
     const {
@@ -175,8 +176,37 @@ async function getBankedAssessments(req, res) {
     })
   } catch (e) {
     console.error('[ERROR] Course Router getBankedAssessments', e);
+    res.error();
   }
 }
 
-module.exports = router;
+async function gradesSummary(req, res) {
+  const {
+    courseId,
+  } = req.body;
+  try {
+    const courseSessions = await CourseService.getAllCourseSessions(courseId);
+    const usersInCourse = await CourseService.getUsers(courseId);
+    const students = usersInCourse.filter(u => u.userType === 'STUDENT');
+    const instructors = usersInCourse.filter(u => u.userType === 'INSTRUCTOR');
+    const contains = (list, x) => !!list.filter(i => i === x)[0];
+    for (let i = 0 ; i < students.length ; i++) {
+      const student = students[i];
+      const courseSessionsInAttendance = !!courseSessions
+        ? courseSessions
+          .filter(c => contains(c.inAttendance, student.id))
+          .length
+        : 0;
+      // const numberOfQuestions = courseSessions
 
+
+
+    }
+  } catch (e) {
+    console.error('[ERROR] Course Router gradesSummary', e);
+    res.error();
+  }
+
+}
+
+module.exports = router;
