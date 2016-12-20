@@ -17,6 +17,7 @@ const CourseSession = new Schema({
   attendanceIds: [Id],
   activeAssessmentId: Id,
   activeAssessmentType: String,
+  inAttendance: [String],
 });
 
 export default CourseSession;

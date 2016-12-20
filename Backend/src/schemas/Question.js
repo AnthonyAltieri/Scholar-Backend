@@ -4,6 +4,7 @@
 
 import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
+import Vote from './Vote';
 const Id = String;
 
 const Question = new Schema({
@@ -15,6 +16,7 @@ const Question = new Schema({
   isDismissed: Boolean,
   isEndorsed: Boolean,
   endorsedBy: Id,
+  votes: [Vote],
   isFlagged: Boolean,
 });
 

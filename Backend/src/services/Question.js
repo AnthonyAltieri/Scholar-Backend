@@ -4,8 +4,11 @@
 
 import mongoose from 'mongoose';
 import ResponseService from './Response';
+import CourseSessionSchemas from '../schemas/CourseSession';
 import QuestionSchema from '../schemas/Question';
 const Question = mongoose.model('questions', QuestionSchema);
+const CourseSession = mongoose
+  .model('coursesessions', CourseSessionSchemas)
 import db from '../db';
 
 import validateQuestion from '../validators/Question';
@@ -26,6 +29,7 @@ export async function build(
       isDismissed: false,
       isEndorsed: false,
       isFlagged: false,
+      votes: [],
       created: new Date().getTime(),
     }, Question);
     return question;
@@ -173,8 +177,11 @@ function createQuestionTree(question, responses) {
 }
 
 async function getQuestionTrees(courseSessionId) {
+  console.log('getQuestionTrees()');
   try {
     const questions = await findByCourseSessionId(courseSessionId);
+    console.log('courseSessionId', courseSessionId);
+    console.log('questions', questions);
     let questionTrees = [];
     for (let i = 0 ; i < questions.length ; i++) {
       const question = questions[i];
@@ -193,6 +200,15 @@ async function getQuestionTrees(courseSessionId) {
   }
 }
 
+async function getInCourseSession(courseSessionId) {
+  try {
+    return await db.find({ courseSessionId }, Question);
+  } catch (e) {
+    console.error('[ERROR] Question Service getNumberInCourseSession', e);
+    return null;
+  }
+}
+
 export default {
   build,
   dismiss,
@@ -204,4 +220,5 @@ export default {
   findByCourseSessionId,
   createQuestionTree,
   getQuestionTrees,
+  getInCourseSession,
 }

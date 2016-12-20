@@ -38,9 +38,10 @@ async function addToQuestion(id, vote) {
   try {
     const question = await db.findById(id, Question);
     question.votes = !!question.votes
-      ? [...question.votes, vote]
+      ? [...question.votes.filter(v => v.userId !== vote.userId), vote]
       : [vote];
     question.rank = question.votes.length;
+    console.log('question now', question);
     return await db.save(question);
   } catch (e) {
     console.error('[ERROR] Vote Service addToQuestion', e);
@@ -51,10 +52,11 @@ async function addToQuestion(id, vote) {
 async function removeFromQuestion(id, userId) {
   try {
     const question = await db.findById(id, Question);
-    const vote = question.votes.filter(v => v.userId === userId);
+    const vote = question.votes.filter(v => v.userId === userId)[0];
     question.votes = question.votes.filter(v => v.userId !== userId);
     question.rank = question.votes.length;
     await db.save(question);
+    console.log('vote', vote);
     return {
       courseSessionId: question.courseSessionId,
       voteId: vote.id
@@ -67,7 +69,9 @@ async function removeFromQuestion(id, userId) {
 async function addToResponse(id, vote) {
   try {
     const response = await db.findById(id, Response);
-    response.votes = [...response.votes, vote];
+    response.votes = !!response.votes
+      ? [...response.votes.filter(v => v.userId !== vote.userId), vote]
+      : [vote];
     response.rank = response.votes.length;
     return await db.save(response);
   } catch (e) {

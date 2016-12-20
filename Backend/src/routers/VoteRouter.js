@@ -87,9 +87,9 @@ export async function remove(req, res, type) {
   try {
     let result;
     if (type === 'QUESTION') {
-      result = VoteService.removeFromQuestion(id, userId);
+      result = await VoteService.removeFromQuestion(id, userId);
     } else if (type === 'RESPONSE') {
-      result = VoteService.removeFromResponse(id, userId);
+      result = await VoteService.removeFromResponse(id, userId);
     } else {
       console.error(`Invalid type: ${type}`);
       res.error();
@@ -99,12 +99,15 @@ export async function remove(req, res, type) {
       res.error();
       return;
     }
-    const { courseSessionId, voteId } = result;
+    const { courseSessionId , voteId } = result;
+    const channel = Socket.generatePrivateChannel(courseSessionId);
+    console.log('result', result);
     Socket.send(
-      Socket.generatePrivateChannel(courseSessionId),
+      channel,
       Events.REMOVE_VOTE,
       {
-        id: voteId,
+        id,
+        userId,
       }
     );
     res.success();

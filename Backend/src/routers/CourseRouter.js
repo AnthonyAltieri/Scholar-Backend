@@ -8,6 +8,13 @@ var mongoose = require('mongoose');
 
 import SchoolService from '../services/SchoolService';
 import CourseService from '../services/CourseService';
+import QuestionService from '../services/Question';
+import AlertService from '../services/Alert';
+import InstantService from '../services/InstantAssessment';
+import InstantAnswerService from '../services/InstantAssessmentAnswer';
+import ReflectiveAnswer from '../services/ReflectiveAssessmentAnswer';
+import ReflectiveService from '../services/ReflectiveAssessment';
+
 import BankedAssessmentService from '../services/BankedAssessment';
 
 router.post('/create', createCourse);
@@ -18,6 +25,7 @@ router.post('/set/activationStatus', setActivationStatus);
 router.post('/enroll/student', enrollStudent);
 router.post('/add/bankedAssessment', addBankedAssessment);
 router.post('/get/bankedAssessments', getBankedAssessments);
+router.get('/grade/summary', gradesSummary);
 
 async function createCourse(req, res){
     const {
@@ -34,7 +42,6 @@ async function createCourse(req, res){
       dateEnd,
       days,
     } = req.body;
-  console.log('req.body', JSON.stringify(req.body, null, 2));
 
     try {
       const course = await CourseService
@@ -134,7 +141,6 @@ async function setActivationStatus(req, res){
 }
 
 async function enrollStudent(req, res){
-  console.log("Course router enroll student");
   const { addCode, studentId } = req.body;
   try {
     const result = await CourseService.enrollStudent(addCode, studentId);
@@ -175,8 +181,181 @@ async function getBankedAssessments(req, res) {
     })
   } catch (e) {
     console.error('[ERROR] Course Router getBankedAssessments', e);
+    res.error();
   }
 }
 
-module.exports = router;
+async function gradesSummary(req, res) {
+  const {
+    courseId,
+    courseTitle,
+  } = req.query;
+  const contains = (list, x) => !!list.filter(i => i === x)[0];
+  try {
+    const courseSessions = await CourseService.getAllCourseSessions(courseId);
+    console.log('courseId', courseId);
+    const usersInCourse = await CourseService.getUsers(courseId);
+    const students = usersInCourse.filter(u => u.type === 'STUDENT');
+    console.log('students', students);
+    const instructors = usersInCourse.filter(u => u.type === 'INSTRUCTOR');
+    let grades = [];
+    for (let i = 0 ; i < students.length ; i++) {
+      const student = students[i];
+      console.log('==================================')
+      console.log('=============Student==============')
+      console.log(student)
+      console.log('==================================')
+      let numberAlerts = 0;
+      let numberQuestions = 0;
+      let numberCourseSessionsIn = 0;
 
+      // Instant numbers
+      let numberInstantParticipated = 0;
+      let numberInstantCorrect = 0;
+      let totalNumberInstants = 0;
+
+      // Reflective numbers
+      let numberReflectiveParticipated = 0;
+      let agreeWithAnswer = 0;
+      let disagreeWithAnswer = 0;
+      let totalNumberReflectives = 0;
+
+      for (let j = 0 ; j < courseSessions.length ; j++) {
+        const courseSession = courseSessions[j];
+        console.log('==================================')
+        console.log('==========Course Session==========')
+        console.log(courseSession);
+        console.log('==================================')
+        const isInAttendance = contains(
+          courseSession.attendanceIds,
+          student.id
+        );
+        if (isInAttendance) {
+          numberCourseSessionsIn++;
+        }
+        const questionsInCourseSession = await QuestionService
+          .getInCourseSession(courseSession.id);
+        console.log('==================================')
+        console.log('==========Questions==========')
+        console.log(questionsInCourseSession);
+        numberQuestions += questionsInCourseSession
+          .filter(q => q.userId === student.id).length;
+        console.log('numberQuestions', numberQuestions);
+        console.log('==================================')
+        const alertsInCourseSession = await AlertService
+          .getInCourseSession(courseSession.id);
+        if (isInAttendance) {
+          numberAlerts += alertsInCourseSession
+            .filter(a => q.userId === student.id).length;
+        }
+        const instantAssessmentsInCourseSession = await InstantService
+          .getInCourseSession(courseSession.id);
+        for (let m = 0 ;
+            m < instantAssessmentsInCourseSession.length ;
+            m++
+        ) {
+          const instantAssessment = instantAssessmentsInCourseSession[m];
+          console.log('===============================')
+          console.log('instantAssessment')
+          console.log(instantAssessment.id);
+          const correctOption = instantAssessment.correctOption;
+          console.log('correctOption', correctOption);
+          const studentAnswer = await InstantAnswerService
+            .getByUserId(student.id, instantAssessment.id);
+          console.log('studentAnswer', studentAnswer);
+          // If there was no answer the student was correct if they answered
+          const isStudentsAnswerCorrect = correctOption === -1
+            ? (!!studentAnswer)
+            : (correctOption === studentAnswer.optionIndex)
+          if (isStudentsAnswerCorrect) {
+            numberInstantCorrect++;
+            console.log('numberInstantCorrect', numberInstantCorrect);
+          }
+          if (!!studentAnswer) {
+            numberInstantParticipated++;
+            console.log('numberInstantParticipated', numberInstantParticipated)
+          }
+          totalNumberInstants++;
+          console.log('totalNumberInstants', totalNumberInstants);
+        }
+        const reflectiveAssessmentsInCourseSession = await ReflectiveService
+          .getInCourseSession(courseSession.id);
+        for (let m = 0 ;
+          m < reflectiveAssessmentsInCourseSession.length ;
+          m++
+        ) {
+          const reflectiveAssessment = reflectiveAssessmentsInCourseSession[m];
+          const studentAnswer = await ReflectiveAnswerService
+            .getByUserId(student.id);
+          if (!!studentAnswer) {
+            numberReflectiveParticipated++;
+            let numberAgree = 0;
+            let numberDisagree = 0;
+            studentAnswer.reviews.forEach((r) => {
+              if (r.type === 'AGREE') {
+                numberAgree++;
+              } else if (r.type === 'DISAGREE') {
+                numberDisagree++;
+              } else {
+                throw new Error(`Invalid review type ${r.type}`);
+              }
+            });
+            agreeWithAnswer += numberAgree;
+            disagreeWithAnswer += numberDisagree;
+          }
+          totalNumberReflectives++;
+        }
+        const studentName = `${student.firstName} ${student.lastName}`;
+        grades = [
+          ...grades,
+          [
+            studentName,
+            student.institutionId,
+            numberCourseSessionsIn,
+            numberQuestions,
+            numberAlerts,
+            numberInstantParticipated,
+            totalNumberInstants,
+            numberInstantCorrect,
+            numberReflectiveParticipated,
+            totalNumberReflectives,
+            agreeWithAnswer,
+            disagreeWithAnswer,
+          ]
+        ]
+      }
+    }
+    res.setHeader(
+      'Content-disposition',
+      `attachment; filename=${courseTitle}.csv`
+    );
+    res.setHeader('Content-type', 'text/plain');
+    res.charset = 'UTF-8';
+    let csv = 'Student Name,'
+      + 'Student Id,'
+      + 'Course Sessions In Attendance,'
+      + '# Questions Asked,'
+      + '# Alerts Created,'
+      + '# Instant Assessments Participated In,'
+      + '# Instant Assessments In Course,'
+      + '# Instant Asessments Correct,'
+      + '# Reflective Assessments Participated In,'
+      + '# Reflective Assessments In Course,'
+      + '# Students That Agreed With Answer,'
+      + '# Students That Disagreed With Answer\n';
+    grades.forEach((g) => {
+      csv += g.reduce((a, c, i) => (i === (g.length - 1)
+        ? a + `${c}\n`
+        : a + `${c},`
+      ), '')
+    })
+    res.write(csv);
+    res.end();
+  } catch (e) {
+    console.error('[ERROR] Course Router gradesSummary', e);
+    res.error();
+  }
+
+}
+
+module.exports = router;
