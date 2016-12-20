@@ -14,11 +14,21 @@ import CourseSessionService from '../services/CourseSession'
 import Socket from '../services/Socket'
 import Events from '../services/Events'
 
-const HELP_TEXT = "Login- email:[EMAIL]&password:[PASSWORD]\n" +
-                  "Attendance- code:[CODE]\n" +
-                  "Ask a question- question:[QUESTION]\n"+
-                  "Answer Assessment- answer:[ANSWER]\n"+
-                  "Eg. code:17AB";
+const HELP_TEXT_1 = "Usage  \n"
+  +"———————— \n"
+  +"[Attendance] text this: \n"
+  +"code : (Code) \n"
+
+  +"where (Code) is the attendance code your professor gives you \n"
+  + "Example: code : ABCD \n";
+
+const HELP_TEXT_2 = HELP_TEXT_1
++"———————— \n"
++"[Ask a question] text this:\n"
++"q: (your question) \n"
+
++"notice the space in between the : and your question \n"
++"Example:what is life?";
 
 
 //Converts the text message into a serialized JSON object
@@ -31,13 +41,12 @@ function parseMessage(content) {
     parts.forEach( part => {
       let segments = part.split(":");
       console.log(segments[0] + " : " + segments[1]);
-      returnObj[segments[0].trim().toLowerCase()] = segments[1];
+      returnObj[segments[0].trim().toLowerCase()] = segments[1].trim();
     });
     return returnObj;
   }
   catch(e) {
    console.error("[ERROR] TextMessageService > parseMessage : " + e);
-    throw e;
   }
 }
 
@@ -129,7 +138,7 @@ async function generateResponse(serialized, phone) {
 
 export default{
   parseMessage,
-  HELP_TEXT,
+  HELP_TEXT_2,
   generateResponse,
   parsePhone
 }

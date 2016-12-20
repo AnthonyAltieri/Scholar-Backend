@@ -43,7 +43,7 @@ async function textJoinAttendance(req, res)
 
 
     var twiml = new twilio.TwimlResponse();
-    twiml.message(payload.content ? payload.content : TextMessageService.HELP_TEXT);
+    twiml.message(payload.content ? payload.content : TextMessageService.HELP_TEXT_2);
     res.writeHead(200, {'Content-Type': 'text/xml'});
     res.end(twiml.toString());
   }
