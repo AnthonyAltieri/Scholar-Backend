@@ -5,9 +5,12 @@ import mongoose from 'mongoose';
 import UserService from './UserService';
 
 import CourseSchema from '../schemas/Course';
-const Course = mongoose.model('Courses', CourseSchema);
 import UserSchema from '../schemas/User';
+import CourseSessionSchema from '../schemas/CourseSession';
+const CourseSession = mongoose.model('coursesessions', CourseSessionSchema);
+const Course = mongoose.model('Courses', CourseSchema);
 const User = mongoose.model('users', UserSchema);
+
 
 import db from '../db';
 import ShortIdUtil from '../utilities/ShortIdUtil'
@@ -89,6 +92,7 @@ function mapToSend(course) {
       timeStart: course.timeStart,
       timeEnd: course.timeEnd,
       days: course.days,
+      term: course.term,
     };
 }
 
@@ -147,7 +151,7 @@ async function enrollStudent(addCode, studentId) {
     if (!course) {
       return { invalidAddCode: true };
     }
-    if(course.studentIds.includes(studentId)){
+    if(!!course.studentIds.filter(s => s === studentId)[0]){
       console.error("[ERROR] in CourseService > enrollStudent: Student Already Enrolled in Course");
       return { studentAlreadyEnrolled: true }
     }
@@ -247,13 +251,20 @@ async function getAllCourseSessions(courseId) {
   }
 }
 
-async function getUsers(courseId) {
-  try {
-    return await db.find({ courses: courseId }, User);
-  } catch (e) {
-    console.error('[ERROR] Course Service getUsers', e);
-    return null;
-  }
+function getUsers(courseId) {
+  return new Promise((resolve, reject) => {
+    User.find(
+      { courses: { $elemMatch: { $eq: courseId } } },
+      (err, found) => {
+        console.log('found', found);
+        if (!!err) {
+          console.error('[ERROR] Course Service getUsers', e);
+          reject(null);
+        }
+        resolve(found);
+      }
+    )
+  });
 };
 
 const CourseService = {
@@ -271,6 +282,7 @@ const CourseService = {
   setActiveCourseSessionId,
   addBankedAssessment,
   getAllCourseSessions,
+  getUsers,
 };
 
 export default  CourseService;

@@ -85,7 +85,7 @@ async function endorseAdd(req, res) {
       Events.ADD_ENDORSE,
       { id }
     );
-    res.end();
+    res.send({ id });
   } catch (e) {
     res.error();
   }
@@ -104,10 +104,10 @@ async function endorseRemove(req, res) {
     }
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
-      Events.ADD_ENDORSE,
+      Events.REMOVE_ENDORSE,
       { id }
     );
-    res.end();
+    res.send({ id });
   } catch (e) {
     res.error();
   }
@@ -150,6 +150,7 @@ async function flagRemove(req, res) {
 }
 
 async function getCourseSession(req, res) {
+  console.log('getCourseSession()');
   const { courseSessionId } = req.body;
   try {
     const questions = await QuestionService

@@ -115,9 +115,21 @@ async function getById(instantAssessmentId) {
   }
 }
 
+async function getInCourseSession(courseSessionId) {
+  try {
+    return await db.find({ courseSessionId }, InstantAssessment);
+  } catch (e) {
+    console.error(
+      '[ERROR] InstantAssessment Service getNumberInCourseSession',
+      e
+    );
+  }
+}
+
 export default {
   create,
   deactivate,
   answer,
   getById,
+  getInCourseSession,
 }

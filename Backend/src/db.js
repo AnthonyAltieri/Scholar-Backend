@@ -16,7 +16,7 @@ const db = {
   save,
   remove,
   generate,
-  find
+  find,
 };
 
 export default db;

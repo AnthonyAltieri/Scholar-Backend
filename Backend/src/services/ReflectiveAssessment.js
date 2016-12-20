@@ -190,6 +190,15 @@ async function createVoteMatrix(assessmentId, numberExpectedReviews) {
   }
 }
 
+async function getInCourseSession(courseSessionId) {
+  try {
+    return await db.find({ courseSessionId }, ReflectiveAssessment);
+  } catch (e) {
+    console.error('[ERROR] Reflective Service getInCourseSession', e);
+    return null;
+  }
+}
+
 export default {
   create,
   deactivate,
@@ -197,4 +206,5 @@ export default {
   review,
   answer,
   startReview,
+  getInCourseSession,
 }

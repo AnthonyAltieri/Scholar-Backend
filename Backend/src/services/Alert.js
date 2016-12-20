@@ -3,6 +3,8 @@
  */
 import mongoose from 'mongoose';
 import AlertSchema from '../schemas/Alert';
+import CourseSessionSchema from '../schemas/CourseSession';
+const CourseSession = mongoose.model('coursesessions', CourseSessionSchema);
 const Alert = mongoose.model('alerts', AlertSchema);
 import db from '../db';
 import DateUtility from '../utilities/DateUtility'
@@ -114,12 +116,22 @@ async function getActiveAlerts(courseSessionId, alertWindow = 60) {
   }
 }
 
+async function getInCourseSession(courseSessionId) {
+  try {
+    return await db.find({ courseSessionId }, CourseSession);
+  } catch (e) {
+    console.error('[ERROR] Alert Service getNumberInCourseSession', e);
+    return null;
+  }
+}
+
 const AlertService = {
   build,
   mapToSend,
   findByCourseSessionId,
   attemptAddAlert,
-  getActiveAlerts
+  getActiveAlerts,
+  getInCourseSession,
 };
 
 export default AlertService;
