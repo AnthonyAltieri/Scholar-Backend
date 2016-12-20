@@ -20,6 +20,8 @@ const User = new Schema({
   passwordResetCode: String,
   referralCode: String,
   sessionsInAttendance: [String],
+  textBoundSession: String,
+  textBoundCourse: String,
   type: String //STUDENT | INSTRUCTOR | ADMIN | STUDENT_REP | TEACHER_ASSISTANT
 
 });

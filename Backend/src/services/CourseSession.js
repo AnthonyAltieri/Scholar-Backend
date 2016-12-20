@@ -420,5 +420,6 @@ export default {
   getActiveAssessment,
   createAttendanceCode,
   destroyAttendanceCode,
-  studentJoinAttendance
+  studentJoinAttendance,
+  findByAttendanceCode
 }

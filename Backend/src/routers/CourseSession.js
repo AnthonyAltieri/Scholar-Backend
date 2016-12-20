@@ -156,7 +156,7 @@ async function endAttendance(req, res) {
   }
 }
 
-async function joinAttendance(req, res) {
+export async function joinAttendance(req, res) {
   try {
     console.log("JOIN ATTENDANCE");
     const { courseSessionId, code, userId } = req.body;

@@ -161,8 +161,17 @@ async function buildUser(
 
 }
 
-async function findById(id){
+async function findById(id) {
   return await db.findById(id, User)
+}
+
+async function findByPhone(phone) {
+  try {
+    return await db.findOne({phone : phone}, User);
+  }
+  catch (e) {
+    console.error("[ERROR] in UserService > findByPhone : " + e);
+  }
 }
 
 
@@ -174,7 +183,42 @@ const UserService = {
   attemptSignUp,
   validateModel,
   mapToSend,
+  attemptLogin,
+  findByPhone
 };
+
+//TODO: currently this is only used by the textRouter -
+//TODO: Fix login endpoint in User Router to use this
+async function attemptLogin(email, password) {
+ try {
+   let user = await findByEmail(email);
+   if(!!user) {
+     user = await db.findOne({email: email, password: PasswordUtil.encryptPassword(password, email)}, User);
+     if(!!user){
+       console.log("found user with pass");
+       return mapToSend(user);
+     }
+     else {
+       console.log("Incorrect PWD");
+       return ({error : "incorrect password"})
+     }
+   } else {
+     return ({error : "no account found for email"});
+   }
+ }
+  catch (e) {
+    console.error("[ERROR] UserService > attemptLogin : " + e)
+  }
+}
+
+async function findByEmail(email) {
+  try {
+    return await db.findOne({email : email}, User);
+  } catch (e) {
+    console.error("[ERROR] UserService > findByEmail : " + e)
+  }
+
+}
 
 
 

@@ -171,7 +171,8 @@ app.use('/api/alert', AlertRouter);
 import VoteRouter from './routers/VoteRouter';
 app.use('/api/vote', VoteRouter);
 
-
+import TextMessageRouter from './routers/TextMessage';
+app.use('/api/text', TextMessageRouter);
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';
 // app.use('/api/test', TestRouter);
