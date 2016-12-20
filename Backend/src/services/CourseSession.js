@@ -374,6 +374,7 @@ function isStudentInAttendance(courseSession, userId) {
 
 async function studentJoinAttendance(courseSessionId, code, userId) {
   try {
+    console.log("Student Join Attendance");
     let courseSession = await db.findById(courseSessionId, CourseSession);
 
     if(!courseSession) {
@@ -384,7 +385,7 @@ async function studentJoinAttendance(courseSessionId, code, userId) {
       console.error(console.error('[ERROR] CourseSession Service > studentJoinAttendance : Incorrect Code ', code));
       console.info('[INFO] CourseSession Service > studentJoinAttendance : Correct Code ', courseSession.attendanceCode);
       if(!courseSession.attendanceCode){
-        return ({isAttendanceOpen : false})
+        return ({isAttendanceClosed : true})
       }
       return ({invalidCode : true});
     }
@@ -392,10 +393,10 @@ async function studentJoinAttendance(courseSessionId, code, userId) {
     if(!isStudentInAttendance(courseSession, userId)){
       courseSession.attendanceIds = [...courseSession.attendanceIds, userId];
       await db.save(courseSession);
-      return null;
+      return {attendance : courseSession.attendanceIds.length};
     }
     else{
-      return null;
+      return ({studentAlreadyInAttendance : true});
     }
   } catch (e) {
     console.error('[ERROR] CourseSession Service > studentJoinAttendance : ', e);
@@ -419,5 +420,6 @@ export default {
   getActiveAssessment,
   createAttendanceCode,
   destroyAttendanceCode,
-  studentJoinAttendance
+  studentJoinAttendance,
+  findByAttendanceCode
 }
