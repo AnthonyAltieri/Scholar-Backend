@@ -374,6 +374,7 @@ function isStudentInAttendance(courseSession, userId) {
 
 async function studentJoinAttendance(courseSessionId, code, userId) {
   try {
+    console.log("Student Join Attendance");
     let courseSession = await db.findById(courseSessionId, CourseSession);
 
     if(!courseSession) {

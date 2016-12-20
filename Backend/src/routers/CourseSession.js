@@ -158,6 +158,7 @@ async function endAttendance(req, res) {
 
 async function joinAttendance(req, res) {
   try {
+    console.log("JOIN ATTENDANCE");
     const { courseSessionId, code, userId } = req.body;
     const payload = await CourseSessionService.studentJoinAttendance(courseSessionId, code, userId);
 
@@ -170,7 +171,7 @@ async function joinAttendance(req, res) {
         { attendance: payload.attendance }
       );
     }
-    else{
+    else {
       res.send(payload);
     }
   }
