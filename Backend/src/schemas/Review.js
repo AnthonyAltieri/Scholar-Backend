@@ -13,3 +13,5 @@ const Review = new Schema({
   type: String, //SIMILAR/DISSIMILAR/GOOD/BAD
   answerId: String,
 });
+
+export default Review;

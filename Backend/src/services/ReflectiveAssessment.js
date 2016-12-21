@@ -100,7 +100,9 @@ async function review(
       ...answer.reviews,
       review,
     ];
+    await db.save(answer);
     await db.save(review);
+
     return answer;
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Service review', e);
