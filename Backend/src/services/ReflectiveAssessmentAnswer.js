@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import db from '../db';
 import ReflectiveAnswerSchema
   from '../schemas/ReflectiveAssessmentAnswer';
 

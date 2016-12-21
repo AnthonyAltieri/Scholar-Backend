@@ -51,7 +51,7 @@ async function deactivate(courseSessionId) {
 
 async function getById(assessmentId) {
   try {
-    return await db.findById(assessmentId, CourseSession);
+    return await db.findById(assessmentId, ReflectiveAssessment);
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Service getById', e);
     return null;
