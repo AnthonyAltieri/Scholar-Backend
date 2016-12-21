@@ -21,7 +21,7 @@ Socket.init();
 var PORT = null;
 switch (SERVER_ENV.ENV) {
   case 'DEVELOPMENT':
-    PORT = 8000;
+    PORT = 7000;
     break;
 
   case 'PRODUCTION':
@@ -89,11 +89,15 @@ app.use(session({
   store: store
 }));
 
-app.use('/static', express.static(path.join(__dirname, 'public')));
-console.log(path.join(__dirname, 'public'));
+app.use('/static', express.static(path.join(__dirname, '../../../ReactReduxSCHOLAR/dist')));
 
 app.post('/schools', async function(req, res){
   res.send((await SchoolService.findAll()).map(s => s.name));
+});
+
+app.get('/*', (req, res) => {
+  console.log('hi')
+  res.sendFile(path.join(__dirname, '../../../ReactReduxSCHOLAR/index.html'));
 });
 
 // app.get('/*', function(req, res) {

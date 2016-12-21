@@ -31,7 +31,8 @@ async function create(
 
 async function getAllInBank(bankId) {
   try {
-    return await db.find({ bankId }, BankedAssessment);
+    return (await db.find({ bankId }, BankedAssessment))
+      .filter(b => !b.removed);
   } catch (e) {
     console.error('[ERROR] BankedAssessment Service getAllInBank', e);
     return null;
@@ -46,6 +47,7 @@ function mapToSend(bankedAssessment) {
     options: bankedAssessment.options,
     created: bankedAssessment.created,
     courseId: bankedAssessment.courseId,
+    inQueue: bankedAssessment.inQueue,
   }
 }
 
@@ -124,7 +126,7 @@ async function editTags(id, tags) {
 async function remove(id) {
   try {
     const bankedAssessment = await findById(id);
-    bankedAssessment.bankId = null;
+    bankedAssessment.removed = true;
     return await db.save(bankedAssessment);
   } catch (e) {
     console.error('[ERROR] BankedAssessment Service remove', e);
