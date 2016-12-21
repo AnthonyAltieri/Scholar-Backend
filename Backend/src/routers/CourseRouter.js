@@ -308,7 +308,7 @@ async function gradesSummary(req, res) {
         const studentName = `${student.firstName} ${student.lastName}`;
         const grade = grades.filter(g => g[0] === studentName)[0];
         grades = !!grade
-          ? [
+          ? ([
             ...grades,
             grade.reduce((a, c, i) => {
               if (i === 0 || i === 1 || i === 2) {
@@ -317,25 +317,25 @@ async function gradesSummary(req, res) {
                 return [...a, grade[i] + c]
               }
             }, [])
-          ]
-          ? [
-          ...grades,
-          [
-            studentName,
-            student.email,
-            student.institutionId,
-            numberCourseSessionsIn,
-            numberQuestions,
-            numberAlerts,
-            numberInstantParticipated,
-            totalNumberInstants,
-            numberInstantCorrect,
-            numberReflectiveParticipated,
-            totalNumberReflectives,
-            agreeWithAnswer,
-            disagreeWithAnswer,
-          ]
-        ]
+          ])
+          ? ([
+            ...grades,
+            [
+              studentName,
+              student.email,
+              student.institutionId,
+              numberCourseSessionsIn,
+              numberQuestions,
+              numberAlerts,
+              numberInstantParticipated,
+              totalNumberInstants,
+              numberInstantCorrect,
+              numberReflectiveParticipated,
+              totalNumberReflectives,
+              agreeWithAnswer,
+              disagreeWithAnswer,
+            ]
+          ]);
       }
     }
     res.setHeader(
