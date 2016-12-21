@@ -25,7 +25,7 @@ async function getByUserId(req, res) {
     let assessmentBank = await AssessmentBankService
       .getBankIdByUserId(userId);
     if (!assessmentBank) {
-      assessmentBank await AssessmentBankService.create(userId);
+      assessmentBank = await AssessmentBankService.create(userId);
     }
     res.send({ assessmentBankId: assessmentBank.id });
   } catch (e) {
