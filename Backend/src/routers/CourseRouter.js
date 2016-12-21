@@ -306,10 +306,14 @@ async function gradesSummary(req, res) {
           totalNumberReflectives++;
         }
         const studentName = `${student.firstName} ${student.lastName}`;
-        const grade = grades.filter(g => g[0] === studentName)[0];
+        const grade = grades.filter(g => {
+		console.log('g', g);
+		console.log('studentName', studentName);
+		return g[0] === studentName
+	})[0];
         grades = !!grade
           ? ([
-            ...grades,
+            ...grades.filter(g => g[0] !== studentName),
             grade.reduce((a, c, i) => {
               if (i === 0 || i === 1 || i === 2) {
                 return [...a, c];

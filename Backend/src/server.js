@@ -132,8 +132,8 @@ if (!!isOnRemoteServer) {
 if (!!isOnRemoteServer) {
   const server = https.createServer(
     {
-      key: fs.readFileSync('./tls/key.pem'),
-      cert: fs.readFileSync('./tls/cert.pem'),
+      key: fs.readFileSync('/home/ec2-user/tls/key.pem'),
+      cert: fs.readFileSync('/home/ec2-user/tls/cert.pem'),
     },
     app
   );
