@@ -22,8 +22,11 @@ async function create(req, res) {
 async function getByUserId(req, res) {
   const { userId } = req.body;
   try {
-    const assessmentBank = await AssessmentBankService
+    let assessmentBank = await AssessmentBankService
       .getBankIdByUserId(userId);
+    if (!assessmentBank) {
+      assessmentBank await AssessmentBankService.create(userId);
+    }
     res.send({ assessmentBankId: assessmentBank.id });
   } catch (e) {
     console.error('[ERROR] AssessmentBank Router getByUserId', e);
