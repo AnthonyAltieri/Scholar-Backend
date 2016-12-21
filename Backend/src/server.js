@@ -68,7 +68,7 @@ if (SERVER_ENV === 'PRODUCTION') {
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', 'http://scholarapp.xyz');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, *');
   next();
@@ -89,15 +89,14 @@ app.use(session({
   store: store
 }));
 
-app.use('/static', express.static(path.join(__dirname, '../../../ReactReduxSCHOLAR/dist')));
+app.use('/static', express.static(path.join(__dirname, '../../../Frontend/dist')));
 
 app.post('/schools', async function(req, res){
   res.send((await SchoolService.findAll()).map(s => s.name));
 });
 
 app.get('/*', (req, res) => {
-  console.log('hi')
-  res.sendFile(path.join(__dirname, '../../../ReactReduxSCHOLAR/index.html'));
+  res.sendFile(path.join(__dirname, '../../../Frontend/index.html'));
 });
 
 // app.get('/*', function(req, res) {

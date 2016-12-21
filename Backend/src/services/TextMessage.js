@@ -25,7 +25,7 @@ const HELP_TEXT_1 = "Usage  \n"
 const HELP_TEXT_2 = HELP_TEXT_1
 +"———————— \n"
 +"[Ask a question] text this:\n"
-+"q: (your question) \n"
++"question: (your question) \n"
 
 +"notice the space in between the : and your question \n"
 +"Example:what is life?";
