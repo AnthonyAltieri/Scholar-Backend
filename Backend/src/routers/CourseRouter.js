@@ -310,6 +310,7 @@ async function gradesSummary(req, res) {
           ...grades,
           [
             studentName,
+            student.email,
             student.institutionId,
             numberCourseSessionsIn,
             numberQuestions,
@@ -333,6 +334,7 @@ async function gradesSummary(req, res) {
     res.charset = 'UTF-8';
     let csv = 'Student Name,'
       + 'Student Id,'
+      + 'Student Email,',
       + 'Course Sessions In Attendance,'
       + '# Questions Asked,'
       + '# Alerts Created,'

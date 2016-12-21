@@ -91,10 +91,6 @@ app.post('/schools', async function(req, res){
   res.send((await SchoolService.findAll()).map(s => s.name));
 });
 
-app.get('/*', (req, res) => {
-  console.log('hi')
-  res.sendFile(path.join(__dirname, '../../../ReactReduxSCHOLAR/index.html'));
-});
 
 // app.get('/*', function(req, res) {
 //
@@ -187,6 +183,11 @@ app.use('/api/vote', VoteRouter);
 
 import TextMessageRouter from './routers/TextMessage';
 app.use('/api/text', TextMessageRouter);
+
+app.get('/*', (req, res) => {
+  console.log('hi')
+  res.sendFile(path.join(__dirname, '../../../ReactReduxSCHOLAR/index.html'));
+});
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';
 // app.use('/api/test', TestRouter);
