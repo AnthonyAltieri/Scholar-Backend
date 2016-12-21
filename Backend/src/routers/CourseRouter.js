@@ -201,10 +201,6 @@ async function gradesSummary(req, res) {
     let grades = [];
     for (let i = 0 ; i < students.length ; i++) {
       const student = students[i];
-      console.log('==================================')
-      console.log('=============Student==============')
-      console.log(student)
-      console.log('==================================')
       let numberAlerts = 0;
       let numberQuestions = 0;
       let numberCourseSessionsIn = 0;
@@ -222,10 +218,6 @@ async function gradesSummary(req, res) {
 
       for (let j = 0 ; j < courseSessions.length ; j++) {
         const courseSession = courseSessions[j];
-        console.log('==================================')
-        console.log('==========Course Session==========')
-        console.log(courseSession);
-        console.log('==================================')
         const isInAttendance = contains(
           courseSession.attendanceIds,
           student.id
@@ -235,13 +227,8 @@ async function gradesSummary(req, res) {
         }
         const questionsInCourseSession = await QuestionService
           .getInCourseSession(courseSession.id);
-        console.log('==================================')
-        console.log('==========Questions==========')
-        console.log(questionsInCourseSession);
         numberQuestions += questionsInCourseSession
           .filter(q => q.userId === student.id).length;
-        console.log('numberQuestions', numberQuestions);
-        console.log('==================================')
         const alertsInCourseSession = await AlertService
           .getInCourseSession(courseSession.id);
         if (isInAttendance) {
@@ -255,28 +242,20 @@ async function gradesSummary(req, res) {
             m++
         ) {
           const instantAssessment = instantAssessmentsInCourseSession[m];
-          console.log('===============================')
-          console.log('instantAssessment')
-          console.log(instantAssessment.id);
           const correctOption = instantAssessment.correctOption;
-          console.log('correctOption', correctOption);
           const studentAnswer = await InstantAnswerService
             .getByUserId(student.id, instantAssessment.id);
-          console.log('studentAnswer', studentAnswer);
           // If there was no answer the student was correct if they answered
           const isStudentsAnswerCorrect = correctOption === -1
             ? (!!studentAnswer)
             : (correctOption === studentAnswer.optionIndex)
           if (isStudentsAnswerCorrect) {
             numberInstantCorrect++;
-            console.log('numberInstantCorrect', numberInstantCorrect);
           }
           if (!!studentAnswer) {
             numberInstantParticipated++;
-            console.log('numberInstantParticipated', numberInstantParticipated)
           }
           totalNumberInstants++;
-          console.log('totalNumberInstants', totalNumberInstants);
         }
         const reflectiveAssessmentsInCourseSession = await ReflectiveService
           .getInCourseSession(courseSession.id);
@@ -306,24 +285,12 @@ async function gradesSummary(req, res) {
           totalNumberReflectives++;
         }
         const studentName = `${student.firstName} ${student.lastName}`;
-        const grade = grades.filter(g => g[0] === studentName)[0];
-        grades = !!grade
-          ? ([
-            ...grades,
-            grade.reduce((a, c, i) => {
-              if (i === 0 || i === 1 || i === 2) {
-                return [...a, c];
-              } else {
-                return [...a, grade[i] + c]
-              }
-            }, [])
-          ])
-          : ([
+        grades = ([
             ...grades,
             [
               studentName,
-              student.email,
               student.institutionId,
+              student.email,
               numberCourseSessionsIn,
               numberQuestions,
               numberAlerts,
