@@ -284,6 +284,7 @@ async function gradesSummary(req, res) {
           }
           totalNumberReflectives++;
         }
+      }
         const studentName = `${student.firstName} ${student.lastName}`;
         grades = ([
             ...grades,
@@ -303,7 +304,6 @@ async function gradesSummary(req, res) {
               disagreeWithAnswer,
             ]
           ])
-      }
     }
     res.setHeader(
       'Content-disposition',
