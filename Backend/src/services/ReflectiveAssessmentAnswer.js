@@ -16,3 +16,20 @@ async function getByUserId(userId) {
     return null;
   }
 }
+
+async function getByAssessmentId(assessmentId) {
+  try {
+    return await db.find({ assessmentId }, ReflectiveAnswer);
+  } catch (e) {
+    console.error(
+      '[ERROR] ReflectiveAssessmentAnswer Service getByAssessmentId',
+      e
+    )
+  }
+
+}
+
+export default {
+  getByUserId,
+  getByAssessmentId,
+}

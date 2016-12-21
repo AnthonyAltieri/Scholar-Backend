@@ -2,6 +2,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import ReflectiveAssessmentService from '../services/ReflectiveAssessment';
+import ReflectiveAnswerService from '../services/ReflectiveAssessmentAnswer';
 import Socket from '../services/Socket';
 import Events from '../services/Events';
 
@@ -54,18 +55,20 @@ async function create(req, res) {
 async function deactivate(req, res) {
   const { courseSessionId } = req.body
   try {
-    const result = await ReflectiveAssessmentService
+    const assessmentId = await ReflectiveAssessmentService
       .deactivate(courseSessionId)
-    if (!result) {
+    if (!assessmentId) {
       res.error();
       return;
     }
+    const answers = await ReflectiveAnswerService
+      .getByAssessmentId(assessmentId);
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
       Events.ASSESSMENT_DEACTIVATED,
       {}
     )
-    res.success();
+    res.send({ answers });
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Router deactivate', e);
     res.error();
@@ -142,10 +145,12 @@ async function startReview(req, res) {
   try {
     const reflectiveAssessment = await ReflectiveAssessmentService
       .startReview(assessmentId);
+    const answers = await ReflectiveAnswerService
+      .getByAssessmentId(assessmentId);
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
       Events.REFLECTIVE_ASSESSMENT_START_REVIEW,
-      {}
+      { toReview: answers }
     );
     res.success();
   } catch (e) {
