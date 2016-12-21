@@ -175,8 +175,13 @@ async function instructorEndSession(courseId, instructorId){
     if (!course) {
       return null;
     }
+    const oldActiveCourseSession = course.activeCourseSessionId;
     course.activeCourseSessionId = null;
-    return await db.save(course);
+    const result = await db.save(course);
+    if (!result) {
+      return null;
+    }
+    return oldActiveCourseSession;
   } catch (e) {
     console.error('[ERROR] CourseSession Service instructorEndSession', e);
     return null;
