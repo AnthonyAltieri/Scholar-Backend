@@ -95,9 +95,23 @@ app.post('/schools', async function(req, res){
   res.send((await SchoolService.findAll()).map(s => s.name));
 });
 
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../../Frontend/index.html'));
+app.get("/pusher/auth", function(req, res) {
+  var query = req.query;
+  var socketId = query.socket_id;
+  var channel = query.channel_name;
+  var callback = query.callback;
+
+  var auth = JSON.stringify(Socket.authenticate(socketId, channel));
+  var cb = callback.replace(/\"/g,"") + "(" + auth + ");";
+
+  res.set({
+    "Content-Type": "application/javascript"
+  });
+
+  res.send(cb);
 });
+
+
 
 // app.get('/*', function(req, res) {
 //
@@ -115,21 +129,6 @@ app.get('/*', (req, res) => {
 //   res.sendFile(path.join(__dirname, 'index.html'));
 // });
 
-app.get("/pusher/auth", function(req, res) {
-  var query = req.query;
-  var socketId = query.socket_id;
-  var channel = query.channel_name;
-  var callback = query.callback;
-
-  var auth = JSON.stringify(Socket.authenticate(socketId, channel));
-  var cb = callback.replace(/\"/g,"") + "(" + auth + ");";
-
-  res.set({
-    "Content-Type": "application/javascript"
-  });
-
-  res.send(cb);
-});
 
 app.listen(PORT, async function() {
   console.log('Starting server, listening on port %s', PORT);
@@ -176,6 +175,10 @@ app.use('/api/vote', VoteRouter);
 
 import TextMessageRouter from './routers/TextMessage';
 app.use('/api/text', TextMessageRouter);
+
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../../Frontend/index.html'));
+});
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';
 // app.use('/api/test', TestRouter);
