@@ -318,7 +318,7 @@ async function gradesSummary(req, res) {
               }
             }, [])
           ])
-          ? ([
+          : ([
             ...grades,
             [
               studentName,
@@ -335,7 +335,7 @@ async function gradesSummary(req, res) {
               agreeWithAnswer,
               disagreeWithAnswer,
             ]
-          ]);
+          ])
       }
     }
     res.setHeader(
