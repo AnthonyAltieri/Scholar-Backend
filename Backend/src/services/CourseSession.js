@@ -394,7 +394,8 @@ async function requestNewCourseSession(courseId, instructorId) {
       lhs.getMonth() === rhs.getMonth() &&
       lhs.getDate() === rhs.getDate()
     );
-    if (isSameDateAs(now, mostRecentCourseSession.created)) {
+    if (!!mostRecentCourseSession &&
+        isSameDateAs(now, mostRecentCourseSession.created)) {
       return mostRecentCourseSession;
     } else {
       return await build(courseId, instructorId);
