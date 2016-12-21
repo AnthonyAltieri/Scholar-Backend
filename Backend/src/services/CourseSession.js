@@ -237,9 +237,11 @@ async function save(courseSession) {
 async function setActiveAssessment(courseSessionId, assessmentId, type) {
   try {
     const courseSession = await getById(courseSessionId);
+    const oldAssessmentId = courseSession.activeAssessmentId;
     courseSession.activeAssessmentId = assessmentId;
     courseSession.activeAssessmentType = type;
-    return await save(courseSession);
+    await save(courseSession);
+    return oldAssessmentId;
   } catch (e) {
     console.error('[ERROR] CourseSession Service setActiveAssessment', e);
     return null;

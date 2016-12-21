@@ -42,8 +42,7 @@ async function create(
 
 async function deactivate(courseSessionId) {
   try {
-    await CourseSessionService.removeActiveAssessment(courseSessionId);
-    return courseSessionId;
+    return await CourseSessionService.removeActiveAssessment(courseSessionId);
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Service deactivate', e);
     return null;
