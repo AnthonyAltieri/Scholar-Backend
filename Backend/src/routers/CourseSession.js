@@ -73,7 +73,7 @@ async function instructorEndSession(req, res){
     const { courseId, instructorId } = req.body;
     const courseSessionId = await CourseSessionService
       .instructorEndSession(courseId, instructorId);
-    if (!course) {
+    if (!courseSessionId) {
       res.error();
     }
     Socket.send(
