@@ -21,6 +21,7 @@ router.post('/attendance/create/code', createAttendanceCode);
 router.post('/attendance/end', endAttendance);
 router.post('/attendance/join', joinAttendance);
 router.post('/numberInCourseSession/get', numberInCourseSessionGet);
+router.post('/attendance/get', getNumberInAttendance);
 
 async function createCourseSession(req, res){
   const {
@@ -187,7 +188,24 @@ export async function joinAttendance(req, res) {
     res.error();
   }
 }
+async function getNumberInAttendance(req, res) {
+  try {
+    const { courseSessionId } = req.body;
+    const courseSession = await CourseSessionService.getById(courseSessionId);
+    if(!!courseSession) {
+      res.send({ attendance : courseSession.attendanceIds.length})
+    }
+    else {
+      console.error("[ERROR] CourseSession Router > getNumberInAttendance : CourseSession Not Found");
+      res.error();
+    }
 
+  }
+  catch (e) {
+    console.error("[ERROR] CourseSession Router > getNumberInAttendance : " + e);
+    res.error();
+  }
+}
 async function numberInCourseSessionGet(req, res) {
   const { courseSessionId } = req.body;
   try {
