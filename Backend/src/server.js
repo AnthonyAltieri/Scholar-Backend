@@ -5,7 +5,7 @@ import Socket from './services/Socket';
 import fs from 'fs';
 import https from 'https';
 
-const isOnRemoteServer = fs.existsSync(path.join(__dirname, '../../../tls'));
+const isOnRemoteServer = fs.existsSync('/home/ec2-user/tls'));
 
 // var express = require('express');
 import express from 'express';
