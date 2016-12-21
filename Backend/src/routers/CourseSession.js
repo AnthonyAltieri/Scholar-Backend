@@ -20,6 +20,7 @@ router.post('/get/activeAssessment', getActiveAssessment);
 router.post('/attendance/create/code', createAttendanceCode);
 router.post('/attendance/end', endAttendance);
 router.post('/attendance/join', joinAttendance);
+router.post('/numberInCourseSession/get', numberInCourseSessionGet);
 
 async function createCourseSession(req, res){
   const {
@@ -56,8 +57,14 @@ async function studentJoinSession(req, res){
     const {courseId, studentId} = req.body;
     const courseSession = await CourseSessionService
       .studentJoinActiveSession(courseId, studentId);
+    Socket.send(
+      Socket.generatePrivateChannel(courseSession.id),
+      Events.STUDENT_JOINED_COURSESESSION,
+      { numberInCourseSession: courseSession.studentIds.length }
+    );
     res.send(await CourseSessionService.mapToSend(courseSession));
-  } catch(err) {
+  } catch(e) {
+    console.error('[ERROR] CourseSession Router studentJoinSession', e);
     res.error();
   }
 }
@@ -180,4 +187,24 @@ export async function joinAttendance(req, res) {
     res.error();
   }
 }
+
+async function numberInCourseSessionGet(req, res) {
+  const { courseSessionId } = req.body;
+  try {
+    const courseSession = await CourseSessionService
+      .getById(courseSessionId);
+      console.log('courseSession', courseSession);
+    res.send({
+      numberInCourseSession: courseSession.studentIds.length,
+    })
+  } catch (e) {
+    console.error(
+      '[ERROR] CourseSession Router numberInCourseSessionGet',
+      e
+    );
+    res.error();
+  }
+}
+
+
 export default router;

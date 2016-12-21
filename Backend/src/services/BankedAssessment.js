@@ -132,6 +132,28 @@ async function remove(id) {
   }
 }
 
+async function moveToQueue(id) {
+  try {
+    const bankedAssessment = await findById(id);
+    bankedAssessment.inQueue = true;
+    return await db.save(bankedAssessment);
+  } catch (e) {
+    console.error('[ERROR] BankedAssessment Service moveToQueue', e);
+    return null;
+  }
+}
+
+async function moveToBank(id) {
+  try {
+    const bankedAssessment = await findById(id);
+    bankedAssessment.inQueue = false;
+    return await db.save(bankedAssessment);
+  } catch (e) {
+    console.error('[ERROR] BankedAssessment Service moveToBank', e);
+    return null;
+  }
+}
+
 
 export default {
   create,
@@ -143,4 +165,6 @@ export default {
   getById,
   editTags,
   remove,
+  moveToQueue,
+  moveToBank,
 };

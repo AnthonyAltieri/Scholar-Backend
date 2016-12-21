@@ -29,19 +29,14 @@ async function getThreshold(id) {
 //Maps the courseSession object into a consumable object for the client
 //We shall populate the courseSession with all required entities here
 async function mapToSend(courseSession){
-  console.log("Map to send course session");
   try {
     if(!!courseSession && typeof courseSession !== 'undefined'){
-      console.log(JSON.stringify(courseSession, null, 2));
-      console.log("attendance");
       const attendance = !!courseSession.studentIds
         ? courseSession.studentIds.length
         : 0;
       const questions = await QuestionService
         .getQuestionTrees(courseSession.id);
-      console.log('questions', JSON.stringify(questions, null, 2));
       const alerts = await AlertService.findByCourseSessionId(courseSession.id);
-      console.log("got alerts");
       //TODO: Add logic for assessments
       return {
         courseSession : {
@@ -83,7 +78,6 @@ async function build(courseId, instructorId){
 
     //build the courseSession if valid course & instructor
     if (!!CourseService.isInstructorPermittedForCourse(course, instructor)) {
-      console.log("Instructor is permitted");
       const courseSession = await db.create(
         {
           courseId,
@@ -97,19 +91,16 @@ async function build(courseId, instructorId){
       }
 
       //successfully created the session
-      console.log("Created in service");
       const savedCourse = await CourseService.setActiveCourseSessionId(
         course,
         courseSession.id
       );
-      console.log('savedCourse', JSON.stringify(savedCourse, null, 2));
       return courseSession;
     }
   }
   catch (err) {
     throw err;
   }
-  console.log("Nothing to return :(");
   return null;
 }
 
@@ -124,32 +115,20 @@ async function instructorJoinActiveSession(courseId, instructorId){
 }
 
 async function studentJoinActiveSession(courseId, studentId){
-  try{
+  try {
     const courseSession = await joinActiveSession(courseId);
-
-    console.log("Student Join Active Session : " + studentId);
-
-    //add student to sessionAttendance
-    await addToAttendanceList(studentId, courseSession);
-    //send socket notification
-    return courseSession;
-  }
-  catch (err) {
-    throw err;
+    return await addToAttendanceList(studentId, courseSession);
+  } catch (e) {
+    console.error(
+      '[ERROR] CourseSession Service studentJoinActiveSession',
+      e
+    );
+    return null;
   }
 }
 
 function isStudentInCourseSession(studentId, courseSession){
-  console.log("Is student in course session?");
-  let isStudentAlreadyPresent = false;
-  courseSession.studentIds
-    .forEach( id => {
-      if(id === studentId){
-        isStudentAlreadyPresent = true;
-      }
-    });
-  console.log(isStudentAlreadyPresent);
-  return isStudentAlreadyPresent;
+  return !!courseSession.studentIds.filter(s => s === studentId)[0];
 }
 
 //Adds student to courseSession.studentIds if not already present
@@ -157,11 +136,9 @@ async function addToAttendanceList(studentId, courseSession){
   try{
     const user = await UserService.findById(studentId);
     if(!!user && user.type === 'STUDENT'){
-      console.log("valid student");
       if(!isStudentInCourseSession(studentId, courseSession)){
         courseSession.studentIds = [...courseSession.studentIds, user.id];
       }
-      console.log("appended time to save");
       return await db.save(courseSession);
     }
     else{
@@ -177,17 +154,15 @@ async function joinActiveSession(courseId){
 
   try {
     let course = await CourseService.findById(courseId);
-
     if(!!course.activeCourseSessionId) {
-      console.log("Activer session id : " + course.activeCourseSessionId);
       return await db.findById(course.activeCourseSessionId, CourseSession);
-    }
-    else {
+    } else {
       throw new Error("CourseSessionService > joinActiveSession: No Active Session Id");
     }
   }
-  catch (err){
-    throw err;
+  catch (e){
+    console.error('[ERROR] CourseSession Service joinActiveSession', e);
+    throw e;
   }
 }
 
@@ -314,18 +289,15 @@ async function findByAttendanceCode(code) {
 async function generateUniqueAttendanceCode() {
   let code = ShortIdUtil.generateShortIdWithRequirements(ATTENDANCE_CODE_LENGTH, ATTENDANCE_CODE_POOL);
 
-  console.log(code);
   while(!!(await findByAttendanceCode(code))){
     console.info("[INFO] CourseSession Service > createAttendanceCode : Attendance Code Already in use - " + code );
     code = ShortIdUtil.generateShortIdWithRequirements(ATTENDANCE_CODE_LENGTH, ATTENDANCE_CODE_POOL);
-    console.log(code);
   }
 
   return code;
 }
 async function createAttendanceCode(courseSessionId) {
   try {
-    console.log("In service : " + courseSessionId);
     let code = await generateUniqueAttendanceCode();
     let courseSession = await db.findById(courseSessionId, CourseSession);
 
@@ -344,17 +316,14 @@ async function createAttendanceCode(courseSessionId) {
 
 async function destroyAttendanceCode(courseSessionId) {
   try {
-    console.log("Destory attendance code for : " + courseSessionId);
 
     let courseSession = await db.findById(courseSessionId, CourseSession);
     if(!courseSession) {
       throw new Error("Invalid Course Session Id : " + courseSessionId);
     }
 
-    console.log("Found coursesession");
     courseSession.attendanceCode = null;
     await db.save(courseSession);
-    console.log("DB save done : " );
     return courseSession;
   } catch (e) {
     console.error('[ERROR] CourseSession Service > destroyAttendanceCode : ', e);
@@ -374,7 +343,6 @@ function isStudentInAttendance(courseSession, userId) {
 
 async function studentJoinAttendance(courseSessionId, code, userId) {
   try {
-    console.log("Student Join Attendance");
     let courseSession = await db.findById(courseSessionId, CourseSession);
 
     if(!courseSession) {

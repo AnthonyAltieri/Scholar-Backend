@@ -10,6 +10,7 @@ const BankedAssessment = new Schema({
   bankId: String,
   courseId: String,
   userId: String,
+  inQueue: Boolean,
 });
 
 export default BankedAssessment;

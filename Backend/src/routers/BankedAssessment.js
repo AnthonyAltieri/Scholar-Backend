@@ -10,6 +10,8 @@ router.post('/edit/tags/id', editTagsById);
 router.post('/get/bankId', getByBankId);
 router.post('/clear/option', clearOption);
 router.post('/remove/id', removeById);
+router.post('/moveTo/bank', moveToBank);
+router.post('/moveTo/queue', moveToQueue);
 
 async function create(req, res) {
   const {
@@ -49,8 +51,8 @@ async function editById(req, res) {
       optionsEdit,
     );
     res.send({
-      question: questionEdit,
-      options: optionsEdit,
+      question: bankedAssessment.question,
+      options: bankedAssessment.options,
     })
   } catch (e) {
     console.error('[ERROR] BankedAssessment Router editById', e);
@@ -111,6 +113,30 @@ export async function removeById(req, res) {
     res.success();
   } catch (e) {
     console.error('[ERROR] BankedAssessment Router removeById', e);
+    res.error();
+  }
+}
+
+export async function moveToBank(req, res) {
+  const { id } = req.body;
+  try {
+    const bankedAssessment = await BankedAssessmentService
+      .moveToBank(id);
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] BankedAssessment Router moveToBank', e);
+    res.error();
+  }
+}
+
+export async function moveToQueue(req, res) {
+  const { id } = req.body;
+  try {
+    const bankedAssessment = await BankedAssessmentService
+      .moveToQueue(id);
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] BankedAssessment Router moveToQueue', e);
     res.error();
   }
 }

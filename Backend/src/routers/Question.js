@@ -109,6 +109,7 @@ async function endorseRemove(req, res) {
     );
     res.send({ id });
   } catch (e) {
+    console.error('[ERROR] Question Router endorseRemove', e);
     res.error();
   }
 }
