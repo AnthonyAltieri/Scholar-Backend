@@ -41,10 +41,13 @@ async function create(req, res) {
       {
         assessmentType: 'REFLECTIVE',
         question,
+        assessmentId : reflectiveAssessmentId
       }
-    )
+    );
+
+    console.log("Started Assessment : " + reflectiveAssessmentId);
     res.send({
-      reflectiveAssessmentId,
+      reflectiveAssessmentId : reflectiveAssessmentId
     })
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Router create', e);
@@ -67,7 +70,7 @@ async function deactivate(req, res) {
       Socket.generatePrivateChannel(courseSessionId),
       Events.ASSESSMENT_DEACTIVATED,
       {}
-    )
+    );
     res.send({ answers });
   } catch (e) {
     console.error('[ERROR] ReflectiveAssessment Router deactivate', e);
@@ -84,6 +87,7 @@ async function review(req, res) {
     answerId,
   } = req.body;
   try {
+    console.log("IN REVIEW, req body : " + JSON.stringify(req.body, null, 2));
     const answer = await ReflectiveAssessmentService
       .review(
         courseSessionId,
@@ -95,7 +99,7 @@ async function review(req, res) {
     Socket.send(
       Socket.generatePrivateChannel(courseSessionId),
       Events.REFLECTIVE_ASSESSMENT_REVIEWED,
-      {}
+      {answer: answer}
     );
     res.success();
   } catch (e) {

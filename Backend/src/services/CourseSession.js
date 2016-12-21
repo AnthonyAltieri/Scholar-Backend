@@ -401,6 +401,9 @@ async function requestNewCourseSession(courseId, instructorId) {
     );
     if (!!mostRecentCourseSession &&
         isSameDateAs(now, mostRecentCourseSession.created)) {
+      const course = await CourseService.findById(mostRecentCourseSession.courseId);
+      course.activeCourseSessionId = mostRecentCourseSession.id;
+      await db.save(course);
       return mostRecentCourseSession;
     } else {
       return await build(courseId, instructorId);

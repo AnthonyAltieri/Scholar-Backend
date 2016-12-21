@@ -6,9 +6,11 @@ import mongoose, { Schema } from 'mongoose';
 import Entity from './Entity';
 import Assessment from './Assessment';
 
-const InstantAssessment = new Schema({
+const ReflectiveAssessment = new Schema({
   ...Entity,
   ...Assessment,
   reviewStarted: Boolean,
   content: String,
 });
+
+export default ReflectiveAssessment;
