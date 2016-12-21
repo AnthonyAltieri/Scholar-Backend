@@ -141,7 +141,7 @@ async function addToAttendanceList(studentId, courseSession){
       }
       user.textBoundSession = courseSession.id;
       user.textBoundCourse = courseSession.courseId;
-      db.save(user);
+      await db.save(user);
       return await db.save(courseSession);
     }
     else{
