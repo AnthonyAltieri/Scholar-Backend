@@ -71,11 +71,16 @@ async function studentJoinSession(req, res){
 async function instructorEndSession(req, res){
   try {
     const { courseId, instructorId } = req.body;
-    const course = await CourseSessionService
+    const courseSessionId = await CourseSessionService
       .instructorEndSession(courseId, instructorId);
     if (!course) {
       res.error();
     }
+    Socket.send(
+      Socket.generatePrivateChannel(courseSessionId),
+      Events.END_COURSESESSION,
+      {}
+    );
     res.success();
   } catch (e) {
     console.error('[ERROR] CourseSession router instructorEndSession', e);
