@@ -13,6 +13,7 @@ const ReflectiveAssessmentAnswer = new Schema({
   assessmentId: String,
   courseId: String,
   content: String,
+  assessmentId: String,
   reviews: [Review],
 });
 
