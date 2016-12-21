@@ -374,6 +374,40 @@ async function studentJoinAttendance(courseSessionId, code, userId) {
   }
 }
 
+async function requestNewCourseSession(courseId, instructorId) {
+  try {
+    const courseSessions = await db.find({ courseId }, CourseSession);
+    const mostRecentCourseSession = courseSessions
+      .slice(0)
+      .sort((l, r) => {
+          if (l.created < r.created) {
+            return 1;
+          } else if (l.created > r.created) {
+            return -1;
+          } else {
+            return 0;
+          }
+        })[0];
+    const now = new Date();
+    const isSameDateAs = (lhs, rhs) => (
+      lhs.getFullYear() === rhs.getFullYear() &&
+      lhs.getMonth() === rhs.getMonth() &&
+      lhs.getDate() === rhs.getDate()
+    );
+    if (isSameDateAs(now, mostRecentCourseSession.created)) {
+      return mostRecentCourseSession;
+    } else {
+      return await build(courseId, instructorId);
+    }
+  } catch (e) {
+    console.error(
+      '[ERROR] CourseSession Service getMostRecentCourseSession',
+      e
+    );
+    return null;
+  }
+}
+
 export default {
   build,
   instructorEndSession,
@@ -391,5 +425,6 @@ export default {
   createAttendanceCode,
   destroyAttendanceCode,
   studentJoinAttendance,
-  findByAttendanceCode
+  findByAttendanceCode,
+  requestNewCourseSession,
 }

@@ -1,9 +1,11 @@
 'use strict';
 
-
 import SERVER_ENV from './ServerEnv';
 import Socket from './services/Socket';
+import fs from 'fs';
+import https from 'https';
 
+const isOnRemoteServer = fs.existsSync(path.join(__dirname, '../../../tls'));
 
 // var express = require('express');
 import express from 'express';
@@ -18,16 +20,10 @@ import IdUtility from './utilities/IdUtility';
 
 Socket.init();
 
-var PORT = null;
-switch (SERVER_ENV.ENV) {
-  case 'DEVELOPMENT':
-    PORT = 7000;
-    break;
+var PORTS = !!isOnRemoteServer
+  ? [80, 443]
+  : [7000, 8001];
 
-  case 'PRODUCTION':
-    PORT = 80;
-    break;
-}
 const SESSION_SECRET = 'Scholar620';
 
 // Connect to MongoDB and our database
@@ -112,7 +108,6 @@ app.get("/pusher/auth", function(req, res) {
 });
 
 
-
 // app.get('/*', function(req, res) {
 //
 //   if(req.query.course && req.query.code){
@@ -130,8 +125,22 @@ app.get("/pusher/auth", function(req, res) {
 // });
 
 
-app.listen(PORT, async function() {
-  console.log('Starting server, listening on port %s', PORT);
+if (!!isOnRemoteServer) {
+
+}
+
+if (!!isOnRemoteServer) {
+  const server = https.createServer(
+    {
+      key: fs.readFileSync('./tls/key.pem'),
+      cert: fs.readFileSync('./tls/cert.pem'),
+    },
+    app
+  );
+  server.listen(PORTS[1]);
+}
+app.listen(PORTS[0], async function() {
+  console.log('Starting server, listening on port %s', PORTS[0]);
 });
 
 import UserRouter from './routers/UserRouter';

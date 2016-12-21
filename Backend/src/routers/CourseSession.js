@@ -28,11 +28,9 @@ async function createCourseSession(req, res){
     courseId,
     instructorId
   } = req.body;
-
-  try{
-    console.log("Create in router");
-    const courseSession = await CourseSessionService.build(courseId, instructorId);
-    console.log("Post build in router");
+  try {
+    const courseSession = await CourseSessionService
+      .requestNewCourseSession(courseId, instructorId);
     if (!courseSession) {
       res.error();
     }
