@@ -93,6 +93,7 @@ function mapToSend(course) {
       timeEnd: course.timeEnd,
       days: course.days,
       term: course.term,
+      addCode: course.addCode,
     };
 }
 
@@ -267,6 +268,25 @@ function getUsers(courseId) {
   });
 };
 
+async function getAddCodesByUserId(userId) {
+  try {
+    const courses = await getByUser(userId);
+    return courses.reduce((a, c) => (
+      [
+        ...a,
+        {
+          title: c.title,
+          abbreviation: c.abbreviation,
+          addCode: c.addCode,
+        }
+      ]
+    ), []);
+  } catch (e) {
+    console.error('[ERROR] Course Service getAddCodesByUserId', e);
+    return null;
+  }
+}
+
 const CourseService = {
   buildCourse,
   mapToSend,
@@ -283,6 +303,7 @@ const CourseService = {
   addBankedAssessment,
   getAllCourseSessions,
   getUsers,
+  getAddCodesByUserId,
 };
 
 export default  CourseService;
