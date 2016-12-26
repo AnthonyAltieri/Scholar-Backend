@@ -25,6 +25,7 @@ router.post('/set/activationStatus', setActivationStatus);
 router.post('/enroll/student', enrollStudent);
 router.post('/add/bankedAssessment', addBankedAssessment);
 router.post('/get/bankedAssessments', getBankedAssessments);
+router.post('/get/addCodes', getAddCodes);
 router.get('/grade/summary', gradesSummary);
 
 async function createCourse(req, res){
@@ -181,6 +182,19 @@ async function getBankedAssessments(req, res) {
     })
   } catch (e) {
     console.error('[ERROR] Course Router getBankedAssessments', e);
+    res.error();
+  }
+}
+
+async function getAddCodes(req, res) {
+  const { userId } = req.body;
+  try {
+    const addCodes = await CourseService.getAddCodesByUserId(userId);
+    res.send({
+      addCodes,
+    })
+  } catch (e) {
+    console.error('[ERROR] Course Router getAddCodes');
     res.error();
   }
 }
