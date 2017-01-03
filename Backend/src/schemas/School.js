@@ -9,6 +9,7 @@ const School = new Schema({
   ...Entity,
   name: {type : String, unique: true  },
   termType: String, // ENUM: quarter | semester | trimester
+  timezoneName: String,
 });
 
 export default School;

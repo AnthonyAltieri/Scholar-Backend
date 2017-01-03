@@ -3,6 +3,8 @@
  */
 import mongoose from 'mongoose';
 import UserService from './UserService';
+import * as DateUtil from '../utilities/Date';
+import CourseSessionService from '../services/CourseSession';
 
 import CourseSchema from '../schemas/Course';
 import UserSchema from '../schemas/User';
@@ -122,11 +124,12 @@ async function getByUser(userId) {
     console.log('courses', courses);
     return courses;
   } catch (e) {
+    console.error('[ERROR] Course Service getByUser', e);
     return null;
   }
 }
 
-async function findById(id) {
+async function getById(id) {
   try {
     return await db.findById(id, Course);
   } catch (e) {
@@ -287,6 +290,48 @@ async function getAddCodesByUserId(userId) {
   }
 }
 
+async function findById(courseId) {
+  try {
+    return await db.findById(courseId, Course);
+  } catch (e) {
+    console.error('[ERROR] Course Service findById', e);
+    return null;
+  }
+}
+
+async function removeActiveCourseSession(courseId) {
+  try {
+    const course = await getById(courseId);
+    course.activeCourseSessionId = null;
+    return await db.save(course);
+  } catch (e) {
+    console.error(
+      '[ERROR] Course Service removeActiveCourseSession',
+      e
+    );
+  }
+}
+
+async function handleCourseSessionActiveEvaluation(course) {
+  try {
+    if (!!course.activeCourseSessionId) {
+      const courseSession = await CourseSessionService
+        .getById(course.activeCourseSessionId);
+      const shouldCreateNewCourseSession = DateUtil
+        .shouldCreateNewCourseSession(courseSession.created);
+      if (!!shouldCreateNewCourseSession) {
+        course.activeCourseSessionId = null;
+        await db.save(course);
+      }
+    }
+  } catch (e) {
+    console.error(
+      '[ERROR] Course Service handleCourseSessionActiveEvaluation',
+      e
+    );
+  }
+}
+
 const CourseService = {
   buildCourse,
   mapToSend,
@@ -298,12 +343,15 @@ const CourseService = {
   saveToUser,
   setActivationStatus,
   isInstructorPermittedForCourse,
-  findById,
+  getById,
   setActiveCourseSessionId,
   addBankedAssessment,
   getAllCourseSessions,
   getUsers,
   getAddCodesByUserId,
+  findById,
+  removeActiveCourseSession,
+  handleCourseSessionActiveEvaluation,
 };
 
 export default  CourseService;

@@ -120,10 +120,16 @@ async function getUser(req, res) {
       res.send({ courses: [] });
       return;
     }
+    for (let i = 0 ; i < userCourses.length ; i++) {
+      const course = userCourses[i];
+      await CourseService.handleCourseSessionActiveEvaluation(course);
+    }
     res.send({
-      courses: CourseService.mapArrayToSend(userCourses)
+      courses: CourseService
+        .mapArrayToSend(userCourses)
     });
   } catch (e) {
+    console.error('[ERROR] Course Router getUser', e);
     res.error()
   }
 }

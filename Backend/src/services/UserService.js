@@ -174,6 +174,14 @@ async function findByPhone(phone) {
   }
 }
 
+async function findById(userId) {
+  try {
+    return await db.findById(userId, User);
+  } catch (e) {
+    console.error('[ERROR] User Service findById', e);
+    return null;
+  }
+}
 
 const UserService = {
   getById,
@@ -184,7 +192,8 @@ const UserService = {
   validateModel,
   mapToSend,
   attemptLogin,
-  findByPhone
+  findByPhone,
+  findById,
 };
 
 //TODO: currently this is only used by the textRouter -
