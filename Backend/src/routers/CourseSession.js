@@ -5,10 +5,12 @@ const express = require('express');
 const router = express.Router();
 
 import CourseService from '../services/CourseService';
+import moment from 'moment-timezone';
 import CourseSessionService from '../services/CourseSession';
 import InstantService from '../services/InstantAssessment';
 import ReflectiveService from '../services/ReflectiveAssessment';
 import UserService from '../services/UserService';
+import * as DateUtil from '../utilities/Date';
 import Socket from '../services/Socket';
 import Events from '../services/Events';
 
@@ -22,11 +24,12 @@ router.post('/attendance/end', endAttendance);
 router.post('/attendance/join', joinAttendance);
 router.post('/numberInCourseSession/get', numberInCourseSessionGet);
 router.post('/attendance/get', getNumberInAttendance);
+router.post('/get/mostRecent', getMostRecent);
 
 async function createCourseSession(req, res){
   const {
     courseId,
-    instructorId
+    instructorId,
   } = req.body;
   try {
     const courseSession = await CourseSessionService
@@ -224,6 +227,41 @@ async function numberInCourseSessionGet(req, res) {
       '[ERROR] CourseSession Router numberInCourseSessionGet',
       e
     );
+    res.error();
+  }
+}
+
+async function getMostRecent(req, res) {
+  const { courseId } = req.body;
+  try {
+    const result = await CourseSessionService.getMostRecent(courseId);
+    if (!!result.none) {
+      console.log('most recent CourseSession NONE');
+      res.send({
+        none: true,
+      });
+      return;
+    }
+    console.log(
+      'most recent CourseSession',
+      moment(result.mostRecentCourseSession).format('l')
+    );
+    console.log('result', result);
+    const shouldCreateNewCourseSession = DateUtil
+      .shouldCreateNewCourseSession(result.mostRecentCourseSession.created);
+    if (!!shouldCreateNewCourseSession
+        && !!result.mostRecentCourseSession.isActive) {
+      await CourseService.removeActiveCourseSession(courseId);
+      await CourseSessionService.makeInactive(
+        result.mostRecentCourseSession.id
+      );
+    }
+    res.send({
+      none: false,
+      mostRecentCourseSession: result.mostRecentCourseSession,
+    })
+  } catch (e) {
+    console.error('[ERROR] CourseSession Router getMostRecent', e);
     res.error();
   }
 }

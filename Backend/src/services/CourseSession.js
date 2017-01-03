@@ -3,16 +3,19 @@
  */
 
 import mongoose from 'mongoose';
-import UserService from '../services/UserService';
 import CourseService from '../services/CourseService';
 import CourseSessionSchema from '../schemas/CourseSession';
+import SchoolSchema from '../schemas/School'
 import moment from 'moment';
-const CourseSession = mongoose.model('coursesessions', CourseSessionSchema);
 import QuestionService from '../services/Question';
+import UserService from '../services/UserService';
 import AlertService from '../services/Alert';
 import ShortIdUtil from '../utilities/ShortIdUtil';
 import db from '../db';
+import * as DateUtil from '../utilities/Date'
 
+const CourseSession = mongoose.model('coursesessions', CourseSessionSchema);
+const School = mongoose.model('schools', SchoolSchema);
 const ATTENDANCE_CODE_LENGTH = 4;
 const ATTENDANCE_CODE_POOL = 'ABCDEFGHUJKLMNOPQRSTUVWXYZ1234567890';
 
@@ -58,7 +61,7 @@ async function mapToSend(courseSession){
 async function build(courseId, instructorId){
   try {
     //Validate Course & Instructor ID
-    const course = await CourseService.findById(courseId);
+    const course = await CourseService.getById(courseId);
 
     if (!course) {
       console.error(`[ERROR] No course found with id: ${courseId}`);
@@ -66,7 +69,7 @@ async function build(courseId, instructorId){
       return;
     }
 
-    const instructor = await UserService.findById(instructorId);
+    const instructor = await UserService.getById(instructorId);
 
     if (!instructor) {
       console.error(`[ERROR] No user found with id: ${instructorId}`);
@@ -81,7 +84,8 @@ async function build(courseId, instructorId){
       const courseSession = await db.create(
         {
           courseId,
-          instructorIds: [instructor.id]
+          instructorIds: [instructor.id],
+          lastActiveTime: new Date(),
         },
         CourseSession
       );
@@ -171,9 +175,11 @@ async function joinActiveSession(courseId){
 
 async function instructorEndSession(courseId, instructorId){
   try {
-    const course = await CourseService.findById(courseId);
+    console.log(`trying to end CourseSession for courseId ${courseId}`);
+    const course = await CourseService.getById(courseId);
+    console.log('course', course);
     if (!course) {
-      return null;
+      throw new Error(`No course found with id ${courseId}`);
     }
     const oldActiveCourseSession = course.activeCourseSessionId;
     course.activeCourseSessionId = null;
@@ -381,38 +387,78 @@ async function studentJoinAttendance(courseSessionId, code, userId) {
 
 async function requestNewCourseSession(courseId, instructorId) {
   try {
-    const courseSessions = await db.find({ courseId }, CourseSession);
-    const mostRecentCourseSession = courseSessions
-      .slice(0)
-      .sort((l, r) => {
-          if (l.created < r.created) {
-            return 1;
-          } else if (l.created > r.created) {
-            return -1;
-          } else {
-            return 0;
-          }
-        })[0];
-    const now = new Date();
-    const isSameDateAs = (lhs, rhs) => (
-      lhs.getFullYear() === rhs.getFullYear() &&
-      lhs.getMonth() === rhs.getMonth() &&
-      lhs.getDate() === rhs.getDate()
-    );
-    if (!!mostRecentCourseSession &&
-        isSameDateAs(now, mostRecentCourseSession.created)) {
-      const course = await CourseService.findById(mostRecentCourseSession.courseId);
-      course.activeCourseSessionId = mostRecentCourseSession.id;
-      await db.save(course);
-      return mostRecentCourseSession;
+    const result = await getMostRecent(courseId);
+    if (!!result && !result.none) {
+      const instructor = await UserService.getById(instructorId);
+      const school = await db.findById(instructor.schoolId, School);
+      const timeZone = school.timezoneName;
+      const needsNewCourseSession = DateUtil
+        .shouldCreateNewCourseSession(
+          result.mostRecentCourseSession.created,
+          timeZone
+        );
+      if (!needsNewCourseSession) {
+        const course = await CourseService.getById(courseId);
+        course.activeCourseSessionId = result.mostRecentCourseSession.id;
+        await db.save(course);
+        result.mostRecentCourseSession.lastActiveTime = new Date();
+        await db.save(result.mostRecentCourseSession);
+        return result.mostRecentCourseSession;
+      } else {
+        const course = await CourseService.getById(courseId);
+        const courseSession = await build(courseId, instructorId);
+        course.activeCourseSessionId = courseSession.id;
+        await db.save(course);
+        return courseSession;
+      }
     } else {
-      return await build(courseId, instructorId);
+      const course = await CourseService.getById(courseId);
+      const courseSession = await build(courseId, instructorId);
+      course.activeCourseSessionId = courseSession.id;
+      await db.save(course);
+      return courseSession;
     }
   } catch (e) {
     console.error(
       '[ERROR] CourseSession Service getMostRecentCourseSession',
       e
     );
+    return null;
+  }
+}
+
+async function getMostRecent(courseId) {
+  console.log('getMostRecent()');
+  try {
+    const courseSessions = await findByCourseId(courseId);
+    if (courseSessions.length === 0) {
+      return {
+        none: true,
+      }
+    }
+    const filteredCourseSessions = courseSessions
+      .sort((a, b) => {
+        if (a.created < b.created) return -1;
+        if (b.created > a.created) return 1;
+        return 0;
+      });
+    return {
+      mostRecentCourseSession: filteredCourseSessions[0],
+      none: false,
+    }
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service getMostRecent', e);
+    return null;
+  }
+}
+
+async function makeInactive(courseSessionId) {
+  try {
+    const courseSession = await getById(courseSessionId);
+    courseSession.isActive = false;
+    return await db.save(courseSession);
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service makeInactive', e);
     return null;
   }
 }
@@ -436,4 +482,6 @@ export default {
   studentJoinAttendance,
   findByAttendanceCode,
   requestNewCourseSession,
+  getMostRecent,
+  makeInactive,
 }
