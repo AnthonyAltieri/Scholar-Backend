@@ -5,8 +5,8 @@ import db from '../db';
 import mongoose from 'mongoose';
 import UserSchema from '../schemas/User';
 const User = mongoose.model('users', UserSchema);
-// import CourseSchema from '../schemas/Course';
-// const Course = mongoose.model('Courses', CourseSchema);
+import CourseSchema from '../schemas/Course';
+const Course = mongoose.model('Courses', CourseSchema);
 //
 import InstantAssessmentService from '../services/InstantAssessment'
 import AlertService from '../services/Alert'
@@ -18,6 +18,12 @@ import Socket from '../services/Socket'
 import Events from '../services/Events'
 
 const HELP_TEXT_1 = "Usage  \n"
+  +"———————— \n"
+  +"[Join Session] text this: \n"
+  +"join : (Code) \n"
+
+  +"where (Code) is the course code your professor gives you \n"
+  + "Example: join : abcde \n"
   +"———————— \n"
   +"[Attendance] text this: \n"
   +"code : (Code) \n"
@@ -101,6 +107,39 @@ async function generateResponse(serialized, phone) {
       }
       console.log(JSON.stringify(user, null, 2)) ;
     }
+
+    if(!!serialized.join && !!user) {
+      try {
+        console.log("Trying to join session by text");
+        const course = await db.findOne({ addCode : serialized.join }, Course);
+
+        if(!!course) {
+          const courseSession = await CourseSessionService
+            .studentJoinActiveSession(course.id, user.id);
+
+          if(!!courseSession) {
+            Socket.send(
+              Socket.generatePrivateChannel(courseSession.id),
+              Events.STUDENT_JOINED_COURSESESSION,
+              { numberInCourseSession: courseSession.studentIds.length }
+            );
+            objToSend.content += "Successfully joined the Course Session";
+          }
+          else {
+            objToSend.content += "Unknown Error";
+          }
+        }
+        else {
+         console.log("Error:  Invalid code" ) ;
+        }
+      }
+      catch (e) {
+        objToSend.content += "Error : " + e;
+        console.error("[ERROR] Text Message Service > join : " + e);
+      }
+
+    }
+
 
     if (!!serialized.code && !!user) {
       let courseSession = await CourseSessionService.findByAttendanceCode(serialized.code);
