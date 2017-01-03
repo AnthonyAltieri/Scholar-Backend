@@ -17,13 +17,14 @@ import * as DateUtil from '../utilities/Date'
 const CourseSession = mongoose.model('coursesessions', CourseSessionSchema);
 const School = mongoose.model('schools', SchoolSchema);
 const ATTENDANCE_CODE_LENGTH = 4;
-const ATTENDANCE_CODE_POOL = 'ABCDEFGHUJKLMNOPQRSTUVWXYZ1234567890';
+const ATTENDANCE_CODE_POOL = 'abcdefghijklmnopqrstuvwxyz1234567890';
 
 //TODO: @tonio - account for this in routes
+//TODO: complete this function
 async function getThreshold(id) {
   try {
     const courseSession = await db.findById(id, CourseSession);
-    return course;
+    return courseSession;
   } catch (e) {
     return null;
   }

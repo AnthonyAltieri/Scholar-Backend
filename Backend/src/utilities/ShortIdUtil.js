@@ -3,7 +3,7 @@
  */
 const shortId = require('shortid');
 var Chance = require('chance');
-
+const DEFAULT_POOL = "abcdefghijklmnopqrstuvwxyz1234567890"
 
 function generateShortId(){
     return shortId.generate();
@@ -11,7 +11,7 @@ function generateShortId(){
 
 function generateShortIdLength(length){
     try {
-        return (generateShortId().substr(0, length));
+        return (generateShortIdWithRequirements(length, DEFAULT_POOL));
     }
     catch (e) {
         console.error("[ERROR] in ShortIdUtil > generateShortIdLength : " + e)

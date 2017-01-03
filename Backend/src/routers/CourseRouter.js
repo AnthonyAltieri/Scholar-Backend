@@ -45,6 +45,7 @@ async function createCourse(req, res){
     } = req.body;
 
     try {
+
       const course = await CourseService
         .buildCourse(
           instructorId,
