@@ -12,7 +12,7 @@ import QuestionService from '../services/Question';
 import AlertService from '../services/Alert';
 import InstantService from '../services/InstantAssessment';
 import InstantAnswerService from '../services/InstantAssessmentAnswer';
-import ReflectiveAnswer from '../services/ReflectiveAssessmentAnswer';
+import ReflectiveAnswerService from '../services/ReflectiveAssessmentAnswer';
 import ReflectiveService from '../services/ReflectiveAssessment';
 
 import BankedAssessmentService from '../services/BankedAssessment';
@@ -284,14 +284,14 @@ async function gradesSummary(req, res) {
           const correctOption = instantAssessment.correctOption;
           const studentAnswer = await InstantAnswerService
             .getByUserId(student.id, instantAssessment.id);
-          // If there was no answer the student was correct if they answered
-          const isStudentsAnswerCorrect = correctOption === -1
-            ? (!!studentAnswer)
-            : (correctOption === studentAnswer.optionIndex)
-          if (isStudentsAnswerCorrect) {
-            numberInstantCorrect++;
-          }
           if (!!studentAnswer) {
+          // If there was no answer the student was correct if they answered
+            const isStudentsAnswerCorrect = (correctOption === -1)
+              ? (!!studentAnswer)
+              : (correctOption === studentAnswer.optionIndex);
+            if (isStudentsAnswerCorrect) {
+              numberInstantCorrect++;
+            }
             numberInstantParticipated++;
           }
           totalNumberInstants++;
@@ -309,17 +309,19 @@ async function gradesSummary(req, res) {
             numberReflectiveParticipated++;
             let numberAgree = 0;
             let numberDisagree = 0;
-            studentAnswer.reviews.forEach((r) => {
-              if (r.type === 'AGREE') {
-                numberAgree++;
-              } else if (r.type === 'DISAGREE') {
-                numberDisagree++;
-              } else {
-                throw new Error(`Invalid review type ${r.type}`);
-              }
-            });
-            agreeWithAnswer += numberAgree;
-            disagreeWithAnswer += numberDisagree;
+            if(!!studentAnswer.reviews){
+              studentAnswer.reviews.forEach((r) => {
+                if (r.type === 'AGREE') {
+                  numberAgree++;
+                } else if (r.type === 'DISAGREE') {
+                  numberDisagree++;
+                } else {
+                  throw new Error(`Invalid review type ${r.type}`);
+                }
+              });
+              agreeWithAnswer += numberAgree;
+              disagreeWithAnswer += numberDisagree;
+            }
           }
           totalNumberReflectives++;
         }

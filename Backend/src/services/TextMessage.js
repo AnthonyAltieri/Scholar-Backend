@@ -18,36 +18,36 @@ import Socket from '../services/Socket'
 import Events from '../services/Events'
 
 const HELP_TEXT_1 = "Usage  \n"
-  +"———————— \n"
-  +"[Join Session] text this: \n"
-  +"join : (Code) \n"
+    +"———————— \n"
+    +"[Join Session] text this: \n"
+    +"join : (Code) \n"
 
-  +"where (Code) is the course code your professor gives you \n"
-  + "Example: join : abcde \n"
-  +"———————— \n"
-  +"[Attendance] text this: \n"
-  +"code : (Code) \n"
+    +"where (Code) is the course code your professor gives you \n"
+    + "Example: join : abcde \n"
+    +"———————— \n"
+    +"[Attendance] text this: \n"
+    +"code : (Code) \n"
 
-  +"where (Code) is the attendance code your professor gives you \n"
-  + "Example: code : ABCD \n"
-  +"———————— \n"
-  +"[Alert] text this: \n"
-  +"! \n";
+    +"where (Code) is the attendance code your professor gives you \n"
+    + "Example: code : ABCD \n"
+    +"———————— \n"
+    +"[Alert] text this: \n"
+    +"! \n";
 
-const HELP_TEXT_2 = HELP_TEXT_1
-  +"———————— \n"
-  +"[Ask a question] text this:\n"
-  +"q: (your question) \n"
+  const HELP_TEXT_2 = HELP_TEXT_1
+    +"———————— \n"
+    +"[Ask a question] text this:\n"
+    +"q: (your question) \n"
 
-  +"notice the space in between the : and your question \n"
-  +"Example - q : what is life? \n"
-  +"———————— \n"
-  + "[Answer instant assessment] text this: \n "
-  + "answer: (option) \n"
-  + "Example - answer : a \n"
-  +"———————— \n"
-  + "[Answer reflective assessment] text this: \n "
-  + "answer: (content) \n";
+    +"notice the space in between the : and your question \n"
+    +"Example - q : what is life? \n"
+    +"———————— \n"
+    + "[Answer instant assessment] text this: \n "
+    + "answer: (option) \n"
+    + "Example - answer : a \n"
+    +"———————— \n"
+    + "[Answer reflective assessment] text this: \n "
+    + "answer: (content) \n";
 
 
 //Converts the text message String into a serialized JSON object
