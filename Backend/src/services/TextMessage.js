@@ -5,9 +5,12 @@ import db from '../db';
 import mongoose from 'mongoose';
 import UserSchema from '../schemas/User';
 const User = mongoose.model('users', UserSchema);
-// import CourseSchema from '../schemas/Course';
-// const Course = mongoose.model('Courses', CourseSchema);
+import CourseSchema from '../schemas/Course';
+const Course = mongoose.model('Courses', CourseSchema);
 //
+import InstantAssessmentService from '../services/InstantAssessment'
+import AlertService from '../services/Alert'
+import ReflectiveAssessmentService from '../services/ReflectiveAssessment'
 import QuestionService from '../services/Question';
 import UserService from '../services/UserService';
 import CourseSessionService from '../services/CourseSession'
@@ -16,32 +19,49 @@ import Events from '../services/Events'
 
 const HELP_TEXT_1 = "Usage  \n"
   +"———————— \n"
+  +"[Join Session] text this: \n"
+  +"join : (Code) \n"
+
+  +"where (Code) is the course code your professor gives you \n"
+  + "Example: join : abcde \n"
+  +"———————— \n"
   +"[Attendance] text this: \n"
   +"code : (Code) \n"
 
   +"where (Code) is the attendance code your professor gives you \n"
-  + "Example: code : ABCD \n";
+  + "Example: code : ABCD \n"
+  +"———————— \n"
+  +"[Alert] text this: \n"
+  +"! \n";
 
 const HELP_TEXT_2 = HELP_TEXT_1
-+"———————— \n"
-+"[Ask a question] text this:\n"
-+"question: (your question) \n"
+  +"———————— \n"
+  +"[Ask a question] text this:\n"
+  +"q: (your question) \n"
 
-+"notice the space in between the : and your question \n"
-+"Example:what is life?";
+  +"notice the space in between the : and your question \n"
+  +"Example - q : what is life? \n"
+  +"———————— \n"
+  + "[Answer instant assessment] text this: \n "
+  + "answer: (option) \n"
+  + "Example - answer : a \n"
+  +"———————— \n"
+  + "[Answer reflective assessment] text this: \n "
+  + "answer: (content) \n";
 
 
-//Converts the text message into a serialized JSON object
+//Converts the text message String into a serialized JSON object
 function parseMessage(content) {
   let returnObj = {};
+
   try {
     console.log(content);
     let parts = content.split('&');
     console.log(JSON.stringify(parts));
     parts.forEach( part => {
       let segments = part.split(":");
-      console.log(segments[0] + " : " + segments[1]);
-      returnObj[segments[0].trim().toLowerCase()] = segments[1].trim();
+      // console.log(segments[0] + " : " + segments[1]);
+      returnObj[segments[0].trim().toLowerCase()] = (!!segments[1]) ? segments[1].trim() : "filler";
     });
     return returnObj;
   }
@@ -55,7 +75,10 @@ function parsePhone(phone) {
   return phone.substring(phone.indexOf("+1") + 2);
 }
 
-
+/*
+inputs: serialized object generated from the text message input , phone number of sender
+output: text message response
+ */
 async function generateResponse(serialized, phone) {
   let objToSend = {};
   try {
@@ -85,6 +108,39 @@ async function generateResponse(serialized, phone) {
       console.log(JSON.stringify(user, null, 2)) ;
     }
 
+    if(!!serialized.join && !!user) {
+      try {
+        console.log("Trying to join session by text");
+        const course = await db.findOne({ addCode : serialized.join }, Course);
+
+        if(!!course) {
+          const courseSession = await CourseSessionService
+            .studentJoinActiveSession(course.id, user.id);
+
+          if(!!courseSession) {
+            Socket.send(
+              Socket.generatePrivateChannel(courseSession.id),
+              Events.STUDENT_JOINED_COURSESESSION,
+              { numberInCourseSession: courseSession.studentIds.length }
+            );
+            objToSend.content += "Successfully joined the Course Session";
+          }
+          else {
+            objToSend.content += "Unknown Error";
+          }
+        }
+        else {
+         console.log("Error:  Invalid code" ) ;
+        }
+      }
+      catch (e) {
+        objToSend.content += "Error : " + e;
+        console.error("[ERROR] Text Message Service > join : " + e);
+      }
+
+    }
+
+
     if (!!serialized.code && !!user) {
       let courseSession = await CourseSessionService.findByAttendanceCode(serialized.code);
       if(!!courseSession){
@@ -108,6 +164,109 @@ async function generateResponse(serialized, phone) {
       }
     }
 
+    if(!!serialized.answer && !!courseSessionId && !!courseId) {
+      let courseSession = await CourseSessionService.getById(courseSessionId);
+
+      if(!!courseSession.activeAssessmentId) {
+
+        if(courseSession.activeAssessmentType === "INSTANT") {
+          let optionIndex = -1;
+
+          switch (serialized.answer.toLowerCase().trim()) {
+            case "a" : optionIndex = 0; break;
+            case "b" : optionIndex = 1; break;
+            case "c" : optionIndex = 2; break;
+            case "d" : optionIndex = 3; break;
+            case "e" : optionIndex = 4; break;
+            default : optionIndex = -1;
+          }
+
+          if(optionIndex !== -1) {
+            try {
+              const answer = InstantAssessmentService
+                .answer(
+                  courseSessionId,
+                  user.id,
+                  courseSession.activeAssessmentId,
+                  courseId,
+                  optionIndex,
+                );
+              Socket.send(
+                Socket.generatePrivateChannel(courseSessionId),
+                Events.INSTANT_ASSESSMENT_ANSWERED,
+                {
+                  userId : user.id,
+                  optionIndex
+                }
+              );
+              objToSend.content += "Success! Answered instant Assessment";
+            } catch (e) {
+              console.error('[ERROR] TextMessage Service > InstantAssessment answer', e);
+              objToSend.content += "Error! Couldn't Answer : " + e;
+            }
+          }
+          else{
+            objToSend.content += "Error : Invalid option";
+          }
+        }
+        else {
+          try {
+            const answer = await ReflectiveAssessmentService
+              .answer(
+                courseSessionId,
+                user.id,
+                courseSession.activeAssessmentId,
+                courseId,
+                serialized.answer,
+              );
+
+            if (!answer) {
+              console.error('[ERROR] TextMessage Service > ReflectiveAssessment null answer');
+              objToSend.content += "Error! Could not answer ";
+            }
+            else {
+              Socket.send(
+                Socket.generatePrivateChannel(courseSessionId),
+                Events.REFLECTIVE_ASSESSMENT_ANSWERED,
+                {}
+              );
+              objToSend.content += "Success! Answered Reflective Assessment";
+            }
+          }
+          catch (e) {
+            console.error('[ERROR] TextMessage Service > ReflectiveAssessment  answer', e);
+            objToSend.content += "Error! Could not answer " + e;
+          }
+        }
+      }
+      else {
+        objToSend.content += "Error! No Active Assessment Found";
+      }
+
+    }
+
+    if(!!serialized["!"] && !!courseSessionId && !!courseId) {
+      try {
+        const alertWindow = 60;//TODO: find this using course Settings
+        const alert = await AlertService.attemptAddAlert(user.id, courseId, courseSessionId, alertWindow );
+
+        if (!!alert) {
+          objToSend.content += "Successfully added your alert."
+        }
+        else {
+          objToSend.content += "Unknown Error. Please try again ";
+        }
+      }
+      catch (e) {
+        console.error("[ERROR] TextMessageService > alert " + e);
+        objToSend.content += "Error : " + e;
+      }
+    }
+
+    //In case the short form has been used for question,
+    if(!!serialized.q && !serialized.question) {
+      serialized.question = serialized.q;
+    }
 
     if(!!serialized.question && !!courseSessionId && !!courseId) {
       let question = await QuestionService

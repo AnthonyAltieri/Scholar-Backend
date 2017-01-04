@@ -186,7 +186,7 @@ import TextMessageRouter from './routers/TextMessage';
 app.use('/api/text', TextMessageRouter);
 
 app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../../Frontend/index.html'));
+  res.sendFile(path.join(__dirname, '../../../Frontend/dist/index.html'));
 });
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';

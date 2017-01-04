@@ -37,11 +37,6 @@ async function textJoinAttendance(req, res)
 
     console.log(JSON.stringify(payload, null, 2));
 
-    if(!!payload && !!payload.cookie) {
-      console.log("Cookie To Be Saved");
-    }
-
-
     var twiml = new twilio.TwimlResponse();
     twiml.message(payload.content ? payload.content : TextMessageService.HELP_TEXT_2);
     res.writeHead(200, {'Content-Type': 'text/xml'});

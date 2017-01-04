@@ -16,9 +16,10 @@ const User = mongoose.model('users', UserSchema);
 
 import db from '../db';
 import ShortIdUtil from '../utilities/ShortIdUtil'
+const ADD_CODE_LENGTH = 5;
 
 function generateShortCode(length){
-    return ShortIdUtil.generateShortId();
+    return ShortIdUtil.generateShortIdLength(length);
 }
 
 async function buildCourse(
@@ -35,8 +36,23 @@ async function buildCourse(
   dateEnd,
   days,
 ) {
-    const addCode = generateShortCode(5);
+    let addCode = generateShortCode(ADD_CODE_LENGTH);
+    let isUnique = false;
+
     try {
+
+      while (!isUnique) {
+
+        let existingCourseSession = await db.findOne({ addCode }, Course);
+
+        if(!existingCourseSession) {
+          isUnique = true;
+        }
+        else {
+          addCode = generateShortCode(ADD_CODE_LENGTH);
+        }
+      }
+
         return await db.create({
           schoolId,
           title,
@@ -55,6 +71,7 @@ async function buildCourse(
         )
     }
     catch (error) {
+        console.log("[ERROR] courseService > create : " + e);
         throw error;
     }
 
