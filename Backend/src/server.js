@@ -17,6 +17,7 @@ var MongoStore = require('connect-mongo/es5')(session);
 import SchoolService from './services/SchoolService'
 
 import IdUtility from './utilities/IdUtility';
+const compression = require('compression');
 
 Socket.init();
 
@@ -36,6 +37,8 @@ db.once('open', function() {
 
 // Initialize the express application
 var app = express();
+
+app.use(compression());
 
 app.use((req, res, next) => {
   res.success = () => {
