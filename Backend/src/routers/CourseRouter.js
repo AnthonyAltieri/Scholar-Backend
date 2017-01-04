@@ -26,6 +26,7 @@ router.post('/enroll/student', enrollStudent);
 router.post('/add/bankedAssessment', addBankedAssessment);
 router.post('/get/bankedAssessments', getBankedAssessments);
 router.post('/get/addCodes', getAddCodes);
+router.post('/get/id', getId);
 router.get('/grade/summary', gradesSummary);
 
 async function createCourse(req, res){
@@ -206,6 +207,17 @@ async function getAddCodes(req, res) {
   }
 }
 
+async function getId(req, res) {
+  const { courseId } = req.body;
+  try {
+    const course = await CourseService.getById(courseId);
+    res.send({ course })
+  } catch (e) {
+    console.error('[ERROR] Course Router getId');
+    res.error();
+  }
+}
+
 async function gradesSummary(req, res) {
   const {
     courseId,
@@ -214,8 +226,14 @@ async function gradesSummary(req, res) {
   const contains = (list, x) => !!list.filter(i => i === x)[0];
   try {
     const courseSessions = await CourseService.getAllCourseSessions(courseId);
+    if (courseSessions === null) {
+      res.error();
+    }
     console.log('courseId', courseId);
     const usersInCourse = await CourseService.getUsers(courseId);
+    if (usersInCourse === null) {
+      res.error();
+    }
     const students = usersInCourse.filter(u => u.type === 'STUDENT');
     console.log('students', students);
     const instructors = usersInCourse.filter(u => u.type === 'INSTRUCTOR');
