@@ -54,6 +54,15 @@ app.use((req, res, next) => {
   next();
 });
 
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (!req.secure) {
+      res.redirect('https://' + req.headers.host + req.url);
+    }
+    next();
+  })
+}
+
 
 if (SERVER_ENV === 'PRODUCTION') {
   app.use( (req, res, next) => {
@@ -185,8 +194,7 @@ import TextMessageRouter from './routers/TextMessage';
 app.use('/api/text', TextMessageRouter);
 
 app.get('/*', (req, res) => {
-  console.log('hi')
-  res.sendFile(path.join(__dirname, '../../../ReactReduxSCHOLAR/index.html'));
+  res.sendFile(path.join(__dirname, '../../../ReactReduxSCHOLAR/src/index.html'));
 });
 //Testing for v1.1
 // import TestRouter from './routers/TestRouter';
