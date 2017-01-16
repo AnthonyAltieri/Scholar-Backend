@@ -27,6 +27,7 @@ router.post('/add/bankedAssessment', addBankedAssessment);
 router.post('/get/bankedAssessments', getBankedAssessments);
 router.post('/get/addCodes', getAddCodes);
 router.post('/get/id', getId);
+router.post('/get/report/date', getReportByDate);
 router.get('/grade/summary', gradesSummary);
 
 async function createCourse(req, res){
@@ -218,6 +219,7 @@ async function getId(req, res) {
   }
 }
 
+
 async function gradesSummary(req, res) {
   const {
     courseId,
@@ -370,7 +372,7 @@ async function gradesSummary(req, res) {
         ? a + `${c}\n`
         : a + `${c},`
       ), '')
-    })
+    });
     res.write(csv);
     res.end();
   } catch (e) {
@@ -378,6 +380,17 @@ async function gradesSummary(req, res) {
     res.error();
   }
 
+}
+
+async function getReportByDate(req, res) {
+  try {
+    const { courseId, date } = req.body;
+    const report = await CourseService.getReportByDate(courseId, date);
+    res.send(report);
+  }
+  catch (e) {
+    console.error("[ERROR] in CourseRouter > getReportByDate ", e);
+  }
 }
 
 module.exports = router;

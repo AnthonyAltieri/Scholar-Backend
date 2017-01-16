@@ -62,30 +62,51 @@ function logIn(req, res) {
       }, User)
         .then((user) => {
           if (!user) {
-            res.send({})
+            db.findOne({email: email}, User)
+              .then((user) => {
+                //User found with the email provided, but password is incorrect
+                if(!!user) {
+                  res.send({incorrectPassword: true})
+                  return;
+                }
+                else{
+                  res.send({});
+                  return;
+                }
+              })
+              .catch((e) => {
+                console.error("[ERROR] in UserRouter > login (A) : " + e);
+              });
           }
+          else {
+            console.info("Guess we found user");
+            console.info(JSON.stringify(user));
 
-          req.session.userName = email;
-          req.session.firstName = user.firstName;
-          req.session.lastName = user.lastName;
-          req.session.userType = user.type;
-          req.session.userId = user.id;
+            req.session.userName = email;
+            req.session.firstName = user.firstName;
+            req.session.lastName = user.lastName;
+            req.session.userType = user.type;
+            req.session.userId = user.id;
 
-          const name = `${user.firstName} ${user.lastName}`;
-          const type = user.type;
+            const name = `${user.firstName} ${user.lastName}`;
+            const type = user.type;
 
-          user.loggedIn = true;
+            user.loggedIn = true;
 
-          db.save(user)
+            db.save(user)
               .then((user) => {
                 console.log("[SUCCESS] Login Success");
-                  res.send(UserService.mapToSend(user))
+                res.send(UserService.mapToSend(user))
               })
-              .catch((error) => { res.error(error) });
-
+              .catch((error) => {
+                console.error("[ERROR] in UserRouter > login (B) : " + error);
+                res.error(error)
+              });
+          }
         })
         .catch(error => {
-          res.error("Password Incorrect");
+          console.error("[ERROR] in UserRouter > login (C) : " + error);
+          res.error(error);
         })
     })
     .catch(error => {

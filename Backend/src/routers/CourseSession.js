@@ -25,6 +25,7 @@ router.post('/attendance/join', joinAttendance);
 router.post('/numberInCourseSession/get', numberInCourseSessionGet);
 router.post('/attendance/get', getNumberInAttendance);
 router.post('/get/mostRecent', getMostRecent);
+router.post('/get/report', getSessionReport);
 
 async function createCourseSession(req, res){
   const {
@@ -266,5 +267,18 @@ async function getMostRecent(req, res) {
   }
 }
 
+
+async function getSessionReport(req, res) {
+  try {
+    const { courseSessionId } = req.body;
+    res.send(await CourseSessionService.getSessionReport(courseSessionId));
+
+  }
+  catch (e) {
+    console.error("[ERROR] in CourseSessionRouter > getSessionReport : ", e);
+    res.error();
+  }
+
+}
 
 export default router;

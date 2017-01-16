@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import UserService from './UserService';
 import * as DateUtil from '../utilities/Date';
 import CourseSessionService from '../services/CourseSession';
+import moment from 'moment'
 
 import CourseSchema from '../schemas/Course';
 import UserSchema from '../schemas/User';
@@ -349,6 +350,19 @@ async function handleCourseSessionActiveEvaluation(course) {
   }
 }
 
+async function getReportByDate(courseId, date) {
+  try {
+    const courseSessions = await CourseSessionService.findByCourseId(courseId);
+    const courseSession = courseSessions.filter( cs => {
+      return DateUtil.isSameDay(moment(new Date(date)), moment(cs.created));
+    })[0];
+    return await CourseSessionService.getSessionReport(courseSession.id);
+  }
+  catch (e) {
+    console.error("[ERROR] CourseService > getReportByDate ", e);
+  }
+}
+
 const CourseService = {
   buildCourse,
   mapToSend,
@@ -369,6 +383,7 @@ const CourseService = {
   findById,
   removeActiveCourseSession,
   handleCourseSessionActiveEvaluation,
+  getReportByDate
 };
 
 export default  CourseService;

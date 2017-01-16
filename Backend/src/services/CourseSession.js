@@ -10,6 +10,10 @@ import moment from 'moment';
 import QuestionService from '../services/Question';
 import UserService from '../services/UserService';
 import AlertService from '../services/Alert';
+import InstantAssessmentService from '../services/InstantAssessment';
+import InstantAssessmentAnswerService from '../services/InstantAssessmentAnswer'
+import ReflectiveAssessmentService from '../services/ReflectiveAssessment'
+import ReflectiveAssessmentAnswerService from '../services/ReflectiveAssessmentAnswer'
 import ShortIdUtil from '../utilities/ShortIdUtil';
 import db from '../db';
 import * as DateUtil from '../utilities/Date'
@@ -464,6 +468,90 @@ async function makeInactive(courseSessionId) {
   }
 }
 
+async function getSessionReport(courseSessionId) {
+  try {
+    const courseSession = await getById(courseSessionId);
+    const course = await CourseService.getById(courseSession.courseId);
+    const questionsInSession = await QuestionService.findByCourseSessionId(courseSessionId);
+    const questionsDismissed = questionsInSession.filter( q => q.isDismissed === true);
+    const questionsEndorsed = questionsInSession.filter( q => q.isEndorsed === true);
+    const questionsFlagged = questionsInSession.filter( q => q.isFlagged === true);
+
+
+    const numberPresent = await getNumberInCourseSession(courseSessionId);
+    const numberInAttendance = await getNumberInAttendance(courseSessionId);
+    const alerts = await AlertService.getInCourseSession(courseSessionId);
+
+    const instantAssessments = await InstantAssessmentService.getInCourseSession(courseSessionId);
+    let numberInstantAnswers = 0;
+    let numberCorrectInstantAnswers = 0;
+
+    instantAssessments.forEach( (assessment) => {
+      if(!!assessment.answers){
+        numberInstantAnswers += assessment.answers.length;
+        numberCorrectInstantAnswers += InstantAssessmentService.getNumberCorrectlyAnswered(assessment);
+      }
+    });
+
+    const reflectiveAssessments = await ReflectiveAssessmentService.getInCourseSession(courseSessionId);
+
+    let numberReflectiveAnswers = 0;
+
+    for(let assessment of reflectiveAssessments) {
+      const reflectiveAnswers = await ReflectiveAssessmentAnswerService.getByAssessmentId(assessment.id);
+      numberReflectiveAnswers += !!reflectiveAnswers ? reflectiveAnswers.length : 0;
+    };
+
+    const date = new Date(courseSession.created);
+
+    let stats = {
+      course : course.abbreviation,
+      date : (date.getMonth()+1) + '-'+date.getDate() +'-' + date.getFullYear(),
+      numberQuestions : questionsInSession.length,
+      numberQuestionsDismissed : questionsDismissed.length,
+      numberQuestionsEndorsed : questionsEndorsed.length,
+      numberQuestionsFlagged : questionsFlagged.length,
+      numberAlerts : alerts.length,
+      numberStudentsPresent : numberPresent,
+      numberInAttendance : numberInAttendance,
+      numberInstantAssessments : instantAssessments.length,
+      numberInstantAnswers : numberInstantAnswers,
+      numberCorrectInstantAnswers : numberCorrectInstantAnswers,
+      numberReflectiveAssessments : reflectiveAssessments.length,
+      numberReflectiveAnswers : numberReflectiveAnswers
+    };
+
+    return stats;
+
+  }
+  catch (e) {
+    console.error("[ERROR] in CourseSessionService > getSessionReport : " + e);
+  }
+}
+
+async function getNumberInCourseSession(courseSessionId){
+  try {
+    const courseSession = await getById(courseSessionId);
+    console.log('courseSession', courseSession);
+    return courseSession.studentIds.length;
+  }
+  catch (e) {
+    console.error('[ERROR] CourseSessionService > getNumberInCourseSession : ' + e);
+    throw e;
+  }
+}
+async function getNumberInAttendance(courseSessionId){
+  try {
+    const courseSession = await getById(courseSessionId);
+    console.log('courseSession', courseSession);
+    return courseSession.attendanceIds.length;
+  }
+  catch (e) {
+    console.error('[ERROR] CourseSessionService > getNumberInAttendance : ' + e);
+    throw e;
+  }
+}
+
 export default {
   build,
   instructorEndSession,
@@ -485,4 +573,7 @@ export default {
   requestNewCourseSession,
   getMostRecent,
   makeInactive,
+  getSessionReport,
+  getNumberInCourseSession,
+  getNumberInAttendance
 }

@@ -4,7 +4,7 @@
 
 import moment from 'moment-timezone';
 
-function isSameDay(a, b) {
+export function isSameDay(a, b) {
   const aArray = a.format('L').split('/');
   const bArray = b.format('L').split('/');
   const aYear = parseInt(aArray[2]);
