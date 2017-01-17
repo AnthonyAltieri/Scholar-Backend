@@ -22,6 +22,7 @@ const User = new Schema({
   sessionsInAttendance: [String],
   textBoundSession: String,
   textBoundCourse: String,
+  forgotPasswordCode: String,
   type: String //STUDENT | INSTRUCTOR | ADMIN | STUDENT_REP | TEACHER_ASSISTANT
 
 });

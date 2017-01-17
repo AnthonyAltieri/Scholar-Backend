@@ -5,6 +5,7 @@ import PasswordUtil from '../utilities/PasswordUtil';
 import nodemailer from 'nodemailer';
 import templateGenerator from '../ForgotPasswordEmail';
 import AssessmentBankService from '../services/AssessmentBank';
+import ForgotPasswordEmail from '../ForgotPasswordEmail';
 
 /*
 User Constants
@@ -18,8 +19,13 @@ const TYPE_INSTRUCTOR = "INSTRUCTOR";
 var express = require('express');
 var router = express.Router();
 
-const transporter = nodemailer
-  .createTransport('smtps://no-reply%40crowdconnect.io:n6iNoz3ztW0d6y@smtp.gmail.com');
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'no-reply@crowdconnect.io',
+    pass: 'ManCheetah888',
+  }
+});
 
 import UserService from '../services/UserService'
 import SchoolService from '../services/SchoolService'
@@ -30,6 +36,8 @@ router.post('/signUp/student', signUpStudent);
 router.post('/signUp/instructor', signUpInstructor);
 router.post('/get/accountInfo', getAccountInfo);
 router.post('/save/accountInfo', saveAccountInfo);
+router.post('/request/forgotPassword', requestForgotPassword);
+router.post('/change/password', changePassword);
 
 /**
  * @description
@@ -304,6 +312,63 @@ async function saveAccountInfo(req, res) {
     res.success();
   } catch (e) {
     console.error('[ERROR] User Router saveAccountInfo', e);
+  }
+}
+
+async function requestForgotPassword(req, res) {
+  const { email } = req.body;
+  try {
+    const user = await UserService.findByEmail(email);
+    if (!user) {
+      res.send({
+        userNotFound: true,
+      });
+      return;
+    }
+    const savedUser = await UserService.generateForgotPasswordCode(user);
+    const from = '"CrowdConnect Team" \<no-reply@crowdconnect.io\>';
+    console.log('forgotPasswordCode', savedUser.forgotPasswordCode);
+    const mailOptions = {
+      from,
+      to: email,
+      subject: 'Forgot Password Scholar',
+      html: ForgotPasswordEmail(savedUser.forgotPasswordCode),
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return console.error('[ERROR] nodemailer', error);
+      }
+      console.log('Message sent: ' + info.response);
+    });
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] User Router requestForgotPassword', e);
+    res.error();
+  }
+};
+
+async function changePassword(req, res) {
+  const { password, forgotPasswordCode } = req.body;
+  try {
+    const user = await UserService.getByForgotPasswordCode(forgotPasswordCode);
+    if (!user) {
+      res.send({
+        userNotFound: true,
+      });
+      return;
+    }
+    const savedUser = await UserService.savePassword(
+      user,
+      PasswordUtil.encryptPassword(password, user.email)
+    );
+    if (!savedUser) {
+      res.error();
+      return;
+    }
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] User Router changePassword', e);
+    res.error();
   }
 }
 

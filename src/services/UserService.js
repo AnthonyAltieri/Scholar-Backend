@@ -3,6 +3,7 @@ import UserSchema from '../schemas/User';
 const User = mongoose.model('users', UserSchema);
 import db from '../db';
 import md5 from '../../node_modules/blueimp-md5/js/md5.js'
+import { v1 } from 'node-uuid';
 const SALT = '620';
 
 import SchoolService from '../services/SchoolService'
@@ -239,8 +240,34 @@ const UserService = {
   attemptLogin,
   findByPhone,
   findById,
+  findByEmail,
   saveAccountInfo,
+  generateForgotPasswordCode,
+  getByForgotPasswordCode,
+  savePassword,
 };
+
+async function savePassword(user, password) {
+  console.log('user', user);
+  try {
+    user.password = password;
+    user.forgotPasswordCode = null;
+    return await db.save(user);
+  } catch (e) {
+    console.error('[ERROR] User Service savePassword', e);
+    return null;
+  }
+}
+
+async function getByForgotPasswordCode(forgotPasswordCode) {
+  try {
+    return db.findOne({ forgotPasswordCode }, User);
+  } catch (e) {
+    console.error('[ERROR] User Service getByForgotPasswordCode', e);
+    return null;
+  }
+}
+
 
 //TODO: currently this is only used by the textRouter -
 //TODO: Fix login endpoint in User Router to use this
@@ -286,6 +313,16 @@ async function saveAccountInfo(
   user.phone = phone;
   user.institutionId = institutionId;
   return await db.save(user);
+}
+
+async function generateForgotPasswordCode(user) {
+  user.forgotPasswordCode = v1();
+  try {
+    return await db.save(user);
+  } catch (e) {
+    console.error('[ERROR] User Service generateForgotPasswordCode', e);
+    return null;
+  }
 }
 
 

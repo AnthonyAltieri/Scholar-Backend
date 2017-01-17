@@ -2,87 +2,16 @@
  * @author Anthony Altieri on 11/13/16.
  */
 
-export const generateEmailTemplate = (code) => {
+const host = process.env.NODE_ENV === 'production'
+  ? 'https://scholar.xyz'
+  : 'http://localhost:3000';
+export default (code) => {
   return (`
-    <head>
-        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
-    </head>
-    <body>
-      <div
-          style="
-              display: flex;
-              flex-flow: row;
-              align-items: center;
-              justify-content: center;
-          "
-      >
-          <div
-              style="
-                  width: 400px;
-                  padding: 25px;
-                  display: flex;
-                  flex-flow: column;
-                  justify-content: space-between;
-                  align-items: center;
-                  border-radius: 3px;
-                  background-color: #FCF7FF;
-                  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-                              0 3px 1px -2px rgba(0, 0, 0, 0.2),
-                              0 1px 5px 0 rgba(0, 0, 0, 0.12);
-              "
-          >
-              <div
-                  style="
-                      display: flex;
-                      flex-flow: row;
-                      align-items: center;
-                      justify-content: center;
-                    "
-              >
-                  <div
-                      style="
-                      display: flex;
-                      flex-flow: row;
-                      justify-content: center;
-                      align-items: center;
-                    "
-                  >
-                      <div
-                          style="
-                              display: flex;
-                              flex-flow: column;
-                              justify-content: center;
-                              align-items: center;
-                          "
-                      >
-                          <p
-                              style="
-                                  font-family: Lato, sans-serif;
-                                  text-align: center;
-                              "
-                          >
-                              Click the button so you can be re-directed to where you can reset your password
-                          </p>
-                          <div
-                              style="
-                        color: rgba(0, 0, 0, 0.870588);
-                        background-color: rgb(255, 255, 255);
-                        transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
-                        box-sizing: border-box;
-                        font-family: Lato, sans-serif;
-                        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-                        box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px,
-                                    rgba(0, 0, 0, 0.117647) 0px 1px 4px;
-                        border-radius: 2px; display: inline-block;
-                        min-width: 88px;
-                        margin: 12px;
-                      "
-                          >
-                              <button
-                                  tabindex="0"
-                                  type="button"
-                                  href="http://localhost:8000/api/user/forgotPassword?code=${code}"
-                                  style="
+    <div>
+        <p>Click the button to be re-directed to where you can reset your password</p>
+      <a 
+      href="${host}/forgotPassword/${code}" 
+      style="
                           border: 10px;
                           box-sizing: border-box;
                           display: inline-block;
@@ -104,43 +33,15 @@ export const generateEmailTemplate = (code) => {
                           transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
                           background-color: #FF7C6B;
                           text-align: center;
+                          text-decoration: none;
+                          color: #FFFFFF;
                         "
-                              />
-                              <div>
-                                  <div
-                                      style="
-                            height: 36px;
-                            border-radius: 2px;
-                            transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
-                            top: 0px;
-                          "
-                                  >
-                          <span
-                              style="
-                              position: relative;
-                              opacity: 1;
-                              font-size: 14px;
-                              letter-spacing: 0px;
-                              text-transform: uppercase;
-                              font-weight: 500;
-                              margin: 0px;
-                              padding-left: 16px;
-                              padding-right: 16px;
-                              color: rgb(255, 255, 255);
-                              user-select: none;
-                            "
-                          >
-                            RESET PASSWORD
-                              </span>
-                                  </div>
-                              </div>
-                          </div>
-
-              </div>
-          </div>
-
-      </div>
-    </body>
+      >
+      RESET PASSWORD
+      
+</a>
+    
+</div>
   `)
 
 };
