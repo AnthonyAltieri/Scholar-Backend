@@ -12,7 +12,7 @@ import QuestionService from '../services/Question';
 import AlertService from '../services/Alert';
 import InstantService from '../services/InstantAssessment';
 import InstantAnswerService from '../services/InstantAssessmentAnswer';
-import ReflectiveAnswer from '../services/ReflectiveAssessmentAnswer';
+import ReflectiveAnswerService from '../services/ReflectiveAssessmentAnswer';
 import ReflectiveService from '../services/ReflectiveAssessment';
 
 import BankedAssessmentService from '../services/BankedAssessment';
@@ -27,6 +27,7 @@ router.post('/add/bankedAssessment', addBankedAssessment);
 router.post('/get/bankedAssessments', getBankedAssessments);
 router.post('/get/addCodes', getAddCodes);
 router.post('/get/id', getId);
+router.post('/get/report/date', getReportByDate);
 router.get('/grade/summary', gradesSummary);
 
 async function createCourse(req, res){
@@ -218,6 +219,7 @@ async function getId(req, res) {
   }
 }
 
+
 async function gradesSummary(req, res) {
   const {
     courseId,
@@ -284,14 +286,14 @@ async function gradesSummary(req, res) {
           const correctOption = instantAssessment.correctOption;
           const studentAnswer = await InstantAnswerService
             .getByUserId(student.id, instantAssessment.id);
-          // If there was no answer the student was correct if they answered
-          const isStudentsAnswerCorrect = correctOption === -1
-            ? (!!studentAnswer)
-            : (correctOption === studentAnswer.optionIndex)
-          if (isStudentsAnswerCorrect) {
-            numberInstantCorrect++;
-          }
           if (!!studentAnswer) {
+          // If there was no answer the student was correct if they answered
+            const isStudentsAnswerCorrect = (correctOption === -1)
+              ? (!!studentAnswer)
+              : (correctOption === studentAnswer.optionIndex);
+            if (isStudentsAnswerCorrect) {
+              numberInstantCorrect++;
+            }
             numberInstantParticipated++;
           }
           totalNumberInstants++;
@@ -309,17 +311,19 @@ async function gradesSummary(req, res) {
             numberReflectiveParticipated++;
             let numberAgree = 0;
             let numberDisagree = 0;
-            studentAnswer.reviews.forEach((r) => {
-              if (r.type === 'AGREE') {
-                numberAgree++;
-              } else if (r.type === 'DISAGREE') {
-                numberDisagree++;
-              } else {
-                throw new Error(`Invalid review type ${r.type}`);
-              }
-            });
-            agreeWithAnswer += numberAgree;
-            disagreeWithAnswer += numberDisagree;
+            if(!!studentAnswer.reviews){
+              studentAnswer.reviews.forEach((r) => {
+                if (r.type === 'AGREE') {
+                  numberAgree++;
+                } else if (r.type === 'DISAGREE') {
+                  numberDisagree++;
+                } else {
+                  throw new Error(`Invalid review type ${r.type}`);
+                }
+              });
+              agreeWithAnswer += numberAgree;
+              disagreeWithAnswer += numberDisagree;
+            }
           }
           totalNumberReflectives++;
         }
@@ -368,7 +372,7 @@ async function gradesSummary(req, res) {
         ? a + `${c}\n`
         : a + `${c},`
       ), '')
-    })
+    });
     res.write(csv);
     res.end();
   } catch (e) {
@@ -376,6 +380,17 @@ async function gradesSummary(req, res) {
     res.error();
   }
 
+}
+
+async function getReportByDate(req, res) {
+  try {
+    const { courseId, date } = req.body;
+    const report = await CourseService.getReportByDate(courseId, date);
+    res.send(report);
+  }
+  catch (e) {
+    console.error("[ERROR] in CourseRouter > getReportByDate ", e);
+  }
 }
 
 module.exports = router;

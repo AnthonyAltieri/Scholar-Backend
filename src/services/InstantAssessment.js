@@ -126,10 +126,24 @@ async function getInCourseSession(courseSessionId) {
   }
 }
 
+//takes an assessment as param and returns the number of correct answers
+function getNumberCorrectlyAnswered(assessment) {
+  //if no correct option is selected, each answer is correct
+  if(assessment.correctOption === -1) {
+    return assessment.answers.length;
+  }
+
+  const correctAnswers = assessment.answers
+    .filter( a => a.optionIndex === assessment.correctOption);
+
+  return correctAnswers.length;
+}
+
 export default {
   create,
   deactivate,
   answer,
   getById,
   getInCourseSession,
+  getNumberCorrectlyAnswered
 }

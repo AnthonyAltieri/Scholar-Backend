@@ -54,6 +54,8 @@ app.use((req, res, next) => {
   next();
 });
 
+console.log('process.env.NODE_ENV', process.env.NODE_ENV);
+
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     if (!req.secure) {
@@ -96,6 +98,22 @@ app.post('/schools', async function(req, res){
   res.send((await SchoolService.findAll()).map(s => s.name));
 });
 
+app.get("/pusher/auth", function(req, res) {
+  var query = req.query;
+  var socketId = query.socket_id;
+  var channel = query.channel_name;
+  var callback = query.callback;
+
+  var auth = JSON.stringify(Socket.authenticate(socketId, channel));
+  var cb = callback.replace(/\"/g,"") + "(" + auth + ");";
+
+  res.set({
+    "Content-Type": "application/javascript"
+  });
+
+  res.send(cb);
+});
+
 
 app.get("/pusher/auth", function(req, res) {
   const query = req.query;
@@ -113,8 +131,8 @@ app.get("/pusher/auth", function(req, res) {
 if (!!isOnRemoteServer) {
   const server = https.createServer(
     {
-      key: fs.readFileSync('./tls/key.pem'),
-      cert: fs.readFileSync('./tls/cert.pem'),
+      key: fs.readFileSync('/home/ec2-user/tls/key.pem'),
+      cert: fs.readFileSync('/home/ec2-user/tls/cert.pem'),
     },
     app
   );

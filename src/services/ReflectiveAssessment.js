@@ -191,6 +191,7 @@ async function createVoteMatrix(assessmentId, numberExpectedReviews) {
   }
 }
 
+
 async function getInCourseSession(courseSessionId) {
   try {
     return await db.find({ courseSessionId }, ReflectiveAssessment);
