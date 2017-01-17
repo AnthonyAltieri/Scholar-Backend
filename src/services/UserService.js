@@ -33,6 +33,10 @@ function mapToSend(user){
       type: user.type,
       firstName: user.firstName,
       lastName: user.lastName,
+      phone: user.phone,
+      institutionId: user.institutionId,
+      email: user.email,
+      schoolId: user.schoolId,
     }
   }
 }
@@ -126,20 +130,10 @@ async function buildUser(
 
     const encryptedPassword = PasswordUtil.encryptPassword(password, email);
 
-    const isEmailVacant = await UserService.isEmailVacant(email);
-
-    if (!isEmailVacant) {
-      return {
-        emailInUse: true,
-      }
-    }
+    const result = await isValidNewStudent(email, phone);
+    if (!result.validStudent) return result;
     const schoolFound = await SchoolService.findByName(school);
-
-    if (!schoolFound) {
-      return {
-        schoolNotFound: true,
-      }
-    }
+    if (!schoolFound) return { schoolNotFound: true };
 
     const user = await attemptSignUp(
       firstName,
@@ -183,7 +177,58 @@ async function findById(userId) {
   }
 }
 
+async function isValidNewStudent(
+  email,
+  phone,
+) {
+  try {
+    const emailIsInUse = await isEmailInUse(email);
+    console.log('Found user with same email: ' + emailIsInUse);
+    if (emailIsInUse) {
+      return {
+        emailInUse: true,
+      }
+    }
+    const userByPhone = await findByPhone(phone);
+    console.log('Found user with same phone number: ' + !!userByPhone);
+    if (!!userByPhone) {
+      return {
+        phoneInUse: true,
+      }
+    }
+    return {
+      validStudent: true,
+    };
+
+  } catch (e) {
+    console.error('[ERROR] User Service isValidNewStudent', e);
+    return null;
+  }
+}
+
+async function isEmailInUse(email) {
+  try {
+    const user = await findByEmail(email);
+    return !!user;
+  } catch (e) {
+    console.error('[ERROR] User Service isEmailInuse', e);
+    return null;
+  }
+}
+
+async function isPhoneInUse(phone) {
+  try {
+    const user = await findByPhone(phone);
+    return !!user;
+  } catch (e) {
+    console.error('[ERROR] User Service isPhoneInUse', e);
+    return null;
+  }
+}
+
+
 const UserService = {
+  isValidNewStudent,
   getById,
   buildUser,
   findById,
@@ -194,6 +239,7 @@ const UserService = {
   attemptLogin,
   findByPhone,
   findById,
+  saveAccountInfo,
 };
 
 //TODO: currently this is only used by the textRouter -
@@ -226,7 +272,20 @@ async function findByEmail(email) {
   } catch (e) {
     console.error("[ERROR] UserService > findByEmail : " + e)
   }
+}
 
+async function saveAccountInfo(
+  user,
+  firstName,
+  lastName,
+  phone,
+  institutionId,
+) {
+  user.firstName = firstName;
+  user.lastName = lastName;
+  user.phone = phone;
+  user.institutionId = institutionId;
+  return await db.save(user);
 }
 
 

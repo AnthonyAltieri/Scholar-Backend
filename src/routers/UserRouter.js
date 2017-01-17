@@ -21,16 +21,6 @@ var router = express.Router();
 const transporter = nodemailer
   .createTransport('smtps://no-reply%40crowdconnect.io:n6iNoz3ztW0d6y@smtp.gmail.com');
 
-// Services
-//import SessionService from '../services/SessionService';
-
-// Import User Schema
-
-
-// Create a model with the Schema
-
-
-
 import UserService from '../services/UserService'
 import SchoolService from '../services/SchoolService'
 
@@ -38,6 +28,8 @@ router.post('/logIn', logIn);
 router.post('/logOut', logOut);
 router.post('/signUp/student', signUpStudent);
 router.post('/signUp/instructor', signUpInstructor);
+router.post('/get/accountInfo', getAccountInfo);
+router.post('/save/accountInfo', saveAccountInfo);
 
 /**
  * @description
@@ -124,7 +116,6 @@ function logIn(req, res) {
           school,
           TYPE_STUDENT
         );
-
       res.send(
         !!result ? result : { error: 'Server Error' }
       );
@@ -251,6 +242,69 @@ async function forgotPassword(req, res) {
           console.log('SAVE ERROR', error)
         })
     })
+}
+
+async function getAccountInfo(req, res) {
+  const { userId } = req.body;
+  try {
+    const user = await UserService.getById(userId);
+    if (!user) {
+      res.send({
+        noUserFound: true,
+      });
+      return;
+    }
+    console.log('found user', user);
+    const accountInfo = {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      institutionId: user.institutionId,
+    };
+    res.send({
+      accountInfo,
+    })
+  } catch (e) {
+    console.error('[ERROR] User Router getAccountInfo', e);
+    res.error();
+  }
+}
+
+async function saveAccountInfo(req, res) {
+  const {
+    firstName,
+    lastName,
+    phone,
+    institutionId,
+    userId,
+  } = req.body;
+  try {
+    const user = await UserService.getById(userId);
+    if (!user) {
+      res.send({
+        noUserFound: true,
+      });
+      return;
+    }
+    const userByPhone = await UserService.findByPhone(phone);
+    if (!!userByPhone && userByPhone.id !== userId) {
+      res.send({
+        phoneInUse: true,
+      });
+      return;
+    }
+    const savedUser = await UserService.saveAccountInfo(
+      user,
+      firstName,
+      lastName,
+      phone,
+      institutionId
+    );
+    res.success();
+  } catch (e) {
+    console.error('[ERROR] User Router saveAccountInfo', e);
+  }
 }
 
 

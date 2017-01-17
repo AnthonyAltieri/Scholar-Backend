@@ -4,20 +4,17 @@ import SERVER_ENV from './ServerEnv';
 import Socket from './services/Socket';
 import fs from 'fs';
 import https from 'https';
-
-const isOnRemoteServer = fs.existsSync(path.join(__dirname, '../../../tls'));
-
-// var express = require('express');
 import express from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
 import path from 'path';
 import mongoose from 'mongoose';
-var MongoStore = require('connect-mongo/es5')(session);
 import SchoolService from './services/SchoolService'
 
 import IdUtility from './utilities/IdUtility';
+const MongoStore = require('connect-mongo/es5')(session);
 const compression = require('compression');
+const isOnRemoteServer = process.env.NODE_ENV === 'production';
 
 Socket.init();
 
@@ -27,7 +24,6 @@ var PORTS = !!isOnRemoteServer
 
 const SESSION_SECRET = 'Scholar620';
 
-// Connect to MongoDB and our database
 mongoose.connect('mongodb://localhost/Scholar');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -35,10 +31,11 @@ db.once('open', function() {
   console.log('Database connection is open.');
 });
 
-// Initialize the express application
 var app = express();
 
-app.use(compression());
+if (process.env.NODE_ENV === 'production') {
+  app.use(compression());
+}
 
 app.use((req, res, next) => {
   res.success = () => {
@@ -67,17 +64,13 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-
-if (SERVER_ENV === 'PRODUCTION') {
-  app.use( (req, res, next) => {
-    console.log(req.url);
-    next();
-  })
-}
+const ORIGIN = isOnRemoteServer
+  ? 'https://scholarapp.xyz'
+  : 'http://localhost:3000';
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, *');
   next();
@@ -86,7 +79,6 @@ app.use(function (req, res, next) {
 // Set up the application's body parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
 
 var store = new MongoStore({ mongooseConnection: mongoose.connection });
 
@@ -98,48 +90,25 @@ app.use(session({
   store: store
 }));
 
-app.use('/static', express.static(path.join(__dirname, '../../../ReactReduxSCHOLAR/dist')));
+app.use('/static', express.static(path.join(__dirname, '../../Frontend/dist')));
 
 app.post('/schools', async function(req, res){
   res.send((await SchoolService.findAll()).map(s => s.name));
 });
 
 
-// app.get('/*', function(req, res) {
-//
-//   if(req.query.course && req.query.code){
-//     console.log("got query params to add course");
-//     CourseRegistrationUtility.handleInitialRequest(req, res);
-//   }
-//   if(req.query.talk === "jae-kim"){
-//     req.query.course="Playground";
-//     req.query.code="57e44ecb0bde70455e0b4821";
-//     req.query.instantSignOn="true";
-//     CourseRegistrationUtility.handleInitialRequest(req, res);
-//   }
-//
-//   res.sendFile(path.join(__dirname, 'index.html'));
-// });
-
 app.get("/pusher/auth", function(req, res) {
-  var query = req.query;
-  var socketId = query.socket_id;
-  var channel = query.channel_name;
-  var callback = query.callback;
-
-  var auth = JSON.stringify(Socket.authenticate(socketId, channel));
-  var cb = callback.replace(/\"/g,"") + "(" + auth + ");";
-
+  const query = req.query;
+  const socketId = query.socket_id;
+  const channel = query.channel_name;
+  const callback = query.callback;
+  const auth = JSON.stringify(Socket.authenticate(socketId, channel));
+  const cb = callback.replace(/\"/g,"") + "(" + auth + ");";
   res.set({
     "Content-Type": "application/javascript"
   });
-
   res.send(cb);
 });
-
-if (!!isOnRemoteServer) {
-
-}
 
 if (!!isOnRemoteServer) {
   const server = https.createServer(
@@ -198,8 +167,5 @@ import TextMessageRouter from './routers/TextMessage';
 app.use('/api/text', TextMessageRouter);
 
 app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../../ReactReduxSCHOLAR/src/index.html'));
+  res.sendFile(path.join(__dirname, '../../Frontend/dist/index.html'));
 });
-//Testing for v1.1
-// import TestRouter from './routers/TestRouter';
-// app.use('/api/test', TestRouter);

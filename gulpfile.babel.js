@@ -10,8 +10,8 @@ var path = require('path');
 
 
 var PathsBackend = {
-  es6: ['./Backend/src/**/*.js'],
-  es5: './Backend/dist',
+  es6: ['./src/**/*.js'],
+  es5: './dist',
   sourceRoot: path.join(__dirname, 'src')
 };
 
