@@ -64,22 +64,7 @@
     "gulp-uglify": "^1.5.4",
     "node-uuid": "^1.4.7",
     "pump": "^1.0.1",
-<<<<<<< HEAD
     "uglify-js": "^2.7.0",
-=======
-    "uglify-js": "^2.7.3"
-  },
-  "dependencies": {
-    "babel-plugin-transform-regenerator": "^6.16.1",
-    "babel-polyfill": "^6.16.0",
-    "babel-preset-stage-0": "^6.16.0",
-    "babel-preset-stage-3": "^6.17.0",
-    "babel-runtime": "^6.18.0",
-    "chance": "^1.0.4",
-    "compression": "^1.6.2",
-    "moment-timezone": "^0.5.11",
-    "redux": "^3.6.0",
->>>>>>> a8349879b565cf1f12d9e5b34c0346d5eb2cbc0d
     "twilio": "^2.11.1"
   }
 }
