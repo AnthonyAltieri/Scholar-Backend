@@ -38,6 +38,7 @@ router.post('/logIn', logIn);
 router.post('/logOut', logOut);
 router.post('/signUp/student', signUpStudent);
 router.post('/signUp/instructor', signUpInstructor);
+router.post('/format/phones', formatPhones);
 
 /**
  * @description
@@ -273,6 +274,51 @@ async function forgotPassword(req, res) {
         })
     })
 }
+
+async function formatPhones(req, res) {
+  try {
+    const { secret } = req.body;
+
+    console.log("Formatting phones");
+
+    if(secret === "ManCheetah888") {
+
+      const formatPhone = (phone) => {
+        let formattedPhone = phone;
+        formattedPhone = formattedPhone.replace('-', '');
+        formattedPhone = formattedPhone.replace('_', '');
+        formattedPhone = formattedPhone.replace(' ', '');
+        formattedPhone = formattedPhone.replace('(', '');
+        formattedPhone = formattedPhone.replace(')', '');
+        formattedPhone = formattedPhone.replace('+', '');
+        formattedPhone = formattedPhone.trim();
+        return formattedPhone;
+      };
+
+      let users = await db.findAll(User);
+
+      for(let user of users) {
+          if(!!user.phone) {
+            console.log(user.phone);
+            let phone = user.phone;
+            user.phone = formatPhone(phone);
+            console.log(user.phone);
+            await db.save(user);
+          }
+      }
+
+      res.send({success : true});
+    }
+    else {
+      res.send({});
+    }
+  }
+  catch (e) {
+    console.error("[ERROR] UserRouter > FormatPhones ", e);
+  }
+}
+
+
 
 
 module.exports = router;
