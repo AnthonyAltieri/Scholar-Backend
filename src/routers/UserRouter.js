@@ -426,7 +426,7 @@ async function formatPhones(req, res) {
           }
       }
 
-      res.send({success : true});
+      res.success();
     }
     else {
       res.send({});

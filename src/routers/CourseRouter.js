@@ -231,13 +231,11 @@ async function gradesSummary(req, res) {
     if (courseSessions === null) {
       res.error();
     }
-    console.log('courseId', courseId);
     const usersInCourse = await CourseService.getUsers(courseId);
     if (usersInCourse === null) {
       res.error();
     }
     const students = usersInCourse.filter(u => u.type === 'STUDENT');
-    console.log('students', students);
     const instructors = usersInCourse.filter(u => u.type === 'INSTRUCTOR');
     let grades = [];
     for (let i = 0 ; i < students.length ; i++) {

@@ -72,7 +72,7 @@ async function buildCourse(
         )
     }
     catch (error) {
-        console.log("[ERROR] courseService > create : " + e);
+        console.error("[ERROR] courseService > create : " + e);
         throw error;
     }
 
@@ -100,7 +100,6 @@ async function getActive(instructorId){
 }
 
 function mapToSend(course) {
-  console.log('mapToSend', JSON.stringify(course, null ,2))
     return {
       id: course.id,
       title: course.title,
@@ -131,7 +130,6 @@ async function setActivationStatus(courseId, isActive) {
 }
 
 async function getByUser(userId) {
-  console.log('CourseService.getByUser()');
   try {
     const user = await UserService.getById(userId);
     if (!user) return null;
@@ -139,7 +137,6 @@ async function getByUser(userId) {
       return [];
     }
     const courses = await getCourses(user.courses);
-    console.log('courses', courses);
     return courses;
   } catch (e) {
     console.error('[ERROR] Course Service getByUser', e);
@@ -160,7 +157,7 @@ async function getCourses(courses) {
     const foundCourses = await db.findByIdArray(courses, Course);
     return foundCourses;
   } catch (e) {
-    console.log('[ERROR] caught in CourseService > getCourses : ', e)
+    console.error('[ERROR] caught in CourseService > getCourses : ', e)
     return null;
   }
 }
@@ -278,7 +275,6 @@ function getUsers(courseId) {
     User.find(
       { courses: { $elemMatch: { $eq: courseId } } },
       (err, found) => {
-        console.log('found', found);
         if (!!err) {
           console.error('[ERROR] Course Service getUsers', e);
           reject(null);
