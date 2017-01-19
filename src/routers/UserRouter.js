@@ -6,6 +6,8 @@ import nodemailer from 'nodemailer';
 import templateGenerator from '../ForgotPasswordEmail';
 import AssessmentBankService from '../services/AssessmentBank';
 import ForgotPasswordEmail from '../ForgotPasswordEmail';
+import initLogger from '../logger';
+const logger = initLogger();
 
 /*
 User Constants
@@ -51,10 +53,7 @@ router.post('/format/phones', formatPhones);
  */
 function logIn(req, res) {
   const { email, password } = req.body;
-
-  console.log("Attempted login");
   const encryptedPassword = PasswordUtil.encryptPassword(password, email);
-
   db.findOne({ email: email }, User)
     .then((user) => {
       db.findOne({

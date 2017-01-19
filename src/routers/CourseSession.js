@@ -33,12 +33,18 @@ async function createCourseSession(req, res){
     instructorId,
   } = req.body;
   try {
-    const courseSession = await CourseSessionService
-      .requestNewCourseSession(courseId, instructorId);
+    const courseSession = await CourseSessionService.requestNewCourseSession(
+      courseId,
+      instructorId
+    );
     if (!courseSession) {
       res.error();
     }
-    res.send({ courseSessionId: courseSession.id });
+    res.send({
+      courseSessionId: courseSession.id,
+      numberInCourseSession: courseSession.studentIds.length,
+      numberAttendees: courseSession.attendanceIds.length,
+    });
   } catch (e) {
     res.error();
   }
@@ -101,9 +107,10 @@ async function getActiveAssessment(req, res) {
       res.error();
       return;
     }
+    console.log('result of getActiveAssessment', result);
     const { activeAssessmentType, activeAssessmentId } = result;
     if (!activeAssessmentId) {
-      res.send({})
+      res.send({});
       return;
     }
     if (activeAssessmentType === 'INSTANT') {
@@ -152,7 +159,8 @@ async function createAttendanceCode(req, res){
   try {
     const { courseSessionId } = req.body;
     console.log("Create Attendance code for : " + courseSessionId);
-    const courseSession = await CourseSessionService.createAttendanceCode( courseSessionId );
+    const courseSession = await CourseSessionService
+      .createAttendanceCode(courseSessionId);
     res.send({ code : courseSession.attendanceCode });
   } catch (e) {
     console.error('[ERROR] CourseSession Router > createAttendanceCode : ' + e);
@@ -174,13 +182,16 @@ async function endAttendance(req, res) {
 
 export async function joinAttendance(req, res) {
   try {
-    console.log("JOIN ATTENDANCE");
     const { courseSessionId, code, userId } = req.body;
-    const payload = await CourseSessionService.studentJoinAttendance(courseSessionId, code, userId);
+    const payload = await CourseSessionService.studentJoinAttendance(
+      courseSessionId,
+      code,
+      userId
+    );
 
-    if(payload.attendance) {
+    if (payload.attendance) {
       console.log("success");
-      res.send({attendance: payload.attendance});
+      res.send({ attendance: payload.attendance });
       Socket.send(
         Socket.generatePrivateChannel(courseSessionId),
         Events.STUDENT_JOINED_ATTENDANCE,
@@ -278,7 +289,6 @@ async function getSessionReport(req, res) {
     console.error("[ERROR] in CourseSessionRouter > getSessionReport : ", e);
     res.error();
   }
-
 }
 
 export default router;

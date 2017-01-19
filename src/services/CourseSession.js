@@ -38,13 +38,14 @@ async function getThreshold(id) {
 //We shall populate the courseSession with all required entities here
 async function mapToSend(courseSession){
   try {
-    if(!!courseSession && typeof courseSession !== 'undefined'){
+    if (!!courseSession) {
       const attendance = !!courseSession.studentIds
         ? courseSession.studentIds.length
         : 0;
       const questions = await QuestionService
         .getQuestionTrees(courseSession.id);
-      const alerts = await AlertService.findByCourseSessionId(courseSession.id);
+      const alerts = await AlertService
+        .findByCourseSessionId(courseSession.id);
       //TODO: Add logic for assessments
       return {
         courseSession : {
@@ -63,54 +64,22 @@ async function mapToSend(courseSession){
   }
 }
 
-async function build(courseId, instructorId){
+async function build(course, instructor, timeZone){
   try {
-    //Validate Course & Instructor ID
-    const course = await CourseService.getById(courseId);
-
-    if (!course) {
-      console.error(`[ERROR] No course found with id: ${courseId}`);
-      res.error();
-      return;
-    }
-
-    const instructor = await UserService.getById(instructorId);
-
-    if (!instructor) {
-      console.error(`[ERROR] No user found with id: ${instructorId}`);
-      res.error();
-      return;
-    }
-
-    // TODO: validate that this instructor is allowed to make set change
-
-    //build the courseSession if valid course & instructor
-    if (!!CourseService.isInstructorPermittedForCourse(course, instructor)) {
-      const courseSession = await db.create(
-        {
-          courseId,
-          instructorIds: [instructor.id],
-          lastActiveTime: new Date(),
-        },
-        CourseSession
-      );
-
-      if (!courseSession) {
-        return null;
-      }
-
-      //successfully created the session
-      const savedCourse = await CourseService.setActiveCourseSessionId(
-        course,
-        courseSession.id
-      );
-      return courseSession;
-    }
+    const created = new Date(moment().tz(timeZone));
+    return await db.create(
+      {
+        courseId: course.id,
+        instructorIds: [instructor.id],
+        lastActiveTime: new Date(moment().tz(timeZone)),
+        created,
+      },
+      CourseSession
+    );
+  } catch (e) {
+    console.error('[ERROR] CourseSession Service build', e);
+    return null;
   }
-  catch (err) {
-    throw err;
-  }
-  return null;
 }
 
 async function instructorJoinActiveSession(courseId, instructorId){
@@ -180,9 +149,7 @@ async function joinActiveSession(courseId){
 
 async function instructorEndSession(courseId, instructorId){
   try {
-    console.log(`trying to end CourseSession for courseId ${courseId}`);
     const course = await CourseService.getById(courseId);
-    console.log('course', course);
     if (!course) {
       throw new Error(`No course found with id ${courseId}`);
     }
@@ -221,11 +188,11 @@ async function hasCourseSessionInLast24Hours(courseId) {
       }
     }));
     const mostRecentCourseSession = courseSessions[0];
+    // TODO: use the timezonned "now" to subtract a day from
     const twentyFourHoursAgo = moment().subtract(1, 'days');
-    return !twentyFourHoursAgo
-      .isBefore(
-        moment(mostRecentCourseSession.created)
-      )
+    return !twentyFourHoursAgo.isBefore(
+      moment(mostRecentCourseSession.created)
+    )
   } catch (e) {
     console.error('[ERROR] CourseSession service hasCourseSessionInLast24Hours', e);
     return false;
@@ -278,7 +245,7 @@ async function getActiveAssessment(courseSessionId) {
     const courseSession = await getById(courseSessionId);
     return {
       activeAssessmentType: courseSession.activeAssessmentType,
-      activeAssessmentId: courseSessionId.activeAssessmentId,
+      activeAssessmentId: courseSession.activeAssessmentId,
     }
   } catch (e) {
     console.error('[ERROR] CourseSession Service getActiveAssessment', e);
@@ -305,11 +272,16 @@ async function findByAttendanceCode(code) {
   }
 }
 async function generateUniqueAttendanceCode() {
-  let code = ShortIdUtil.generateShortIdWithRequirements(ATTENDANCE_CODE_LENGTH, ATTENDANCE_CODE_POOL);
+  let code = ShortIdUtil.generateShortIdWithRequirements(
+    ATTENDANCE_CODE_LENGTH,
+    ATTENDANCE_CODE_POOL
+  );
 
-  while(!!(await findByAttendanceCode(code))){
-    console.info("[INFO] CourseSession Service > createAttendanceCode : Attendance Code Already in use - " + code );
-    code = ShortIdUtil.generateShortIdWithRequirements(ATTENDANCE_CODE_LENGTH, ATTENDANCE_CODE_POOL);
+  while (!!(await findByAttendanceCode(code))) {
+    code = ShortIdUtil.generateShortIdWithRequirements(
+      ATTENDANCE_CODE_LENGTH,
+      ATTENDANCE_CODE_POOL
+    );
   }
 
   return code;
@@ -350,42 +322,32 @@ async function destroyAttendanceCode(courseSessionId) {
 }
 
 function isStudentInAttendance(courseSession, userId) {
-  try {
-    return ((courseSession.attendanceIds.filter( (u) => { return u === userId;})).length > 0) ;
-  }
-  catch (e) {
-    console.error('[ERROR] CourseSession Service > isStudentInAttendance : ', e);
-    throw e;
-  }
+  return !!courseSession.attendanceIds.filter(id => id === userId)[0];
 }
 
 async function studentJoinAttendance(courseSessionId, code, userId) {
   try {
-    let courseSession = await db.findById(courseSessionId, CourseSession);
-
-    if(!courseSession) {
+    const courseSession = await getById(courseSessionId);
+    if (!courseSession) {
       throw new Error("Invalid Course Session Id : " + courseSessionId);
     }
-
-    if(courseSession.attendanceCode !== code){
-      console.error(console.error('[ERROR] CourseSession Service > studentJoinAttendance : Incorrect Code ', code));
-      console.info('[INFO] CourseSession Service > studentJoinAttendance : Correct Code ', courseSession.attendanceCode);
-      if(!courseSession.attendanceCode){
-        return ({isAttendanceClosed : true})
-      }
-      return ({invalidCode : true});
+    const { attendanceCode } = courseSession;
+    if (!attendanceCode) return { isAttendanceClosed: true };
+    if (attendanceCode.toLowerCase() !== code.toLowerCase()){
+      return { invalidCode: true }
     }
-    //attempt to add student
-    if(!isStudentInAttendance(courseSession, userId)){
+    if (!isStudentInAttendance(courseSession, userId)){
       courseSession.attendanceIds = [...courseSession.attendanceIds, userId];
       await db.save(courseSession);
-      return {attendance : courseSession.attendanceIds.length};
-    }
-    else{
-      return ({studentAlreadyInAttendance : true});
+      return { attendance: courseSession.attendanceIds.length };
+    } else {
+      return { studentAlreadyInAttendance: true };
     }
   } catch (e) {
-    console.error('[ERROR] CourseSession Service > studentJoinAttendance : ', e);
+    console.error(
+      '[ERROR] CourseSession Service > studentJoinAttendance : ',
+      e
+    );
     return null;
   }
 }
@@ -397,11 +359,13 @@ async function requestNewCourseSession(courseId, instructorId) {
       const instructor = await UserService.getById(instructorId);
       const school = await db.findById(instructor.schoolId, School);
       const timeZone = school.timezoneName;
-      const needsNewCourseSession = DateUtil
-        .shouldCreateNewCourseSession(
-          result.mostRecentCourseSession.created,
-          timeZone
-        );
+      console.log('most recent course session: '
+        + moment(result.mostRecentCourseSession.created).tz(timeZone).format('l')
+      )
+      const needsNewCourseSession = DateUtil.shouldCreateNewCourseSession(
+        result.mostRecentCourseSession.created,
+        timeZone
+      );
       if (!needsNewCourseSession) {
         const course = await CourseService.getById(courseId);
         course.activeCourseSessionId = result.mostRecentCourseSession.id;
@@ -411,14 +375,17 @@ async function requestNewCourseSession(courseId, instructorId) {
         return result.mostRecentCourseSession;
       } else {
         const course = await CourseService.getById(courseId);
-        const courseSession = await build(courseId, instructorId);
+        const courseSession = await build(course, instructor, timeZone);
         course.activeCourseSessionId = courseSession.id;
         await db.save(course);
         return courseSession;
       }
     } else {
       const course = await CourseService.getById(courseId);
-      const courseSession = await build(courseId, instructorId);
+      const instructor = await UserService.getById(instructorId);
+      const school = await db.findById(instructor.schoolId, School);
+      const timeZone = school.timezoneName;
+      const courseSession = await build(course, instructor, timeZone);
       course.activeCourseSessionId = courseSession.id;
       await db.save(course);
       return courseSession;

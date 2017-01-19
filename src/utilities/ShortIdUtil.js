@@ -3,7 +3,7 @@
  */
 const shortId = require('shortid');
 var Chance = require('chance');
-const DEFAULT_POOL = "abcdefghijklmnopqrstuvwxyz1234567890"
+const DEFAULT_POOL = "abcdefghjkmnpqrstuvwxyz123456789"
 
 function generateShortId(){
     return shortId.generate();

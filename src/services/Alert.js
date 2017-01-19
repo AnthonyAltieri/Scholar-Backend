@@ -54,25 +54,21 @@ function getMostRecentAlert(alerts){
 
 function isAlertInWindow(alert, alertWindowMillis) {
   return ((DateUtility.diffMillisFromNow(alert.created.getTime())) < alertWindowMillis)
-
 }
 
 async function isDuplicateAlert(userId, courseSessionId, alertWindowMillis) {
   try {
-    let userAlerts = await findByUserAndCourseSessionId(userId, courseSessionId);
-
+    let userAlerts = await findByUserAndCourseSessionId(
+      userId,
+      courseSessionId
+    );
     if(!!userAlerts && userAlerts.length > 0) {
-
       let mostRecentAlert = getMostRecentAlert(userAlerts);
-
-      if( isAlertInWindow(mostRecentAlert, alertWindowMillis) ) {
-        return true;
-      }
+      return isAlertInWindow(mostRecentAlert, alertWindowMillis);
     }
     return false;
-  }
-  catch (err) {
-    console.error("[ERROR] Alert Service > isDuplicateAlert : " + err);
+  } catch (err) {
+    console.error("[ERROR] Alert Service > isDuplicateAlert",err);
     throw err;
   }
 }
@@ -81,15 +77,16 @@ async function isDuplicateAlert(userId, courseSessionId, alertWindowMillis) {
 async function attemptAddAlert(userId, courseId, courseSessionId, alertWindow = 60) {
   try {
     let alertWindowMillis = alertWindow * 1000;
-    if(! ( await isDuplicateAlert(userId, courseSessionId, alertWindowMillis ))) {
-      return await db.create({
+    if(!(await isDuplicateAlert(userId, courseSessionId, alertWindowMillis))) {
+      console.log('is not duplicate alert');
+      const alert = await db.create({
         userId,
         courseId,
         courseSessionId
       }, Alert);
-    }
-    else {
-      throw new Error("Duplicate Alert");
+      return { alert };
+    } else {
+      return { duplicateAlert: true };
     }
   }
   catch (err) {
