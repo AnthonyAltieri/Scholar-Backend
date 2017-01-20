@@ -21,7 +21,7 @@ import * as DateUtil from '../utilities/Date'
 const CourseSession = mongoose.model('coursesessions', CourseSessionSchema);
 const School = mongoose.model('schools', SchoolSchema);
 const ATTENDANCE_CODE_LENGTH = 4;
-const ATTENDANCE_CODE_POOL = 'abcdefghijklmnopqrstuvwxyz1234567890';
+const ATTENDANCE_CODE_POOL = 'abcdefghjkmnpqrstuvwxyz123456789';
 
 //TODO: @tonio - account for this in routes
 //TODO: complete this function
