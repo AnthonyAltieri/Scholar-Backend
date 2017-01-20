@@ -358,7 +358,8 @@ async function requestNewCourseSession(courseId, instructorId) {
     if (!!result && !result.none) {
       const instructor = await UserService.getById(instructorId);
       const school = await db.findById(instructor.schoolId, School);
-      const timeZone = school.timezoneName;
+      let timeZone = school.timezoneName;
+      if (!timeZone) timeZone = 'America/Los_Angeles';
       const needsNewCourseSession = DateUtil.shouldCreateNewCourseSession(
         result.mostRecentCourseSession.created,
         timeZone

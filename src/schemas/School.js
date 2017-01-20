@@ -7,7 +7,7 @@ import Entity from './Entity';
 
 const School = new Schema({
   ...Entity,
-  name: {type : String, unique: true  },
+  name: { type: String, unique: true  },
   termType: String, // ENUM: quarter | semester | trimester
   timezoneName: String,
 });
