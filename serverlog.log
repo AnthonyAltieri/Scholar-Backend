@@ -1,0 +1,38 @@
+[TAILING] Tailing last 10 lines for [all] processes (change the value with --lines option)
+/root/.pm2/pm2.log last 10 lines:
+PM2        | 2017-01-19 08:43:37: PM2 PID file         : /root/.pm2/pm2.pid
+PM2        | 2017-01-19 08:43:37: RPC socket file      : /root/.pm2/rpc.sock
+PM2        | 2017-01-19 08:43:37: BUS socket file      : /root/.pm2/pub.sock
+PM2        | 2017-01-19 08:43:37: Application log path : /root/.pm2/logs
+PM2        | 2017-01-19 08:43:37: Process dump file    : /root/.pm2/dump.pm2
+PM2        | 2017-01-19 08:43:37: Concurrent actions   : 2
+PM2        | 2017-01-19 08:43:37: SIGTERM timeout      : 1600
+PM2        | 2017-01-19 08:43:37: ===============================================================================
+PM2        | 2017-01-19 08:43:37: Starting execution sequence in -fork mode- for app name:server id:0
+PM2        | 2017-01-19 08:43:37: App name:server id:0 online
+
+/root/.pm2/logs/server-error-0.log last 10 lines:
+0|server   |     at GeneratorFunctionPrototype.invoke [as _invoke] (/home/ec2-user/Backend/node_modules/regenerator-runtime/runtime.js:355:22)
+0|server   |     at GeneratorFunctionPrototype.prototype.(anonymous function) [as next] (/home/ec2-user/Backend/node_modules/regenerator-runtime/runtime.js:116:21)
+0|server   |     at step (/home/ec2-user/Backend/node_modules/babel-runtime/helpers/asyncToGenerator.js:17:30)
+0|server   |     at /home/ec2-user/Backend/node_modules/babel-runtime/helpers/asyncToGenerator.js:28:13
+0|server   |     at process._tickDomainCallback (internal/process/next_tick.js:129:7)
+0|server   | ERROR:  undefined
+0|server   | Thu, 19 Jan 2017 08:42:15 GMT express-session deprecated undefined resave option; provide resave option at dist/server.js:181:38
+0|server   | Thu, 19 Jan 2017 08:42:15 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at dist/server.js:181:38
+0|server   | Thu, 19 Jan 2017 08:43:38 GMT express-session deprecated undefined resave option; provide resave option at dist/server.js:181:38
+0|server   | Thu, 19 Jan 2017 08:43:38 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at dist/server.js:181:38
+
+/root/.pm2/logs/server-out-0.log last 10 lines:
+0|server   | Attempted login
+0|server   | Guess we found user
+0|server   | {"_id":"585a00004c498a79c07d36bb","firstName":"Anthony","lastName":"Altieri","email":"instructor@email.edu","password":"_MÌ;Z§eÖ\u001d'Þ¸Ïinstructor@email.edu620","phone":"8182014755","institutionId":"A12463877","schoolId":"70200e91-a48a-11e6-8314-3fc1f048afeb620","type":"INSTRUCTOR","id":"fcb1c5e0-c732-11e6-9198-c9a23e8ead9c620","created":"2016-12-21T04:07:28.318Z","__v":2,"loggedIn":true,"sessionsInAttendance":[],"courses":["30c75c50-c733-11e6-9198-c9a23e8ead9c620","db524730-c737-11e6-8110-47a9c7f50c05620"]}
+0|server   | [SUCCESS] Login Success
+0|server   | process.env.NODE_ENV undefined
+0|server   | Starting server, listening on port 7000
+0|server   | Database connection is open.
+0|server   | process.env.NODE_ENV production
+0|server   | Starting server, listening on port 80
+0|server   | Database connection is open.
+
+[STREAMING] Now streaming realtime logs for [all] processes

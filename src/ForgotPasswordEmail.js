@@ -3,7 +3,7 @@
  */
 
 const host = process.env.NODE_ENV === 'production'
-  ? 'https://scholar.xyz'
+  ? 'https://scholarapp.xyz'
   : 'http://localhost:3000';
 export default (code) => {
   return (`
