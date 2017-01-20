@@ -359,9 +359,6 @@ async function requestNewCourseSession(courseId, instructorId) {
       const instructor = await UserService.getById(instructorId);
       const school = await db.findById(instructor.schoolId, School);
       const timeZone = school.timezoneName;
-      console.log('most recent course session: '
-        + moment(result.mostRecentCourseSession.created).tz(timeZone).format('l')
-      )
       const needsNewCourseSession = DateUtil.shouldCreateNewCourseSession(
         result.mostRecentCourseSession.created,
         timeZone
