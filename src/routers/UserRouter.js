@@ -33,6 +33,7 @@ import UserService from '../services/UserService'
 import SchoolService from '../services/SchoolService'
 
 router.post('/logIn', logIn);
+router.post('/logIn/anonymous/student', logInAnonymousStudent);
 router.post('/logOut', logOut);
 router.post('/signUp/student', signUpStudent);
 router.post('/signUp/instructor', signUpInstructor);
@@ -120,6 +121,15 @@ function logIn(req, res) {
           break;
       }
     });
+}
+
+async function logInAnonymousStudent(req, res) {
+  try {
+    const user = await UserService.createAnonymousStudent();
+  } catch (e) {
+    console.error('[ERROR] User Router logInAnonymousStudent', e);
+    res.error();
+  }
 }
 
  async function signUpStudent(req, res) {

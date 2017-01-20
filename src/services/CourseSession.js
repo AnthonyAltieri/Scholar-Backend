@@ -64,14 +64,14 @@ async function mapToSend(courseSession){
   }
 }
 
-async function build(course, instructor, timeZone){
+async function build(course, instructor){
   try {
-    const created = new Date(moment().tz(timeZone));
+    const created = new Date();
     return await db.create(
       {
         courseId: course.id,
         instructorIds: [instructor.id],
-        lastActiveTime: new Date(moment().tz(timeZone)),
+        lastActiveTime: new Date(),
         created,
       },
       CourseSession
@@ -375,7 +375,7 @@ async function requestNewCourseSession(courseId, instructorId) {
         return result.mostRecentCourseSession;
       } else {
         const course = await CourseService.getById(courseId);
-        const courseSession = await build(course, instructor, timeZone);
+        const courseSession = await build(course, instructor);
         course.activeCourseSessionId = courseSession.id;
         await db.save(course);
         return courseSession;

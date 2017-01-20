@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import UserSchema from '../schemas/User';
-const User = mongoose.model('users', UserSchema);
 import db from '../db';
 import md5 from '../../node_modules/blueimp-md5/js/md5.js'
 import { v1 } from 'node-uuid';
-const SALT = '620';
-
 import SchoolService from '../services/SchoolService'
 import PasswordUtil from '../utilities/PasswordUtil'
+const SALT = '620';
+const DEMO_COURSE_SESSION_ID = '12345-12345-12345-12345';
+const User = mongoose.model('users', UserSchema);
 
 async function getById(userId) {
   try {
@@ -228,24 +228,6 @@ async function isPhoneInUse(phone) {
 }
 
 
-const UserService = {
-  isValidNewStudent,
-  getById,
-  buildUser,
-  findById,
-  isEmailVacant,
-  attemptSignUp,
-  validateModel,
-  mapToSend,
-  attemptLogin,
-  findByPhone,
-  findById,
-  findByEmail,
-  saveAccountInfo,
-  generateForgotPasswordCode,
-  getByForgotPasswordCode,
-  savePassword,
-};
 
 async function savePassword(user, password) {
   console.log('user', user);
@@ -325,6 +307,64 @@ async function generateForgotPasswordCode(user) {
   }
 }
 
+async function createAnonymousStudent() {
+  const email = v1();
+  const password = v1();
+  const type = 'ANONYMOUS_STUDENT';
+  const UCSD_SCHOOL_ID = '70200e91-a48a-11e6-8314-3fc1f048afeb620';
+  try {
+    return await buildUser(
+      'AnonymousFirst',
+      'AnonymousLast',
+      email,
+      password,
+      '1231231234',
+      '123456789',
+      UCSD_SCHOOL_ID,
+      type,
+      '123',
+    );
+  } catch (e) {
+    console.error('[ERROR] User Service createAnonymousStudent', e);
+  }
+}
+
+async function addStudentToDemo(userId) {
+  try {
+
+  } catch (e) {
+    console.error('[ERROR] User Service addStudentToDemo', e);
+  }
+}
+
+async function addInstructorToDemo(userId) {
+  try {
+
+  } catch (e) {
+    console.error('[ERROR] User Service addStudentToDemo', e);
+  }
+}
+
+const UserService = {
+  isValidNewStudent,
+  getById,
+  buildUser,
+  isEmailVacant,
+  attemptSignUp,
+  validateModel,
+  mapToSend,
+  attemptLogin,
+  findByPhone,
+  findById,
+  findByEmail,
+  saveAccountInfo,
+  generateForgotPasswordCode,
+  getByForgotPasswordCode,
+  savePassword,
+  createAnonymousStudent,
+  addStudentToDemo,
+  addInstructorToDemo,
+};
 
 
 export default UserService;
