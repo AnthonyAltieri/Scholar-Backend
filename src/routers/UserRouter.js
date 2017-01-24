@@ -54,7 +54,8 @@ router.post('/format/phones', formatPhones);
  */
 function logIn(req, res) {
   const { email, password } = req.body;
-  console.log('email: ' + email);
+  console.log("------------------------------------------------------");
+  console.log('Attempted login > Email: ' + email);
   const encryptedPassword = PasswordUtil.encryptPassword(password, email);
   db.findOne({ email: email }, User)
     .then((user) => {
@@ -68,7 +69,8 @@ function logIn(req, res) {
               .then((user) => {
                 //User found with the email provided, but password is incorrect
                 if(!!user) {
-                  res.send({incorrectPassword: true})
+                  console.log("Result : incorrect password ");
+                  res.send({incorrectPassword: true});
                   return;
                 }
                 else{
@@ -81,6 +83,7 @@ function logIn(req, res) {
               });
           }
           else {
+            console.log("Result : Login Success");
 
             req.session.userName = email;
             req.session.firstName = user.firstName;
@@ -111,6 +114,7 @@ function logIn(req, res) {
     .catch(error => {
       switch(error) {
         case db.NOT_FOUND:
+          console.log("Result : User not found");
           res.error("User Not Found");
           break;
 

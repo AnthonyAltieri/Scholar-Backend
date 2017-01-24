@@ -33,6 +33,10 @@ async function createCourseSession(req, res){
     instructorId,
   } = req.body;
   try {
+    console.log("------------------------------------------------------");
+    console.log("instructorJoinSession");
+    console.log(`courseId=${courseId}, instructorId=${instructorId}`);
+
     const courseSession = await CourseSessionService.requestNewCourseSession(
       courseId,
       instructorId
@@ -45,6 +49,9 @@ async function createCourseSession(req, res){
       numberInCourseSession: courseSession.studentIds.length,
       numberAttendees: courseSession.attendanceIds.length,
     });
+
+    console.log(`Sending Session = ${courseSession.id}`);
+
   } catch (e) {
     res.error();
   }
@@ -53,8 +60,12 @@ async function createCourseSession(req, res){
 async function instructorJoinSession(req, res) {
   try {
     const {courseId, instructorId} = req.body;
+    console.log("------------------------------------------------------");
+    console.log("instructorJoinSession");
+    console.log(`courseId=${courseId}, instructorId=${instructorId}`);
     const courseSession = await CourseSessionService.instructorJoinActiveSession(courseId, instructorId);
     res.send(await CourseSessionService.mapToSend(courseSession));
+    console.log(`Sending Session = ${courseSession.id}`);
   } catch (e) {
     console.error('[ERROR] CourseSession Router instructorJoinSession', e);
     res.error();
@@ -64,6 +75,9 @@ async function instructorJoinSession(req, res) {
 async function studentJoinSession(req, res){
   try {
     const {courseId, studentId} = req.body;
+    console.log("------------------------------------------------------");
+    console.log("studentJoinSession");
+    console.log(`courseId=${courseId}, studentId=${studentId}`);
     const courseSession = await CourseSessionService
       .studentJoinActiveSession(courseId, studentId);
     Socket.send(
@@ -72,6 +86,8 @@ async function studentJoinSession(req, res){
       { numberInCourseSession: courseSession.studentIds.length }
     );
     res.send(await CourseSessionService.mapToSend(courseSession));
+    console.log(`Sending Session = ${courseSession.id}`);
+
   } catch(e) {
     console.error('[ERROR] CourseSession Router studentJoinSession', e);
     res.error();
@@ -182,6 +198,9 @@ async function endAttendance(req, res) {
 export async function joinAttendance(req, res) {
   try {
     const { courseSessionId, code, userId } = req.body;
+    console.log("------------------------------------------------------");
+    console.log("Student Join Attendance");
+    console.log(`courseSessionId=${courseSessionId}, studentId=${userId}, code=${code}`);
     const payload = await CourseSessionService.studentJoinAttendance(
       courseSessionId,
       code,
@@ -189,6 +208,7 @@ export async function joinAttendance(req, res) {
     );
 
     if (payload.attendance) {
+      console.log(`Success, new attendance=${payload.attendance}`);
       res.send({ attendance: payload.attendance });
       Socket.send(
         Socket.generatePrivateChannel(courseSessionId),
@@ -197,6 +217,7 @@ export async function joinAttendance(req, res) {
       );
     }
     else {
+      console.log(`Erroneous Result=${payload}`);
       res.send(payload);
     }
   }

@@ -332,6 +332,7 @@ async function studentJoinAttendance(courseSessionId, code, userId) {
       throw new Error("Invalid Course Session Id : " + courseSessionId);
     }
     const { attendanceCode } = courseSession;
+    console.log(`Actual Attendance Code = ${attendanceCode}`);
     if (!attendanceCode) return { isAttendanceClosed: true };
     if (attendanceCode.toLowerCase() !== code.toLowerCase()){
       return { invalidCode: true }
