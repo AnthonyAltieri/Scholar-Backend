@@ -38,13 +38,6 @@ if (process.env.NODE_ENV === 'production') {
   app.use(compression());
 }
 
-//JANK Logging
-app.use((req, res, next) => {
-  console.log("------------------------------------------------------");
-  console.log(`time: ${moment().format('YYYY-MM-DD, h:mm:ss a')} \ntype: ${req.method} \nurl: ${req.url}`);
-  next();
-});
-
 app.use((req, res, next) => {
   res.success = () => {
     res.send({
@@ -99,6 +92,19 @@ app.use(session({
   secret: SESSION_SECRET,
   store: store
 }));
+
+//JANK Logging
+app.use((req, res, next) => {
+  console.log("------------------------------------------------------");
+  console.log(`time: ${moment().format('YYYY-MM-DD, h:mm:ss a')} \ntype: ${req.method} \nurl: ${req.url}`);
+  if(!!req.body){
+    const { userId, courseSessionId, courseId } = req.body;
+    if(!!userId) console.log(`UserId: ${userId}`);
+    if(!!courseId) console.log(`CourseId: ${courseId}`);
+    if(!!courseSessionId) console.log(`UserId: ${courseSessionId}`);
+  }
+  next();
+});
 
 app.use('/static', express.static(path.join(__dirname, '../../Frontend/dist')));
 
