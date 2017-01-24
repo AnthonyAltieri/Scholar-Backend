@@ -54,6 +54,7 @@ router.post('/format/phones', formatPhones);
  */
 function logIn(req, res) {
   const { email, password } = req.body;
+  console.log('email: ' + email);
   const encryptedPassword = PasswordUtil.encryptPassword(password, email);
   db.findOne({ email: email }, User)
     .then((user) => {
@@ -80,8 +81,6 @@ function logIn(req, res) {
               });
           }
           else {
-            console.info("Guess we found user");
-            console.info(JSON.stringify(user));
 
             req.session.userName = email;
             req.session.firstName = user.firstName;
@@ -96,7 +95,6 @@ function logIn(req, res) {
 
             db.save(user)
               .then((user) => {
-                console.log("[SUCCESS] Login Success");
                 res.send(UserService.mapToSend(user))
               })
               .catch((error) => {
@@ -275,7 +273,7 @@ async function forgotPassword(req, res) {
     .then((user) => {
       db.save(user)
         .then((user) => {
-          console.log('mark5')
+
         })
         .catch((error) => {
           console.log('SAVE ERROR', error)
@@ -293,7 +291,7 @@ async function getAccountInfo(req, res) {
       });
       return;
     }
-    console.log('found user', user);
+
     const accountInfo = {
       email: user.email,
       firstName: user.firstName,
@@ -427,10 +425,10 @@ async function formatPhones(req, res) {
 
       for(let user of users) {
           if(!!user.phone) {
-            console.log(user.phone);
+
             let phone = user.phone;
             user.phone = formatPhone(phone);
-            console.log(user.phone);
+
             await db.save(user);
           }
       }

@@ -398,7 +398,7 @@ async function requestNewCourseSession(courseId, instructorId) {
 }
 
 async function getMostRecent(courseId) {
-  console.log('getMostRecent()');
+
   try {
     const courseSessions = await findByCourseId(courseId);
     if (courseSessions.length === 0) {
@@ -497,7 +497,7 @@ async function getSessionReport(courseSessionId) {
 async function getNumberInCourseSession(courseSessionId){
   try {
     const courseSession = await getById(courseSessionId);
-    console.log('courseSession', courseSession);
+
     return courseSession.studentIds.length;
   }
   catch (e) {
@@ -508,7 +508,7 @@ async function getNumberInCourseSession(courseSessionId){
 async function getNumberInAttendance(courseSessionId){
   try {
     const courseSession = await getById(courseSessionId);
-    console.log('courseSession', courseSession);
+
     return courseSession.attendanceIds.length;
   }
   catch (e) {

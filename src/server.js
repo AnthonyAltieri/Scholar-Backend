@@ -15,6 +15,7 @@ import IdUtility from './utilities/IdUtility';
 const MongoStore = require('connect-mongo/es5')(session);
 const compression = require('compression');
 const isOnRemoteServer = process.env.NODE_ENV === 'production';
+import moment from 'moment-timezone';
 
 Socket.init();
 
@@ -36,6 +37,12 @@ var app = express();
 if (process.env.NODE_ENV === 'production') {
   app.use(compression());
 }
+
+//JANK Logging
+app.use((req, res, next) => {
+  console.log(`time: ${moment().format('YYYY-MM-DD, h:mm:ss a')} \ntype: ${req.method} \nurl: ${req.url}`);
+  next();
+});
 
 app.use((req, res, next) => {
   res.success = () => {

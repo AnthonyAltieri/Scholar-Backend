@@ -230,7 +230,6 @@ async function isPhoneInUse(phone) {
 
 
 async function savePassword(user, password) {
-  console.log('user', user);
   try {
     user.password = password;
     user.forgotPasswordCode = null;

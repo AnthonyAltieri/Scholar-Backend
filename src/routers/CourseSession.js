@@ -107,7 +107,6 @@ async function getActiveAssessment(req, res) {
       res.error();
       return;
     }
-    console.log('result of getActiveAssessment', result);
     const { activeAssessmentType, activeAssessmentId } = result;
     if (!activeAssessmentId) {
       res.send({});
@@ -190,7 +189,6 @@ export async function joinAttendance(req, res) {
     );
 
     if (payload.attendance) {
-      console.log("success");
       res.send({ attendance: payload.attendance });
       Socket.send(
         Socket.generatePrivateChannel(courseSessionId),
@@ -230,7 +228,6 @@ async function numberInCourseSessionGet(req, res) {
   try {
     const courseSession = await CourseSessionService
       .getById(courseSessionId);
-      console.log('courseSession', courseSession);
     res.send({
       numberInCourseSession: courseSession.studentIds.length,
     })
@@ -248,7 +245,7 @@ async function getMostRecent(req, res) {
   try {
     const result = await CourseSessionService.getMostRecent(courseId);
     if (!!result.none) {
-      console.log('most recent CourseSession NONE');
+      console.log('most recent CourseSession : NONE');
       res.send({
         none: true,
       });
@@ -258,7 +255,7 @@ async function getMostRecent(req, res) {
       'most recent CourseSession',
       moment(result.mostRecentCourseSession).format('l')
     );
-    console.log('result', result);
+
     const shouldCreateNewCourseSession = DateUtil
       .shouldCreateNewCourseSession(result.mostRecentCourseSession.created);
     if (!!shouldCreateNewCourseSession
