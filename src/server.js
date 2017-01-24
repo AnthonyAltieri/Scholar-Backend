@@ -40,6 +40,7 @@ if (process.env.NODE_ENV === 'production') {
 
 //JANK Logging
 app.use((req, res, next) => {
+  console.log("------------------------------------------------------");
   console.log(`time: ${moment().format('YYYY-MM-DD, h:mm:ss a')} \ntype: ${req.method} \nurl: ${req.url}`);
   next();
 });
