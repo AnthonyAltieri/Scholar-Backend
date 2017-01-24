@@ -34,7 +34,7 @@ async function createCourseSession(req, res){
   } = req.body;
   try {
     console.log("------------------------------------------------------");
-    console.log("instructorJoinSession");
+    console.log("instructorCreateSession");
     console.log(`courseId=${courseId}, instructorId=${instructorId}`);
 
     const courseSession = await CourseSessionService.requestNewCourseSession(
