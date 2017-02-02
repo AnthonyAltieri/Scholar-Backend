@@ -5,6 +5,7 @@ var express = require('express');
 var router = express.Router();
 
 var mongoose = require('mongoose');
+import db from '../db';
 
 import SchoolService from '../services/SchoolService';
 import CourseService from '../services/CourseService';
@@ -14,6 +15,8 @@ import InstantService from '../services/InstantAssessment';
 import InstantAnswerService from '../services/InstantAssessmentAnswer';
 import ReflectiveAnswerService from '../services/ReflectiveAssessmentAnswer';
 import ReflectiveService from '../services/ReflectiveAssessment';
+import PresentationSchema from '../schemas/Presentation';
+const Presentation = mongoose.model('presentations', PresentationSchema);
 
 import BankedAssessmentService from '../services/BankedAssessment';
 
@@ -28,6 +31,9 @@ router.post('/get/bankedAssessments', getBankedAssessments);
 router.post('/get/addCodes', getAddCodes);
 router.post('/get/id', getId);
 router.post('/get/report/date', getReportByDate);
+router.post('/add/presentation', addPresentation);
+router.post('/get/presentation/mostRecent', getMostRecentPresentation);
+router.post('/get/presentations', getPresentations);
 router.get('/grade/summary', gradesSummary);
 
 async function createCourse(req, res){
@@ -391,4 +397,55 @@ async function getReportByDate(req, res) {
   }
 }
 
+async function addPresentation(req, res) {
+  try{
+    const { courseId, userId, url, title } = req.body;
+    await db.create({
+      courseId,
+      userId,
+      url,
+      title
+    }, Presentation);
+    console.log("SEND ME");
+    res.send({});//SUCCESS
+  }
+  catch (e) {
+    console.error("[ERROR] in CourseRouter > addPresentation ", e);
+    res.error();
+  }
+}
+async function getMostRecentPresentation(req, res) {
+  try {
+    const { courseId } = req.body;
+    const presentations = await db.find({ courseId : courseId }, Presentation);
+    if(presentations.length>0){
+      let mostRecentPresentation = presentations[0];
+
+      presentations.forEach( (p) => {
+        if(new Date (p.created) > new Date(mostRecentPresentation.created) )
+            mostRecentPresentation = p;
+      });
+
+      res.send(mostRecentPresentation);
+
+    }
+    else res.send();//No presentations
+
+  }
+  catch (e) {
+    console.error("[ERROR] in CourseRouter > getMostRecentPresentation ", e);
+    res.error();
+  }
+}
+async function getPresentations(req, res) {
+  try{
+    const { courseId } = req.body;
+    const presentations = await db.find({ courseId : courseId }, Presentation);
+    res.send(presentations);
+  }
+  catch (e) {
+    console.error("[ERROR] in CourseRouter > getPresentation ", e);
+    res.error();
+  }
+}
 module.exports = router;
