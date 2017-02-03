@@ -9,7 +9,8 @@ const Presentation = new Schema({
   courseId : String,
   userId: String,
   url : String,
-  title : String
+  title : String,
+  lastAccessTime: Date
 });
 
 export default Presentation;

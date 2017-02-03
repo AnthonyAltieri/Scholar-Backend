@@ -34,6 +34,7 @@ router.post('/get/report/date', getReportByDate);
 router.post('/add/presentation', addPresentation);
 router.post('/get/presentation/mostRecent', getMostRecentPresentation);
 router.post('/get/presentations', getPresentations);
+router.post('/set/presentation/accessTime', setPresentationAccessTime);
 router.get('/grade/summary', gradesSummary);
 
 async function createCourse(req, res){
@@ -404,7 +405,8 @@ async function addPresentation(req, res) {
       courseId,
       userId,
       url,
-      title
+      title,
+      lastAccessTime : new Date()
     }, Presentation);
     console.log("SEND ME");
     res.send({});//SUCCESS
@@ -414,6 +416,8 @@ async function addPresentation(req, res) {
     res.error();
   }
 }
+
+//Gets the most recently accessed presentation
 async function getMostRecentPresentation(req, res) {
   try {
     const { courseId } = req.body;
@@ -422,7 +426,7 @@ async function getMostRecentPresentation(req, res) {
       let mostRecentPresentation = presentations[0];
 
       presentations.forEach( (p) => {
-        if(new Date (p.created) > new Date(mostRecentPresentation.created) )
+        if(new Date (p.lastAccessTime) > new Date(mostRecentPresentation.lastAccessTime) )
             mostRecentPresentation = p;
       });
 
@@ -445,6 +449,26 @@ async function getPresentations(req, res) {
   }
   catch (e) {
     console.error("[ERROR] in CourseRouter > getPresentation ", e);
+    res.error();
+  }
+}
+
+async function setPresentationAccessTime(req, res){
+  try{
+    console.log("IS THIS BEING HIT?");
+    const { presentationId } = req.body;
+
+    console.log("Hit : " + presentationId);
+    const presentation = await db.findById( presentationId, Presentation );
+    console.log("Found");
+    presentation.lastAccessTime = new Date();
+    await db.save(presentation);
+    console.log("SABED");
+    console.log(JSON.stringify(presentation));
+    res.success();
+  }
+  catch (e) {
+    console.error("[ERROR] in CourseRouter > setPresentationAccessTime ", e);
     res.error();
   }
 }
